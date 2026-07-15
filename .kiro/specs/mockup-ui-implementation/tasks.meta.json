@@ -1,0 +1,997 @@
+{
+  "pbtResults": {
+    "2.3 Write property tests for session grouping": {
+      "status": "passed",
+      "lastRunTimestamp": 1784133744962
+    },
+    "2.4 Write property tests for token formatting": {
+      "status": "passed",
+      "lastRunTimestamp": 1784133801938
+    },
+    "5.7 Write property test for send button state derivation": {
+      "status": "passed",
+      "lastRunTimestamp": 1784134625745
+    },
+    "4.2 Write property test for toast replacement behavior": {
+      "status": "passed",
+      "lastRunTimestamp": 1784134637424
+    },
+    "5.5 Write property test for context ring colors": {
+      "status": "passed",
+      "lastRunTimestamp": 1784134646604
+    },
+    "5.3 Write property test for thinking level cycle": {
+      "status": "passed",
+      "lastRunTimestamp": 1784134671903
+    },
+    "7.5 Write property test for streaming token rate": {
+      "status": "passed",
+      "lastRunTimestamp": 1784135328197
+    },
+    "7.2 Write property test for sidebar snap threshold": {
+      "status": "passed",
+      "lastRunTimestamp": 1784135384948
+    },
+    "8.3 Write property test for code panel accent-derived colors": {
+      "status": "passed",
+      "lastRunTimestamp": 1784136200520
+    },
+    "12.3 Write property test for rename dialog validation": {
+      "status": "passed",
+      "lastRunTimestamp": 1784137243808
+    }
+  },
+  "executionHistory": {
+    "1.1 Add color palette extensions to `src/theme/colors.ts`": [
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784133080105
+      },
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784133104535
+      },
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784133361040
+      }
+    ],
+    "1.2 Add border radii extensions to `src/theme/spacing.ts`": [
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784133080161
+      },
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784133105367
+      },
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784133361892
+      }
+    ],
+    "1.3 Add animation constants to `src/theme/animations.ts` (new file)": [
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784133080202
+      },
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784133106417
+      },
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784133362885
+      }
+    ],
+    "1.4 Install `expo-haptics` dependency": [
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784133080249
+      },
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784133108801
+      },
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784133364586
+      }
+    ],
+    "2.1 Create `src/utils/session-grouping.ts`": [
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784133080297
+      },
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784133378069
+      },
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784133616569
+      }
+    ],
+    "2.2 Create `src/utils/token-formatting.ts`": [
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784133080369
+      },
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784133378795
+      },
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784133617863
+      }
+    ],
+    "2.3 Write property tests for session grouping": [
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784133080431
+      },
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784133630272
+      },
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784134070988
+      }
+    ],
+    "2.4 Write property tests for token formatting": [
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784133080468
+      },
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784133631078
+      },
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784134071478
+      }
+    ],
+    "3.1 Create `src/stores/ui-store.ts`": [
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784133080506
+      },
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784133380389
+      },
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784133618783
+      }
+    ],
+    "4.1 Create `src/components/overlays/ToastProvider.tsx`": [
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784133080549
+      },
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784133632260
+      },
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784134072693
+      }
+    ],
+    "4.2 Write property test for toast replacement behavior": [
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784133080600
+      },
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784134469928
+      },
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784134885795
+      }
+    ],
+    "5.1 Create `src/components/input/ModelChip.tsx`": [
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784133080665
+      },
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784133633623
+      },
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784134073450
+      }
+    ],
+    "5.2 Create `src/components/input/ThinkingLevelSelector.tsx`": [
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784133080711
+      },
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784133634571
+      },
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784134074916
+      }
+    ],
+    "5.3 Write property test for thinking level cycle": [
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784133080749
+      },
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784134470507
+      },
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784134886592
+      }
+    ],
+    "5.4 Create `src/components/input/ContextRing.tsx`": [
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784133080788
+      },
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784134080426
+      },
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784134461704
+      }
+    ],
+    "5.5 Write property test for context ring colors": [
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784133080832
+      },
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784134471389
+      },
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784134887512
+      }
+    ],
+    "5.6 Create `src/components/input/SendStopButton.tsx`": [
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784133080877
+      },
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784134081352
+      },
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784134462452
+      }
+    ],
+    "5.7 Write property test for send button state derivation": [
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784133080917
+      },
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784134472388
+      },
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784134889166
+      }
+    ],
+    "5.8 Create `src/components/input/EqualiserAnimation.tsx`": [
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784133080963
+      },
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784134082918
+      },
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784134464160
+      }
+    ],
+    "6. Checkpoint": [
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784133081017
+      },
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784135743528
+      },
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784136022639
+      }
+    ],
+    "7.1 Create `src/hooks/useSidebarTransition.ts`": [
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784133081049
+      },
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784134473940
+      },
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784134884870
+      }
+    ],
+    "7.2 Write property test for sidebar snap threshold": [
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784133081098
+      },
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784135157307
+      },
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784135730792
+      }
+    ],
+    "7.3 Create `src/hooks/useSwipeToDelete.ts`": [
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784133081150
+      },
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784134895343
+      },
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784135149286
+      }
+    ],
+    "7.4 Create `src/hooks/useStreamingMetrics.ts`": [
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784133081202
+      },
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784134896187
+      },
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784135149792
+      }
+    ],
+    "7.5 Write property test for streaming token rate": [
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784133081297
+      },
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784135157943
+      },
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784135731440
+      }
+    ],
+    "7.6 Create `src/hooks/usePressAnimation.ts`": [
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784133081429
+      },
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784134897836
+      },
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784135151453
+      }
+    ],
+    "8.1 Create `src/components/chat/MessageFlow.tsx`": [
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784133081514
+      },
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784135158731
+      },
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784135732444
+      }
+    ],
+    "8.2 Create `src/components/chat/CodePanel.tsx`": [
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784133081568
+      },
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784135159602
+      },
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784135733266
+      }
+    ],
+    "8.3 Write property test for code panel accent-derived colors": [
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784133081620
+      },
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784136031583
+      },
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784136389296
+      }
+    ],
+    "8.4 Create `src/components/chat/StreamingMessage.tsx`": [
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784133081669
+      },
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784135161221
+      },
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784135734913
+      }
+    ],
+    "8.5 Create `src/components/chat/ThinkingDisclosure.tsx`": [
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784133081717
+      },
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784135741076
+      },
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784136025122
+      }
+    ],
+    "8.6 Update inline markdown rendering for code spans": [
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784133081771
+      },
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784135741965
+      },
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784136023471
+      }
+    ],
+    "9. Checkpoint": [
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784133081838
+      },
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784136401264
+      },
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784137101656
+      }
+    ],
+    "10.1 Create `src/components/layout/NavigationChrome.tsx`": [
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784133081903
+      },
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784136032457
+      },
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784136388291
+      }
+    ],
+    "10.2 Create `src/components/layout/InputChrome.tsx`": [
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784133081970
+      },
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784136034108
+      },
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784136391006
+      }
+    ],
+    "11.1 Create `src/components/sidebar/SessionRow.tsx`": [
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784133082030
+      },
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784136396974
+      },
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784137102540
+      }
+    ],
+    "11.2 Create `src/components/sidebar/SessionSidebar.tsx`": [
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784133082097
+      },
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784136397652
+      },
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784137103241
+      }
+    ],
+    "12.1 Create `src/components/overlays/ModelPicker.tsx`": [
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784133082201
+      },
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784136398493
+      },
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784137104031
+      }
+    ],
+    "12.2 Create `src/components/overlays/RenameDialog.tsx`": [
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784133082288
+      },
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784136399499
+      },
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784137105607
+      }
+    ],
+    "12.3 Write property test for rename dialog validation": [
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784133082365
+      },
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784137111750
+      },
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784137618099
+      }
+    ],
+    "12.4 Create `src/components/overlays/SettingsScreen.tsx`": [
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784133082446
+      },
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784137112755
+      },
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784137618701
+      }
+    ],
+    "12.5 Create `src/components/overlays/ProviderDetailScreen.tsx`": [
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784133082515
+      },
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784137114278
+      },
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784137620326
+      }
+    ],
+    "13. Checkpoint": [
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784133082564
+      },
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784137628658
+      },
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784138341246
+      }
+    ],
+    "14.1 Create `src/components/layout/ChatShell.tsx`": [
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784133082610
+      },
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784137627013
+      },
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784138339705
+      }
+    ],
+    "14.2 Refactor `src/screens/ChatScreen.tsx` to use ChatShell": [
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784133082649
+      },
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784138347910
+      },
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784138531603
+      }
+    ],
+    "15. Final checkpoint": [
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784133082693
+      },
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784138538170
+      },
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784138855844
+      }
+    ],
+    "16.1 Write snapshot tests for NavigationChrome (light + dark)": [
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784133082731
+      },
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784138539094
+      },
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784138850918
+      }
+    ],
+    "16.2 Write snapshot tests for InputChrome states (empty, has text, streaming)": [
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784133082772
+      },
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784138539873
+      },
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784138851664
+      }
+    ],
+    "16.3 Write snapshot tests for MessageFlow (user vs assistant)": [
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784133082815
+      },
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784138540647
+      },
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784138852533
+      }
+    ],
+    "16.4 Write snapshot tests for CodePanel with syntax highlighting": [
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784133082866
+      },
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784138541529
+      },
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784138853541
+      }
+    ],
+    "16.5 Write integration test for send message flow → streaming state → cursor": [
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784133082900
+      },
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784138543226
+      },
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784138854160
+      }
+    ],
+    "1. Extend theme tokens and utilities": [
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784133364629
+      }
+    ],
+    "3. Create UI store for overlay state management": [
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784133618811
+      }
+    ],
+    "2. Create utility functions": [
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784134071512
+      }
+    ],
+    "4. Implement toast system": [
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784134885823
+      }
+    ],
+    "5. Implement input subcomponents": [
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784134889195
+      }
+    ],
+    "7. Implement animation hooks": [
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784135731505
+      }
+    ],
+    "8. Implement message components": [
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784136389339
+      }
+    ],
+    "10. Implement layout chrome components": [
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784136391058
+      }
+    ],
+    "11. Implement sidebar components": [
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784137103275
+      }
+    ],
+    "12. Implement overlay components": [
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784137620357
+      }
+    ],
+    "14. Compose the chat screen shell": [
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784138531643
+      }
+    ],
+    "16. Integration and snapshot tests": [
+      {
+        "executionId": "0e1031b7-32f9-46c9-b207-beb3e161a45b",
+        "chatSessionId": "sess_72d77398-dfe7-4c99-8915-c59eb0b33141",
+        "timestamp": 1784138854195
+      }
+    ]
+  }
+}

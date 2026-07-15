@@ -55,6 +55,14 @@ export interface BorderRadii {
   xl: number;
   /** 9999px — pill/circular shape */
   full: number;
+  /** 10px — code block corners */
+  codeBlock: number;
+  /** 17px — input field corners */
+  input: number;
+  /** 12px — card corners */
+  card: number;
+  /** 26px — grouped list containers (iOS 26 Liquid Glass style) */
+  groupedList: number;
 }
 
 export const borderRadii: BorderRadii = {
@@ -63,4 +71,8 @@ export const borderRadii: BorderRadii = {
   lg: 12,
   xl: 16,
   full: 9999,
+  codeBlock: 10,
+  input: 17,
+  card: 12,
+  groupedList: 26,
 };

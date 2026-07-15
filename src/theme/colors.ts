@@ -41,6 +41,24 @@ export interface ColorPalette {
   inputBackground: string;
   /** Overlay/scrim for modals */
   overlay: string;
+  /** Context ring warning color (50-74% usage) */
+  contextWarning: string;
+  /** Context ring critical color (75%+ usage) */
+  contextCritical: string;
+  /** Code block fixed dark background */
+  codeBlockBackground: string;
+  /** Code keyword color (accent 62% mix with white) */
+  codeKeyword: string;
+  /** Code string color (accent 30% mix with white) */
+  codeString: string;
+  /** Code type color (accent 45% mix with #cfd0ff) */
+  codeType: string;
+  /** Code comment color (reduced opacity text) */
+  codeComment: string;
+  /** Inline code span background — distinct from message bg and code block bg */
+  inlineCodeBackground: string;
+  /** Inline code span text color */
+  inlineCodeText: string;
 }
 
 /**
@@ -70,6 +88,15 @@ export const lightColors: ColorPalette = {
   codeBackground: '#1C1C1E',
   inputBackground: '#F2F2F7',
   overlay: 'rgba(0, 0, 0, 0.4)',
+  contextWarning: '#FF9500',
+  contextCritical: '#D32F2F',
+  codeBlockBackground: '#15151b',
+  codeKeyword: '#9896E6',
+  codeString: '#CDCCF3',
+  codeType: '#9999ED',
+  codeComment: '#8E8E93',
+  inlineCodeBackground: '#E8E8ED',
+  inlineCodeText: '#1C1C1E',
 };
 
 /**
@@ -100,4 +127,13 @@ export const darkColors: ColorPalette = {
   codeBackground: '#1C1C1E',
   inputBackground: '#1C1C1E',
   overlay: 'rgba(0, 0, 0, 0.6)',
+  contextWarning: '#FFD60A',
+  contextCritical: '#EF5350',
+  codeBlockBackground: '#15151b',
+  codeKeyword: '#ADACF1',
+  codeString: '#D7D7F8',
+  codeType: '#A9A9F5',
+  codeComment: '#636366',
+  inlineCodeBackground: '#2C2C2E',
+  inlineCodeText: '#E8E8ED',
 };

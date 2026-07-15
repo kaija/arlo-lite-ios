@@ -107,3 +107,15 @@ export { createTypography, scaleFontSize, scaleLineHeight, getFontScale, baseTyp
 export type { Typography, FontStyle } from './typography';
 export { spacing, borderRadii } from './spacing';
 export type { Spacing, BorderRadii } from './spacing';
+export {
+  SIDEBAR_EASING,
+  DIALOG_EASING,
+  TRANSITION_DURATION,
+  SETTINGS_SLIDE_DURATION,
+  MODEL_PICKER_FADE_DURATION,
+  SIDEBAR_TRANSITION_DURATION,
+  TOAST_ENTER_DURATION,
+  TOAST_EXIT_DURATION,
+  TOAST_DISPLAY_DURATION,
+  RENAME_DIALOG_DURATION,
+} from './animations';

@@ -1,0 +1,5092 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`CodePanel Snapshot Tests Edge cases renders empty code string 1`] = `
+<View
+  accessibilityLabel="Code block, language javascript"
+  accessibilityRole="none"
+  style={
+    [
+      {
+        "backgroundColor": "#15151b",
+        "borderColor": "rgba(255, 255, 255, 0.08)",
+        "borderWidth": 0.5,
+        "marginVertical": 8,
+        "overflow": "hidden",
+      },
+      {
+        "borderRadius": 10,
+      },
+    ]
+  }
+>
+  <View
+    style={
+      {
+        "alignItems": "center",
+        "flexDirection": "row",
+        "justifyContent": "space-between",
+        "paddingHorizontal": 12,
+        "paddingVertical": 8,
+      }
+    }
+  >
+    <Text
+      style={
+        [
+          {
+            "color": "rgba(232, 232, 232, 0.6)",
+            "fontFamily": "Menlo",
+            "textTransform": "lowercase",
+          },
+          {
+            "fontSize": 12,
+            "lineHeight": 16,
+          },
+        ]
+      }
+    >
+      javascript
+    </Text>
+    <View
+      accessibilityLabel="Copy code"
+      accessibilityRole="button"
+      accessibilityState={
+        {
+          "busy": undefined,
+          "checked": undefined,
+          "disabled": undefined,
+          "expanded": undefined,
+          "selected": undefined,
+        }
+      }
+      accessibilityValue={
+        {
+          "max": undefined,
+          "min": undefined,
+          "now": undefined,
+          "text": undefined,
+        }
+      }
+      accessible={true}
+      collapsable={false}
+      focusable={true}
+      hitSlop={
+        {
+          "bottom": 8,
+          "left": 8,
+          "right": 8,
+          "top": 8,
+        }
+      }
+      onBlur={[Function]}
+      onClick={[Function]}
+      onFocus={[Function]}
+      onResponderGrant={[Function]}
+      onResponderMove={[Function]}
+      onResponderRelease={[Function]}
+      onResponderTerminate={[Function]}
+      onResponderTerminationRequest={[Function]}
+      onStartShouldSetResponder={[Function]}
+      style={
+        {
+          "alignItems": "center",
+          "justifyContent": "center",
+          "minHeight": 44,
+          "minWidth": 44,
+          "paddingHorizontal": 8,
+          "paddingVertical": 4,
+        }
+      }
+    >
+      <Text
+        style={
+          [
+            {
+              "color": "rgba(232, 232, 232, 0.7)",
+              "fontSize": 12,
+              "fontWeight": "500",
+            },
+            false,
+          ]
+        }
+      >
+        Copy
+      </Text>
+    </View>
+  </View>
+  <View
+    style={
+      {
+        "backgroundColor": "rgba(255, 255, 255, 0.1)",
+        "height": 0.5,
+      }
+    }
+  />
+  <RCTScrollView
+    accessibilityRole="none"
+    contentContainerStyle={
+      {
+        "padding": 12,
+        "paddingRight": 24,
+      }
+    }
+    horizontal={true}
+    showsHorizontalScrollIndicator={false}
+  >
+    <View>
+      <Text
+        selectable={true}
+        style={
+          [
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            },
+            {
+              "fontFamily": "Menlo",
+              "fontSize": 15,
+              "lineHeight": 20,
+            },
+          ]
+        }
+      />
+    </View>
+  </RCTScrollView>
+</View>
+`;
+
+exports[`CodePanel Snapshot Tests Edge cases renders long single line for horizontal scroll 1`] = `
+<View
+  accessibilityLabel="Code block, language javascript"
+  accessibilityRole="none"
+  style={
+    [
+      {
+        "backgroundColor": "#15151b",
+        "borderColor": "rgba(255, 255, 255, 0.08)",
+        "borderWidth": 0.5,
+        "marginVertical": 8,
+        "overflow": "hidden",
+      },
+      {
+        "borderRadius": 10,
+      },
+    ]
+  }
+>
+  <View
+    style={
+      {
+        "alignItems": "center",
+        "flexDirection": "row",
+        "justifyContent": "space-between",
+        "paddingHorizontal": 12,
+        "paddingVertical": 8,
+      }
+    }
+  >
+    <Text
+      style={
+        [
+          {
+            "color": "rgba(232, 232, 232, 0.6)",
+            "fontFamily": "Menlo",
+            "textTransform": "lowercase",
+          },
+          {
+            "fontSize": 12,
+            "lineHeight": 16,
+          },
+        ]
+      }
+    >
+      javascript
+    </Text>
+    <View
+      accessibilityLabel="Copy code"
+      accessibilityRole="button"
+      accessibilityState={
+        {
+          "busy": undefined,
+          "checked": undefined,
+          "disabled": undefined,
+          "expanded": undefined,
+          "selected": undefined,
+        }
+      }
+      accessibilityValue={
+        {
+          "max": undefined,
+          "min": undefined,
+          "now": undefined,
+          "text": undefined,
+        }
+      }
+      accessible={true}
+      collapsable={false}
+      focusable={true}
+      hitSlop={
+        {
+          "bottom": 8,
+          "left": 8,
+          "right": 8,
+          "top": 8,
+        }
+      }
+      onBlur={[Function]}
+      onClick={[Function]}
+      onFocus={[Function]}
+      onResponderGrant={[Function]}
+      onResponderMove={[Function]}
+      onResponderRelease={[Function]}
+      onResponderTerminate={[Function]}
+      onResponderTerminationRequest={[Function]}
+      onStartShouldSetResponder={[Function]}
+      style={
+        {
+          "alignItems": "center",
+          "justifyContent": "center",
+          "minHeight": 44,
+          "minWidth": 44,
+          "paddingHorizontal": 8,
+          "paddingVertical": 4,
+        }
+      }
+    >
+      <Text
+        style={
+          [
+            {
+              "color": "rgba(232, 232, 232, 0.7)",
+              "fontSize": 12,
+              "fontWeight": "500",
+            },
+            false,
+          ]
+        }
+      >
+        Copy
+      </Text>
+    </View>
+  </View>
+  <View
+    style={
+      {
+        "backgroundColor": "rgba(255, 255, 255, 0.1)",
+        "height": 0.5,
+      }
+    }
+  />
+  <RCTScrollView
+    accessibilityRole="none"
+    contentContainerStyle={
+      {
+        "padding": 12,
+        "paddingRight": 24,
+      }
+    }
+    horizontal={true}
+    showsHorizontalScrollIndicator={false}
+  >
+    <View>
+      <Text
+        selectable={true}
+        style={
+          {
+            "fontFamily": "Menlo",
+            "fontSize": 15,
+            "lineHeight": 20,
+          }
+        }
+      >
+        <Text
+          style={
+            {
+              "color": "#9896E6",
+            }
+          }
+        >
+          const
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+           
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+          veryLongVariableName
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+           
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.6)",
+            }
+          }
+        >
+          =
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+           
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+          someFunction
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.6)",
+            }
+          }
+        >
+          (
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+          argument1
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.6)",
+            }
+          }
+        >
+          ,
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+           
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+          argument2
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.6)",
+            }
+          }
+        >
+          ,
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+           
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+          argument3
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.6)",
+            }
+          }
+        >
+          ,
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+           
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+          argument4
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.6)",
+            }
+          }
+        >
+          ,
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+           
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+          argument5
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.6)",
+            }
+          }
+        >
+          ,
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+           
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+          argument6
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.6)",
+            }
+          }
+        >
+          ,
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+           
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+          argument7
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.6)",
+            }
+          }
+        >
+          );
+        </Text>
+      </Text>
+    </View>
+  </RCTScrollView>
+</View>
+`;
+
+exports[`CodePanel Snapshot Tests Edge cases renders single-line code 1`] = `
+<View
+  accessibilityLabel="Code block, language javascript"
+  accessibilityRole="none"
+  style={
+    [
+      {
+        "backgroundColor": "#15151b",
+        "borderColor": "rgba(255, 255, 255, 0.08)",
+        "borderWidth": 0.5,
+        "marginVertical": 8,
+        "overflow": "hidden",
+      },
+      {
+        "borderRadius": 10,
+      },
+    ]
+  }
+>
+  <View
+    style={
+      {
+        "alignItems": "center",
+        "flexDirection": "row",
+        "justifyContent": "space-between",
+        "paddingHorizontal": 12,
+        "paddingVertical": 8,
+      }
+    }
+  >
+    <Text
+      style={
+        [
+          {
+            "color": "rgba(232, 232, 232, 0.6)",
+            "fontFamily": "Menlo",
+            "textTransform": "lowercase",
+          },
+          {
+            "fontSize": 12,
+            "lineHeight": 16,
+          },
+        ]
+      }
+    >
+      javascript
+    </Text>
+    <View
+      accessibilityLabel="Copy code"
+      accessibilityRole="button"
+      accessibilityState={
+        {
+          "busy": undefined,
+          "checked": undefined,
+          "disabled": undefined,
+          "expanded": undefined,
+          "selected": undefined,
+        }
+      }
+      accessibilityValue={
+        {
+          "max": undefined,
+          "min": undefined,
+          "now": undefined,
+          "text": undefined,
+        }
+      }
+      accessible={true}
+      collapsable={false}
+      focusable={true}
+      hitSlop={
+        {
+          "bottom": 8,
+          "left": 8,
+          "right": 8,
+          "top": 8,
+        }
+      }
+      onBlur={[Function]}
+      onClick={[Function]}
+      onFocus={[Function]}
+      onResponderGrant={[Function]}
+      onResponderMove={[Function]}
+      onResponderRelease={[Function]}
+      onResponderTerminate={[Function]}
+      onResponderTerminationRequest={[Function]}
+      onStartShouldSetResponder={[Function]}
+      style={
+        {
+          "alignItems": "center",
+          "justifyContent": "center",
+          "minHeight": 44,
+          "minWidth": 44,
+          "paddingHorizontal": 8,
+          "paddingVertical": 4,
+        }
+      }
+    >
+      <Text
+        style={
+          [
+            {
+              "color": "rgba(232, 232, 232, 0.7)",
+              "fontSize": 12,
+              "fontWeight": "500",
+            },
+            false,
+          ]
+        }
+      >
+        Copy
+      </Text>
+    </View>
+  </View>
+  <View
+    style={
+      {
+        "backgroundColor": "rgba(255, 255, 255, 0.1)",
+        "height": 0.5,
+      }
+    }
+  />
+  <RCTScrollView
+    accessibilityRole="none"
+    contentContainerStyle={
+      {
+        "padding": 12,
+        "paddingRight": 24,
+      }
+    }
+    horizontal={true}
+    showsHorizontalScrollIndicator={false}
+  >
+    <View>
+      <Text
+        selectable={true}
+        style={
+          {
+            "fontFamily": "Menlo",
+            "fontSize": 15,
+            "lineHeight": 20,
+          }
+        }
+      >
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+          console
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.6)",
+            }
+          }
+        >
+          .
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+          log
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.6)",
+            }
+          }
+        >
+          (
+        </Text>
+        <Text
+          style={
+            {
+              "color": "#CDCCF3",
+            }
+          }
+        >
+          "hello"
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.6)",
+            }
+          }
+        >
+          );
+        </Text>
+      </Text>
+    </View>
+  </RCTScrollView>
+</View>
+`;
+
+exports[`CodePanel Snapshot Tests JavaScript syntax highlighting renders JavaScript with comments and strings 1`] = `
+<View
+  accessibilityLabel="Code block, language javascript"
+  accessibilityRole="none"
+  style={
+    [
+      {
+        "backgroundColor": "#15151b",
+        "borderColor": "rgba(255, 255, 255, 0.08)",
+        "borderWidth": 0.5,
+        "marginVertical": 8,
+        "overflow": "hidden",
+      },
+      {
+        "borderRadius": 10,
+      },
+    ]
+  }
+>
+  <View
+    style={
+      {
+        "alignItems": "center",
+        "flexDirection": "row",
+        "justifyContent": "space-between",
+        "paddingHorizontal": 12,
+        "paddingVertical": 8,
+      }
+    }
+  >
+    <Text
+      style={
+        [
+          {
+            "color": "rgba(232, 232, 232, 0.6)",
+            "fontFamily": "Menlo",
+            "textTransform": "lowercase",
+          },
+          {
+            "fontSize": 12,
+            "lineHeight": 16,
+          },
+        ]
+      }
+    >
+      javascript
+    </Text>
+    <View
+      accessibilityLabel="Copy code"
+      accessibilityRole="button"
+      accessibilityState={
+        {
+          "busy": undefined,
+          "checked": undefined,
+          "disabled": undefined,
+          "expanded": undefined,
+          "selected": undefined,
+        }
+      }
+      accessibilityValue={
+        {
+          "max": undefined,
+          "min": undefined,
+          "now": undefined,
+          "text": undefined,
+        }
+      }
+      accessible={true}
+      collapsable={false}
+      focusable={true}
+      hitSlop={
+        {
+          "bottom": 8,
+          "left": 8,
+          "right": 8,
+          "top": 8,
+        }
+      }
+      onBlur={[Function]}
+      onClick={[Function]}
+      onFocus={[Function]}
+      onResponderGrant={[Function]}
+      onResponderMove={[Function]}
+      onResponderRelease={[Function]}
+      onResponderTerminate={[Function]}
+      onResponderTerminationRequest={[Function]}
+      onStartShouldSetResponder={[Function]}
+      style={
+        {
+          "alignItems": "center",
+          "justifyContent": "center",
+          "minHeight": 44,
+          "minWidth": 44,
+          "paddingHorizontal": 8,
+          "paddingVertical": 4,
+        }
+      }
+    >
+      <Text
+        style={
+          [
+            {
+              "color": "rgba(232, 232, 232, 0.7)",
+              "fontSize": 12,
+              "fontWeight": "500",
+            },
+            false,
+          ]
+        }
+      >
+        Copy
+      </Text>
+    </View>
+  </View>
+  <View
+    style={
+      {
+        "backgroundColor": "rgba(255, 255, 255, 0.1)",
+        "height": 0.5,
+      }
+    }
+  />
+  <RCTScrollView
+    accessibilityRole="none"
+    contentContainerStyle={
+      {
+        "padding": 12,
+        "paddingRight": 24,
+      }
+    }
+    horizontal={true}
+    showsHorizontalScrollIndicator={false}
+  >
+    <View>
+      <Text
+        selectable={true}
+        style={
+          {
+            "fontFamily": "Menlo",
+            "fontSize": 15,
+            "lineHeight": 20,
+          }
+        }
+      >
+        <Text
+          style={
+            {
+              "color": "#8E8E93",
+              "fontStyle": "italic",
+            }
+          }
+        >
+          // Initialize the app
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+          
+
+        </Text>
+        <Text
+          style={
+            {
+              "color": "#9896E6",
+            }
+          }
+        >
+          const
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+           
+        </Text>
+        <Text
+          style={
+            {
+              "color": "#9999ED",
+            }
+          }
+        >
+          API_URL
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+           
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.6)",
+            }
+          }
+        >
+          =
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+           
+        </Text>
+        <Text
+          style={
+            {
+              "color": "#CDCCF3",
+            }
+          }
+        >
+          "https://api.example.com"
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.6)",
+            }
+          }
+        >
+          ;
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+          
+
+        </Text>
+        <Text
+          style={
+            {
+              "color": "#8E8E93",
+              "fontStyle": "italic",
+            }
+          }
+        >
+          /* Multi-line
+   comment */
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+          
+
+        </Text>
+        <Text
+          style={
+            {
+              "color": "#9896E6",
+            }
+          }
+        >
+          let
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+           
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+          count
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+           
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.6)",
+            }
+          }
+        >
+          =
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+           
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.6)",
+            }
+          }
+        >
+          42;
+        </Text>
+      </Text>
+    </View>
+  </RCTScrollView>
+</View>
+`;
+
+exports[`CodePanel Snapshot Tests JavaScript syntax highlighting renders a JavaScript function with highlighting 1`] = `
+<View
+  accessibilityLabel="Code block, language javascript"
+  accessibilityRole="none"
+  style={
+    [
+      {
+        "backgroundColor": "#15151b",
+        "borderColor": "rgba(255, 255, 255, 0.08)",
+        "borderWidth": 0.5,
+        "marginVertical": 8,
+        "overflow": "hidden",
+      },
+      {
+        "borderRadius": 10,
+      },
+    ]
+  }
+>
+  <View
+    style={
+      {
+        "alignItems": "center",
+        "flexDirection": "row",
+        "justifyContent": "space-between",
+        "paddingHorizontal": 12,
+        "paddingVertical": 8,
+      }
+    }
+  >
+    <Text
+      style={
+        [
+          {
+            "color": "rgba(232, 232, 232, 0.6)",
+            "fontFamily": "Menlo",
+            "textTransform": "lowercase",
+          },
+          {
+            "fontSize": 12,
+            "lineHeight": 16,
+          },
+        ]
+      }
+    >
+      javascript
+    </Text>
+    <View
+      accessibilityLabel="Copy code"
+      accessibilityRole="button"
+      accessibilityState={
+        {
+          "busy": undefined,
+          "checked": undefined,
+          "disabled": undefined,
+          "expanded": undefined,
+          "selected": undefined,
+        }
+      }
+      accessibilityValue={
+        {
+          "max": undefined,
+          "min": undefined,
+          "now": undefined,
+          "text": undefined,
+        }
+      }
+      accessible={true}
+      collapsable={false}
+      focusable={true}
+      hitSlop={
+        {
+          "bottom": 8,
+          "left": 8,
+          "right": 8,
+          "top": 8,
+        }
+      }
+      onBlur={[Function]}
+      onClick={[Function]}
+      onFocus={[Function]}
+      onResponderGrant={[Function]}
+      onResponderMove={[Function]}
+      onResponderRelease={[Function]}
+      onResponderTerminate={[Function]}
+      onResponderTerminationRequest={[Function]}
+      onStartShouldSetResponder={[Function]}
+      style={
+        {
+          "alignItems": "center",
+          "justifyContent": "center",
+          "minHeight": 44,
+          "minWidth": 44,
+          "paddingHorizontal": 8,
+          "paddingVertical": 4,
+        }
+      }
+    >
+      <Text
+        style={
+          [
+            {
+              "color": "rgba(232, 232, 232, 0.7)",
+              "fontSize": 12,
+              "fontWeight": "500",
+            },
+            false,
+          ]
+        }
+      >
+        Copy
+      </Text>
+    </View>
+  </View>
+  <View
+    style={
+      {
+        "backgroundColor": "rgba(255, 255, 255, 0.1)",
+        "height": 0.5,
+      }
+    }
+  />
+  <RCTScrollView
+    accessibilityRole="none"
+    contentContainerStyle={
+      {
+        "padding": 12,
+        "paddingRight": 24,
+      }
+    }
+    horizontal={true}
+    showsHorizontalScrollIndicator={false}
+  >
+    <View>
+      <Text
+        selectable={true}
+        style={
+          {
+            "fontFamily": "Menlo",
+            "fontSize": 15,
+            "lineHeight": 20,
+          }
+        }
+      >
+        <Text
+          style={
+            {
+              "color": "#9896E6",
+            }
+          }
+        >
+          function
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+           
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+          greet
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.6)",
+            }
+          }
+        >
+          (
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+          name
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.6)",
+            }
+          }
+        >
+          )
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+           
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.6)",
+            }
+          }
+        >
+          {
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+          
+  
+        </Text>
+        <Text
+          style={
+            {
+              "color": "#9896E6",
+            }
+          }
+        >
+          const
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+           
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+          message
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+           
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.6)",
+            }
+          }
+        >
+          =
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+           
+        </Text>
+        <Text
+          style={
+            {
+              "color": "#CDCCF3",
+            }
+          }
+        >
+          "Hello, "
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+           
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.6)",
+            }
+          }
+        >
+          +
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+           
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+          name
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.6)",
+            }
+          }
+        >
+          ;
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+          
+  
+        </Text>
+        <Text
+          style={
+            {
+              "color": "#9896E6",
+            }
+          }
+        >
+          return
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+           
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+          message
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.6)",
+            }
+          }
+        >
+          ;
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+          
+
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.6)",
+            }
+          }
+        >
+          }
+        </Text>
+      </Text>
+    </View>
+  </RCTScrollView>
+</View>
+`;
+
+exports[`CodePanel Snapshot Tests Language aliases renders js alias as javascript 1`] = `
+<View
+  accessibilityLabel="Code block, language javascript"
+  accessibilityRole="none"
+  style={
+    [
+      {
+        "backgroundColor": "#15151b",
+        "borderColor": "rgba(255, 255, 255, 0.08)",
+        "borderWidth": 0.5,
+        "marginVertical": 8,
+        "overflow": "hidden",
+      },
+      {
+        "borderRadius": 10,
+      },
+    ]
+  }
+>
+  <View
+    style={
+      {
+        "alignItems": "center",
+        "flexDirection": "row",
+        "justifyContent": "space-between",
+        "paddingHorizontal": 12,
+        "paddingVertical": 8,
+      }
+    }
+  >
+    <Text
+      style={
+        [
+          {
+            "color": "rgba(232, 232, 232, 0.6)",
+            "fontFamily": "Menlo",
+            "textTransform": "lowercase",
+          },
+          {
+            "fontSize": 12,
+            "lineHeight": 16,
+          },
+        ]
+      }
+    >
+      javascript
+    </Text>
+    <View
+      accessibilityLabel="Copy code"
+      accessibilityRole="button"
+      accessibilityState={
+        {
+          "busy": undefined,
+          "checked": undefined,
+          "disabled": undefined,
+          "expanded": undefined,
+          "selected": undefined,
+        }
+      }
+      accessibilityValue={
+        {
+          "max": undefined,
+          "min": undefined,
+          "now": undefined,
+          "text": undefined,
+        }
+      }
+      accessible={true}
+      collapsable={false}
+      focusable={true}
+      hitSlop={
+        {
+          "bottom": 8,
+          "left": 8,
+          "right": 8,
+          "top": 8,
+        }
+      }
+      onBlur={[Function]}
+      onClick={[Function]}
+      onFocus={[Function]}
+      onResponderGrant={[Function]}
+      onResponderMove={[Function]}
+      onResponderRelease={[Function]}
+      onResponderTerminate={[Function]}
+      onResponderTerminationRequest={[Function]}
+      onStartShouldSetResponder={[Function]}
+      style={
+        {
+          "alignItems": "center",
+          "justifyContent": "center",
+          "minHeight": 44,
+          "minWidth": 44,
+          "paddingHorizontal": 8,
+          "paddingVertical": 4,
+        }
+      }
+    >
+      <Text
+        style={
+          [
+            {
+              "color": "rgba(232, 232, 232, 0.7)",
+              "fontSize": 12,
+              "fontWeight": "500",
+            },
+            false,
+          ]
+        }
+      >
+        Copy
+      </Text>
+    </View>
+  </View>
+  <View
+    style={
+      {
+        "backgroundColor": "rgba(255, 255, 255, 0.1)",
+        "height": 0.5,
+      }
+    }
+  />
+  <RCTScrollView
+    accessibilityRole="none"
+    contentContainerStyle={
+      {
+        "padding": 12,
+        "paddingRight": 24,
+      }
+    }
+    horizontal={true}
+    showsHorizontalScrollIndicator={false}
+  >
+    <View>
+      <Text
+        selectable={true}
+        style={
+          {
+            "fontFamily": "Menlo",
+            "fontSize": 15,
+            "lineHeight": 20,
+          }
+        }
+      >
+        <Text
+          style={
+            {
+              "color": "#9896E6",
+            }
+          }
+        >
+          const
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+           
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+          x
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+           
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.6)",
+            }
+          }
+        >
+          =
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+           
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.6)",
+            }
+          }
+        >
+          [1,
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+           
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.6)",
+            }
+          }
+        >
+          2,
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+           
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.6)",
+            }
+          }
+        >
+          3].
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+          map
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.6)",
+            }
+          }
+        >
+          (
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+          n
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+           
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.6)",
+            }
+          }
+        >
+          =&gt;
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+           
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+          n
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+           
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.6)",
+            }
+          }
+        >
+          *
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+           
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.6)",
+            }
+          }
+        >
+          2);
+        </Text>
+      </Text>
+    </View>
+  </RCTScrollView>
+</View>
+`;
+
+exports[`CodePanel Snapshot Tests Language aliases renders ts alias as typescript 1`] = `
+<View
+  accessibilityLabel="Code block, language typescript"
+  accessibilityRole="none"
+  style={
+    [
+      {
+        "backgroundColor": "#15151b",
+        "borderColor": "rgba(255, 255, 255, 0.08)",
+        "borderWidth": 0.5,
+        "marginVertical": 8,
+        "overflow": "hidden",
+      },
+      {
+        "borderRadius": 10,
+      },
+    ]
+  }
+>
+  <View
+    style={
+      {
+        "alignItems": "center",
+        "flexDirection": "row",
+        "justifyContent": "space-between",
+        "paddingHorizontal": 12,
+        "paddingVertical": 8,
+      }
+    }
+  >
+    <Text
+      style={
+        [
+          {
+            "color": "rgba(232, 232, 232, 0.6)",
+            "fontFamily": "Menlo",
+            "textTransform": "lowercase",
+          },
+          {
+            "fontSize": 12,
+            "lineHeight": 16,
+          },
+        ]
+      }
+    >
+      typescript
+    </Text>
+    <View
+      accessibilityLabel="Copy code"
+      accessibilityRole="button"
+      accessibilityState={
+        {
+          "busy": undefined,
+          "checked": undefined,
+          "disabled": undefined,
+          "expanded": undefined,
+          "selected": undefined,
+        }
+      }
+      accessibilityValue={
+        {
+          "max": undefined,
+          "min": undefined,
+          "now": undefined,
+          "text": undefined,
+        }
+      }
+      accessible={true}
+      collapsable={false}
+      focusable={true}
+      hitSlop={
+        {
+          "bottom": 8,
+          "left": 8,
+          "right": 8,
+          "top": 8,
+        }
+      }
+      onBlur={[Function]}
+      onClick={[Function]}
+      onFocus={[Function]}
+      onResponderGrant={[Function]}
+      onResponderMove={[Function]}
+      onResponderRelease={[Function]}
+      onResponderTerminate={[Function]}
+      onResponderTerminationRequest={[Function]}
+      onStartShouldSetResponder={[Function]}
+      style={
+        {
+          "alignItems": "center",
+          "justifyContent": "center",
+          "minHeight": 44,
+          "minWidth": 44,
+          "paddingHorizontal": 8,
+          "paddingVertical": 4,
+        }
+      }
+    >
+      <Text
+        style={
+          [
+            {
+              "color": "rgba(232, 232, 232, 0.7)",
+              "fontSize": 12,
+              "fontWeight": "500",
+            },
+            false,
+          ]
+        }
+      >
+        Copy
+      </Text>
+    </View>
+  </View>
+  <View
+    style={
+      {
+        "backgroundColor": "rgba(255, 255, 255, 0.1)",
+        "height": 0.5,
+      }
+    }
+  />
+  <RCTScrollView
+    accessibilityRole="none"
+    contentContainerStyle={
+      {
+        "padding": 12,
+        "paddingRight": 24,
+      }
+    }
+    horizontal={true}
+    showsHorizontalScrollIndicator={false}
+  >
+    <View>
+      <Text
+        selectable={true}
+        style={
+          {
+            "fontFamily": "Menlo",
+            "fontSize": 15,
+            "lineHeight": 20,
+          }
+        }
+      >
+        <Text
+          style={
+            {
+              "color": "#9896E6",
+            }
+          }
+        >
+          const
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+           
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+          arr
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.6)",
+            }
+          }
+        >
+          :
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+           
+        </Text>
+        <Text
+          style={
+            {
+              "color": "#9999ED",
+            }
+          }
+        >
+          Array
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.6)",
+            }
+          }
+        >
+          &lt;
+        </Text>
+        <Text
+          style={
+            {
+              "color": "#9999ED",
+            }
+          }
+        >
+          number
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.6)",
+            }
+          }
+        >
+          &gt;
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+           
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.6)",
+            }
+          }
+        >
+          =
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+           
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.6)",
+            }
+          }
+        >
+          [1,
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+           
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.6)",
+            }
+          }
+        >
+          2,
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+           
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.6)",
+            }
+          }
+        >
+          3];
+        </Text>
+      </Text>
+    </View>
+  </RCTScrollView>
+</View>
+`;
+
+exports[`CodePanel Snapshot Tests Plain text (no language) renders plain text without syntax highlighting 1`] = `
+<View
+  accessibilityLabel="Code block"
+  accessibilityRole="none"
+  style={
+    [
+      {
+        "backgroundColor": "#15151b",
+        "borderColor": "rgba(255, 255, 255, 0.08)",
+        "borderWidth": 0.5,
+        "marginVertical": 8,
+        "overflow": "hidden",
+      },
+      {
+        "borderRadius": 10,
+      },
+    ]
+  }
+>
+  <View
+    style={
+      {
+        "alignItems": "center",
+        "flexDirection": "row",
+        "justifyContent": "space-between",
+        "paddingHorizontal": 12,
+        "paddingVertical": 8,
+      }
+    }
+  >
+    <View />
+    <View
+      accessibilityLabel="Copy code"
+      accessibilityRole="button"
+      accessibilityState={
+        {
+          "busy": undefined,
+          "checked": undefined,
+          "disabled": undefined,
+          "expanded": undefined,
+          "selected": undefined,
+        }
+      }
+      accessibilityValue={
+        {
+          "max": undefined,
+          "min": undefined,
+          "now": undefined,
+          "text": undefined,
+        }
+      }
+      accessible={true}
+      collapsable={false}
+      focusable={true}
+      hitSlop={
+        {
+          "bottom": 8,
+          "left": 8,
+          "right": 8,
+          "top": 8,
+        }
+      }
+      onBlur={[Function]}
+      onClick={[Function]}
+      onFocus={[Function]}
+      onResponderGrant={[Function]}
+      onResponderMove={[Function]}
+      onResponderRelease={[Function]}
+      onResponderTerminate={[Function]}
+      onResponderTerminationRequest={[Function]}
+      onStartShouldSetResponder={[Function]}
+      style={
+        {
+          "alignItems": "center",
+          "justifyContent": "center",
+          "minHeight": 44,
+          "minWidth": 44,
+          "paddingHorizontal": 8,
+          "paddingVertical": 4,
+        }
+      }
+    >
+      <Text
+        style={
+          [
+            {
+              "color": "rgba(232, 232, 232, 0.7)",
+              "fontSize": 12,
+              "fontWeight": "500",
+            },
+            false,
+          ]
+        }
+      >
+        Copy
+      </Text>
+    </View>
+  </View>
+  <View
+    style={
+      {
+        "backgroundColor": "rgba(255, 255, 255, 0.1)",
+        "height": 0.5,
+      }
+    }
+  />
+  <RCTScrollView
+    accessibilityRole="none"
+    contentContainerStyle={
+      {
+        "padding": 12,
+        "paddingRight": 24,
+      }
+    }
+    horizontal={true}
+    showsHorizontalScrollIndicator={false}
+  >
+    <View>
+      <Text
+        selectable={true}
+        style={
+          [
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            },
+            {
+              "fontFamily": "Menlo",
+              "fontSize": 15,
+              "lineHeight": 20,
+            },
+          ]
+        }
+      >
+        Some plain text output
+without any syntax highlighting.
+Line three.
+      </Text>
+    </View>
+  </RCTScrollView>
+</View>
+`;
+
+exports[`CodePanel Snapshot Tests Python syntax highlighting renders Python with classes and decorators 1`] = `
+<View
+  accessibilityLabel="Code block, language python"
+  accessibilityRole="none"
+  style={
+    [
+      {
+        "backgroundColor": "#15151b",
+        "borderColor": "rgba(255, 255, 255, 0.08)",
+        "borderWidth": 0.5,
+        "marginVertical": 8,
+        "overflow": "hidden",
+      },
+      {
+        "borderRadius": 10,
+      },
+    ]
+  }
+>
+  <View
+    style={
+      {
+        "alignItems": "center",
+        "flexDirection": "row",
+        "justifyContent": "space-between",
+        "paddingHorizontal": 12,
+        "paddingVertical": 8,
+      }
+    }
+  >
+    <Text
+      style={
+        [
+          {
+            "color": "rgba(232, 232, 232, 0.6)",
+            "fontFamily": "Menlo",
+            "textTransform": "lowercase",
+          },
+          {
+            "fontSize": 12,
+            "lineHeight": 16,
+          },
+        ]
+      }
+    >
+      python
+    </Text>
+    <View
+      accessibilityLabel="Copy code"
+      accessibilityRole="button"
+      accessibilityState={
+        {
+          "busy": undefined,
+          "checked": undefined,
+          "disabled": undefined,
+          "expanded": undefined,
+          "selected": undefined,
+        }
+      }
+      accessibilityValue={
+        {
+          "max": undefined,
+          "min": undefined,
+          "now": undefined,
+          "text": undefined,
+        }
+      }
+      accessible={true}
+      collapsable={false}
+      focusable={true}
+      hitSlop={
+        {
+          "bottom": 8,
+          "left": 8,
+          "right": 8,
+          "top": 8,
+        }
+      }
+      onBlur={[Function]}
+      onClick={[Function]}
+      onFocus={[Function]}
+      onResponderGrant={[Function]}
+      onResponderMove={[Function]}
+      onResponderRelease={[Function]}
+      onResponderTerminate={[Function]}
+      onResponderTerminationRequest={[Function]}
+      onStartShouldSetResponder={[Function]}
+      style={
+        {
+          "alignItems": "center",
+          "justifyContent": "center",
+          "minHeight": 44,
+          "minWidth": 44,
+          "paddingHorizontal": 8,
+          "paddingVertical": 4,
+        }
+      }
+    >
+      <Text
+        style={
+          [
+            {
+              "color": "rgba(232, 232, 232, 0.7)",
+              "fontSize": 12,
+              "fontWeight": "500",
+            },
+            false,
+          ]
+        }
+      >
+        Copy
+      </Text>
+    </View>
+  </View>
+  <View
+    style={
+      {
+        "backgroundColor": "rgba(255, 255, 255, 0.1)",
+        "height": 0.5,
+      }
+    }
+  />
+  <RCTScrollView
+    accessibilityRole="none"
+    contentContainerStyle={
+      {
+        "padding": 12,
+        "paddingRight": 24,
+      }
+    }
+    horizontal={true}
+    showsHorizontalScrollIndicator={false}
+  >
+    <View>
+      <Text
+        selectable={true}
+        style={
+          {
+            "fontFamily": "Menlo",
+            "fontSize": 15,
+            "lineHeight": 20,
+          }
+        }
+      >
+        <Text
+          style={
+            {
+              "color": "#8E8E93",
+              "fontStyle": "italic",
+            }
+          }
+        >
+          # A simple Python class
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+          
+
+        </Text>
+        <Text
+          style={
+            {
+              "color": "#9896E6",
+            }
+          }
+        >
+          class
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+           
+        </Text>
+        <Text
+          style={
+            {
+              "color": "#9999ED",
+            }
+          }
+        >
+          Calculator
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.6)",
+            }
+          }
+        >
+          :
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+          
+    
+        </Text>
+        <Text
+          style={
+            {
+              "color": "#9896E6",
+            }
+          }
+        >
+          def
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+           
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+          __init__
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.6)",
+            }
+          }
+        >
+          (
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+          self
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.6)",
+            }
+          }
+        >
+          ):
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+          
+        
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+          self
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.6)",
+            }
+          }
+        >
+          .
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+          result
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+           
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.6)",
+            }
+          }
+        >
+          =
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+           
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.6)",
+            }
+          }
+        >
+          0
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+          
+
+    
+        </Text>
+        <Text
+          style={
+            {
+              "color": "#9896E6",
+            }
+          }
+        >
+          def
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+           
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+          add
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.6)",
+            }
+          }
+        >
+          (
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+          self
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.6)",
+            }
+          }
+        >
+          ,
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+           
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+          value
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.6)",
+            }
+          }
+        >
+          :
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+           
+        </Text>
+        <Text
+          style={
+            {
+              "color": "#9999ED",
+            }
+          }
+        >
+          int
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.6)",
+            }
+          }
+        >
+          )
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+           
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.6)",
+            }
+          }
+        >
+          -&gt;
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+           
+        </Text>
+        <Text
+          style={
+            {
+              "color": "#9999ED",
+            }
+          }
+        >
+          int
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.6)",
+            }
+          }
+        >
+          :
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+          
+        
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+          self
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.6)",
+            }
+          }
+        >
+          .
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+          result
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+           
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.6)",
+            }
+          }
+        >
+          +=
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+           
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+          value
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+          
+        
+        </Text>
+        <Text
+          style={
+            {
+              "color": "#9896E6",
+            }
+          }
+        >
+          return
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+           
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+          self
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.6)",
+            }
+          }
+        >
+          .
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+          result
+        </Text>
+      </Text>
+    </View>
+  </RCTScrollView>
+</View>
+`;
+
+exports[`CodePanel Snapshot Tests Rust syntax highlighting renders Rust with ownership patterns 1`] = `
+<View
+  accessibilityLabel="Code block, language rust"
+  accessibilityRole="none"
+  style={
+    [
+      {
+        "backgroundColor": "#15151b",
+        "borderColor": "rgba(255, 255, 255, 0.08)",
+        "borderWidth": 0.5,
+        "marginVertical": 8,
+        "overflow": "hidden",
+      },
+      {
+        "borderRadius": 10,
+      },
+    ]
+  }
+>
+  <View
+    style={
+      {
+        "alignItems": "center",
+        "flexDirection": "row",
+        "justifyContent": "space-between",
+        "paddingHorizontal": 12,
+        "paddingVertical": 8,
+      }
+    }
+  >
+    <Text
+      style={
+        [
+          {
+            "color": "rgba(232, 232, 232, 0.6)",
+            "fontFamily": "Menlo",
+            "textTransform": "lowercase",
+          },
+          {
+            "fontSize": 12,
+            "lineHeight": 16,
+          },
+        ]
+      }
+    >
+      rust
+    </Text>
+    <View
+      accessibilityLabel="Copy code"
+      accessibilityRole="button"
+      accessibilityState={
+        {
+          "busy": undefined,
+          "checked": undefined,
+          "disabled": undefined,
+          "expanded": undefined,
+          "selected": undefined,
+        }
+      }
+      accessibilityValue={
+        {
+          "max": undefined,
+          "min": undefined,
+          "now": undefined,
+          "text": undefined,
+        }
+      }
+      accessible={true}
+      collapsable={false}
+      focusable={true}
+      hitSlop={
+        {
+          "bottom": 8,
+          "left": 8,
+          "right": 8,
+          "top": 8,
+        }
+      }
+      onBlur={[Function]}
+      onClick={[Function]}
+      onFocus={[Function]}
+      onResponderGrant={[Function]}
+      onResponderMove={[Function]}
+      onResponderRelease={[Function]}
+      onResponderTerminate={[Function]}
+      onResponderTerminationRequest={[Function]}
+      onStartShouldSetResponder={[Function]}
+      style={
+        {
+          "alignItems": "center",
+          "justifyContent": "center",
+          "minHeight": 44,
+          "minWidth": 44,
+          "paddingHorizontal": 8,
+          "paddingVertical": 4,
+        }
+      }
+    >
+      <Text
+        style={
+          [
+            {
+              "color": "rgba(232, 232, 232, 0.7)",
+              "fontSize": 12,
+              "fontWeight": "500",
+            },
+            false,
+          ]
+        }
+      >
+        Copy
+      </Text>
+    </View>
+  </View>
+  <View
+    style={
+      {
+        "backgroundColor": "rgba(255, 255, 255, 0.1)",
+        "height": 0.5,
+      }
+    }
+  />
+  <RCTScrollView
+    accessibilityRole="none"
+    contentContainerStyle={
+      {
+        "padding": 12,
+        "paddingRight": 24,
+      }
+    }
+    horizontal={true}
+    showsHorizontalScrollIndicator={false}
+  >
+    <View>
+      <Text
+        selectable={true}
+        style={
+          {
+            "fontFamily": "Menlo",
+            "fontSize": 15,
+            "lineHeight": 20,
+          }
+        }
+      >
+        <Text
+          style={
+            {
+              "color": "#9896E6",
+            }
+          }
+        >
+          fn
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+           
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+          main
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.6)",
+            }
+          }
+        >
+          ()
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+           
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.6)",
+            }
+          }
+        >
+          {
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+          
+    
+        </Text>
+        <Text
+          style={
+            {
+              "color": "#9896E6",
+            }
+          }
+        >
+          let
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+           
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+          s
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+           
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.6)",
+            }
+          }
+        >
+          =
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+           
+        </Text>
+        <Text
+          style={
+            {
+              "color": "#9999ED",
+            }
+          }
+        >
+          String
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.6)",
+            }
+          }
+        >
+          ::
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+          from
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.6)",
+            }
+          }
+        >
+          (
+        </Text>
+        <Text
+          style={
+            {
+              "color": "#CDCCF3",
+            }
+          }
+        >
+          "hello"
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.6)",
+            }
+          }
+        >
+          );
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+          
+    
+        </Text>
+        <Text
+          style={
+            {
+              "color": "#9896E6",
+            }
+          }
+        >
+          let
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+           
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+          len
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+           
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.6)",
+            }
+          }
+        >
+          =
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+           
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+          calculate_length
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.6)",
+            }
+          }
+        >
+          (&
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+          s
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.6)",
+            }
+          }
+        >
+          );
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+          
+    
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+          println
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.6)",
+            }
+          }
+        >
+          !(
+        </Text>
+        <Text
+          style={
+            {
+              "color": "#CDCCF3",
+            }
+          }
+        >
+          "Length of '{}' is {}."
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.6)",
+            }
+          }
+        >
+          ,
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+           
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+          s
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.6)",
+            }
+          }
+        >
+          ,
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+           
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+          len
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.6)",
+            }
+          }
+        >
+          );
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+          
+
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.6)",
+            }
+          }
+        >
+          }
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+          
+
+
+        </Text>
+        <Text
+          style={
+            {
+              "color": "#9896E6",
+            }
+          }
+        >
+          fn
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+           
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+          calculate_length
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.6)",
+            }
+          }
+        >
+          (
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+          s
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.6)",
+            }
+          }
+        >
+          :
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+           
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.6)",
+            }
+          }
+        >
+          &
+        </Text>
+        <Text
+          style={
+            {
+              "color": "#9999ED",
+            }
+          }
+        >
+          String
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.6)",
+            }
+          }
+        >
+          )
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+           
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.6)",
+            }
+          }
+        >
+          -&gt;
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+           
+        </Text>
+        <Text
+          style={
+            {
+              "color": "#9999ED",
+            }
+          }
+        >
+          usize
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+           
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.6)",
+            }
+          }
+        >
+          {
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+          
+    
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+          s
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.6)",
+            }
+          }
+        >
+          .
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+          len
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.6)",
+            }
+          }
+        >
+          ()
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+          
+
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.6)",
+            }
+          }
+        >
+          }
+        </Text>
+      </Text>
+    </View>
+  </RCTScrollView>
+</View>
+`;
+
+exports[`CodePanel Snapshot Tests Swift syntax highlighting renders Swift with struct and protocol 1`] = `
+<View
+  accessibilityLabel="Code block, language swift"
+  accessibilityRole="none"
+  style={
+    [
+      {
+        "backgroundColor": "#15151b",
+        "borderColor": "rgba(255, 255, 255, 0.08)",
+        "borderWidth": 0.5,
+        "marginVertical": 8,
+        "overflow": "hidden",
+      },
+      {
+        "borderRadius": 10,
+      },
+    ]
+  }
+>
+  <View
+    style={
+      {
+        "alignItems": "center",
+        "flexDirection": "row",
+        "justifyContent": "space-between",
+        "paddingHorizontal": 12,
+        "paddingVertical": 8,
+      }
+    }
+  >
+    <Text
+      style={
+        [
+          {
+            "color": "rgba(232, 232, 232, 0.6)",
+            "fontFamily": "Menlo",
+            "textTransform": "lowercase",
+          },
+          {
+            "fontSize": 12,
+            "lineHeight": 16,
+          },
+        ]
+      }
+    >
+      swift
+    </Text>
+    <View
+      accessibilityLabel="Copy code"
+      accessibilityRole="button"
+      accessibilityState={
+        {
+          "busy": undefined,
+          "checked": undefined,
+          "disabled": undefined,
+          "expanded": undefined,
+          "selected": undefined,
+        }
+      }
+      accessibilityValue={
+        {
+          "max": undefined,
+          "min": undefined,
+          "now": undefined,
+          "text": undefined,
+        }
+      }
+      accessible={true}
+      collapsable={false}
+      focusable={true}
+      hitSlop={
+        {
+          "bottom": 8,
+          "left": 8,
+          "right": 8,
+          "top": 8,
+        }
+      }
+      onBlur={[Function]}
+      onClick={[Function]}
+      onFocus={[Function]}
+      onResponderGrant={[Function]}
+      onResponderMove={[Function]}
+      onResponderRelease={[Function]}
+      onResponderTerminate={[Function]}
+      onResponderTerminationRequest={[Function]}
+      onStartShouldSetResponder={[Function]}
+      style={
+        {
+          "alignItems": "center",
+          "justifyContent": "center",
+          "minHeight": 44,
+          "minWidth": 44,
+          "paddingHorizontal": 8,
+          "paddingVertical": 4,
+        }
+      }
+    >
+      <Text
+        style={
+          [
+            {
+              "color": "rgba(232, 232, 232, 0.7)",
+              "fontSize": 12,
+              "fontWeight": "500",
+            },
+            false,
+          ]
+        }
+      >
+        Copy
+      </Text>
+    </View>
+  </View>
+  <View
+    style={
+      {
+        "backgroundColor": "rgba(255, 255, 255, 0.1)",
+        "height": 0.5,
+      }
+    }
+  />
+  <RCTScrollView
+    accessibilityRole="none"
+    contentContainerStyle={
+      {
+        "padding": 12,
+        "paddingRight": 24,
+      }
+    }
+    horizontal={true}
+    showsHorizontalScrollIndicator={false}
+  >
+    <View>
+      <Text
+        selectable={true}
+        style={
+          {
+            "fontFamily": "Menlo",
+            "fontSize": 15,
+            "lineHeight": 20,
+          }
+        }
+      >
+        <Text
+          style={
+            {
+              "color": "#9896E6",
+            }
+          }
+        >
+          struct
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+           
+        </Text>
+        <Text
+          style={
+            {
+              "color": "#9999ED",
+            }
+          }
+        >
+          ContentView
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.6)",
+            }
+          }
+        >
+          :
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+           
+        </Text>
+        <Text
+          style={
+            {
+              "color": "#9999ED",
+            }
+          }
+        >
+          View
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+           
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.6)",
+            }
+          }
+        >
+          {
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+          
+    
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.6)",
+            }
+          }
+        >
+          @
+        </Text>
+        <Text
+          style={
+            {
+              "color": "#9999ED",
+            }
+          }
+        >
+          State
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+           
+        </Text>
+        <Text
+          style={
+            {
+              "color": "#9896E6",
+            }
+          }
+        >
+          private
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+           
+        </Text>
+        <Text
+          style={
+            {
+              "color": "#9896E6",
+            }
+          }
+        >
+          var
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+           
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+          count
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.6)",
+            }
+          }
+        >
+          :
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+           
+        </Text>
+        <Text
+          style={
+            {
+              "color": "#9999ED",
+            }
+          }
+        >
+          Int
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+           
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.6)",
+            }
+          }
+        >
+          =
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+           
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.6)",
+            }
+          }
+        >
+          0
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+          
+
+    
+        </Text>
+        <Text
+          style={
+            {
+              "color": "#9896E6",
+            }
+          }
+        >
+          var
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+           
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+          body
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.6)",
+            }
+          }
+        >
+          :
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+           
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+          some
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+           
+        </Text>
+        <Text
+          style={
+            {
+              "color": "#9999ED",
+            }
+          }
+        >
+          View
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+           
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.6)",
+            }
+          }
+        >
+          {
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+          
+        
+        </Text>
+        <Text
+          style={
+            {
+              "color": "#9999ED",
+            }
+          }
+        >
+          Text
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.6)",
+            }
+          }
+        >
+          (
+        </Text>
+        <Text
+          style={
+            {
+              "color": "#CDCCF3",
+            }
+          }
+        >
+          "Count: \\(count)"
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.6)",
+            }
+          }
+        >
+          )
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+          
+    
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.6)",
+            }
+          }
+        >
+          }
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+          
+
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.6)",
+            }
+          }
+        >
+          }
+        </Text>
+      </Text>
+    </View>
+  </RCTScrollView>
+</View>
+`;
+
+exports[`CodePanel Snapshot Tests TypeScript syntax highlighting renders TypeScript with type annotations 1`] = `
+<View
+  accessibilityLabel="Code block, language typescript"
+  accessibilityRole="none"
+  style={
+    [
+      {
+        "backgroundColor": "#15151b",
+        "borderColor": "rgba(255, 255, 255, 0.08)",
+        "borderWidth": 0.5,
+        "marginVertical": 8,
+        "overflow": "hidden",
+      },
+      {
+        "borderRadius": 10,
+      },
+    ]
+  }
+>
+  <View
+    style={
+      {
+        "alignItems": "center",
+        "flexDirection": "row",
+        "justifyContent": "space-between",
+        "paddingHorizontal": 12,
+        "paddingVertical": 8,
+      }
+    }
+  >
+    <Text
+      style={
+        [
+          {
+            "color": "rgba(232, 232, 232, 0.6)",
+            "fontFamily": "Menlo",
+            "textTransform": "lowercase",
+          },
+          {
+            "fontSize": 12,
+            "lineHeight": 16,
+          },
+        ]
+      }
+    >
+      typescript
+    </Text>
+    <View
+      accessibilityLabel="Copy code"
+      accessibilityRole="button"
+      accessibilityState={
+        {
+          "busy": undefined,
+          "checked": undefined,
+          "disabled": undefined,
+          "expanded": undefined,
+          "selected": undefined,
+        }
+      }
+      accessibilityValue={
+        {
+          "max": undefined,
+          "min": undefined,
+          "now": undefined,
+          "text": undefined,
+        }
+      }
+      accessible={true}
+      collapsable={false}
+      focusable={true}
+      hitSlop={
+        {
+          "bottom": 8,
+          "left": 8,
+          "right": 8,
+          "top": 8,
+        }
+      }
+      onBlur={[Function]}
+      onClick={[Function]}
+      onFocus={[Function]}
+      onResponderGrant={[Function]}
+      onResponderMove={[Function]}
+      onResponderRelease={[Function]}
+      onResponderTerminate={[Function]}
+      onResponderTerminationRequest={[Function]}
+      onStartShouldSetResponder={[Function]}
+      style={
+        {
+          "alignItems": "center",
+          "justifyContent": "center",
+          "minHeight": 44,
+          "minWidth": 44,
+          "paddingHorizontal": 8,
+          "paddingVertical": 4,
+        }
+      }
+    >
+      <Text
+        style={
+          [
+            {
+              "color": "rgba(232, 232, 232, 0.7)",
+              "fontSize": 12,
+              "fontWeight": "500",
+            },
+            false,
+          ]
+        }
+      >
+        Copy
+      </Text>
+    </View>
+  </View>
+  <View
+    style={
+      {
+        "backgroundColor": "rgba(255, 255, 255, 0.1)",
+        "height": 0.5,
+      }
+    }
+  />
+  <RCTScrollView
+    accessibilityRole="none"
+    contentContainerStyle={
+      {
+        "padding": 12,
+        "paddingRight": 24,
+      }
+    }
+    horizontal={true}
+    showsHorizontalScrollIndicator={false}
+  >
+    <View>
+      <Text
+        selectable={true}
+        style={
+          {
+            "fontFamily": "Menlo",
+            "fontSize": 15,
+            "lineHeight": 20,
+          }
+        }
+      >
+        <Text
+          style={
+            {
+              "color": "#9896E6",
+            }
+          }
+        >
+          interface
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+           
+        </Text>
+        <Text
+          style={
+            {
+              "color": "#9999ED",
+            }
+          }
+        >
+          User
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+           
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.6)",
+            }
+          }
+        >
+          {
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+          
+  
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+          id
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.6)",
+            }
+          }
+        >
+          :
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+           
+        </Text>
+        <Text
+          style={
+            {
+              "color": "#9999ED",
+            }
+          }
+        >
+          string
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.6)",
+            }
+          }
+        >
+          ;
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+          
+  
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+          name
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.6)",
+            }
+          }
+        >
+          :
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+           
+        </Text>
+        <Text
+          style={
+            {
+              "color": "#9999ED",
+            }
+          }
+        >
+          string
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.6)",
+            }
+          }
+        >
+          ;
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+          
+  
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+          age
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.6)",
+            }
+          }
+        >
+          :
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+           
+        </Text>
+        <Text
+          style={
+            {
+              "color": "#9999ED",
+            }
+          }
+        >
+          number
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.6)",
+            }
+          }
+        >
+          ;
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+          
+
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.6)",
+            }
+          }
+        >
+          }
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+          
+
+
+        </Text>
+        <Text
+          style={
+            {
+              "color": "#9896E6",
+            }
+          }
+        >
+          function
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+           
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+          getUser
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.6)",
+            }
+          }
+        >
+          (
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+          id
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.6)",
+            }
+          }
+        >
+          :
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+           
+        </Text>
+        <Text
+          style={
+            {
+              "color": "#9999ED",
+            }
+          }
+        >
+          string
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.6)",
+            }
+          }
+        >
+          ):
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+           
+        </Text>
+        <Text
+          style={
+            {
+              "color": "#9999ED",
+            }
+          }
+        >
+          Promise
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.6)",
+            }
+          }
+        >
+          &lt;
+        </Text>
+        <Text
+          style={
+            {
+              "color": "#9999ED",
+            }
+          }
+        >
+          User
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.6)",
+            }
+          }
+        >
+          &gt;
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+           
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.6)",
+            }
+          }
+        >
+          {
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+          
+  
+        </Text>
+        <Text
+          style={
+            {
+              "color": "#9896E6",
+            }
+          }
+        >
+          return
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+           
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+          fetch
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.6)",
+            }
+          }
+        >
+          (
+        </Text>
+        <Text
+          style={
+            {
+              "color": "#CDCCF3",
+            }
+          }
+        >
+          \`/api/users/\${id}\`
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.6)",
+            }
+          }
+        >
+          ).
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+          then
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.6)",
+            }
+          }
+        >
+          (
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+          r
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+           
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.6)",
+            }
+          }
+        >
+          =&gt;
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+           
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+          r
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.6)",
+            }
+          }
+        >
+          .
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+          json
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.6)",
+            }
+          }
+        >
+          ());
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            }
+          }
+        >
+          
+
+        </Text>
+        <Text
+          style={
+            {
+              "color": "rgba(232, 232, 232, 0.6)",
+            }
+          }
+        >
+          }
+        </Text>
+      </Text>
+    </View>
+  </RCTScrollView>
+</View>
+`;
+
+exports[`CodePanel Snapshot Tests Unrecognized language renders as plain text with no language label 1`] = `
+<View
+  accessibilityLabel="Code block"
+  accessibilityRole="none"
+  style={
+    [
+      {
+        "backgroundColor": "#15151b",
+        "borderColor": "rgba(255, 255, 255, 0.08)",
+        "borderWidth": 0.5,
+        "marginVertical": 8,
+        "overflow": "hidden",
+      },
+      {
+        "borderRadius": 10,
+      },
+    ]
+  }
+>
+  <View
+    style={
+      {
+        "alignItems": "center",
+        "flexDirection": "row",
+        "justifyContent": "space-between",
+        "paddingHorizontal": 12,
+        "paddingVertical": 8,
+      }
+    }
+  >
+    <View />
+    <View
+      accessibilityLabel="Copy code"
+      accessibilityRole="button"
+      accessibilityState={
+        {
+          "busy": undefined,
+          "checked": undefined,
+          "disabled": undefined,
+          "expanded": undefined,
+          "selected": undefined,
+        }
+      }
+      accessibilityValue={
+        {
+          "max": undefined,
+          "min": undefined,
+          "now": undefined,
+          "text": undefined,
+        }
+      }
+      accessible={true}
+      collapsable={false}
+      focusable={true}
+      hitSlop={
+        {
+          "bottom": 8,
+          "left": 8,
+          "right": 8,
+          "top": 8,
+        }
+      }
+      onBlur={[Function]}
+      onClick={[Function]}
+      onFocus={[Function]}
+      onResponderGrant={[Function]}
+      onResponderMove={[Function]}
+      onResponderRelease={[Function]}
+      onResponderTerminate={[Function]}
+      onResponderTerminationRequest={[Function]}
+      onStartShouldSetResponder={[Function]}
+      style={
+        {
+          "alignItems": "center",
+          "justifyContent": "center",
+          "minHeight": 44,
+          "minWidth": 44,
+          "paddingHorizontal": 8,
+          "paddingVertical": 4,
+        }
+      }
+    >
+      <Text
+        style={
+          [
+            {
+              "color": "rgba(232, 232, 232, 0.7)",
+              "fontSize": 12,
+              "fontWeight": "500",
+            },
+            false,
+          ]
+        }
+      >
+        Copy
+      </Text>
+    </View>
+  </View>
+  <View
+    style={
+      {
+        "backgroundColor": "rgba(255, 255, 255, 0.1)",
+        "height": 0.5,
+      }
+    }
+  />
+  <RCTScrollView
+    accessibilityRole="none"
+    contentContainerStyle={
+      {
+        "padding": 12,
+        "paddingRight": 24,
+      }
+    }
+    horizontal={true}
+    showsHorizontalScrollIndicator={false}
+  >
+    <View>
+      <Text
+        selectable={true}
+        style={
+          [
+            {
+              "color": "rgba(232, 232, 232, 0.85)",
+            },
+            {
+              "fontFamily": "Menlo",
+              "fontSize": 15,
+              "lineHeight": 20,
+            },
+          ]
+        }
+      >
+        custom language code here
+  indented content
+end
+      </Text>
+    </View>
+  </RCTScrollView>
+</View>
+`;

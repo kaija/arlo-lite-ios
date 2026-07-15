@@ -28,6 +28,9 @@ import {
 import type { ChatMessage, ContentPart, CompletionRequest, ProviderConfig, StreamChunk, TokenUsage } from '@/providers/types';
 import type { Message } from '@/database/repositories/message-repo';
 
+/** Stable empty array to avoid infinite re-render loops in selectors */
+const EMPTY_MESSAGES: Message[] = [];
+
 export interface ChatError {
   /** Short user-facing error message */
   message: string;
@@ -72,9 +75,8 @@ export function useChat(): UseChatResult {
   // Store selectors
   const activeSessionId = useSessionStore((s) => s.activeSessionId);
   const addMessage = useSessionStore((s) => s.addMessage);
-  const messages = useSessionStore((s) =>
-    activeSessionId ? (s.messages[activeSessionId] ?? []) : []
-  );
+  const messagesMap = useSessionStore((s) => s.messages);
+  const messages = (activeSessionId ? messagesMap[activeSessionId] : undefined) ?? EMPTY_MESSAGES;
 
   const {
     isStreaming,

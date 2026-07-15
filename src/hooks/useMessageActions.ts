@@ -18,6 +18,9 @@ import { buildRegenerationContext } from '@/domain/session-manager';
 import { copyToClipboard } from '@/utils/clipboard';
 import type { Message } from '@/database/repositories/message-repo';
 
+/** Stable empty array to avoid infinite re-render loops in selectors */
+const EMPTY_MESSAGES: Message[] = [];
+
 export interface UseMessageActionsResult {
   /** Copy message content to clipboard */
   copyMessage: (message: Message) => Promise<void>;
@@ -36,9 +39,8 @@ export function useMessageActions(): UseMessageActionsResult {
   const { t } = useTranslation();
 
   const activeSessionId = useSessionStore((s) => s.activeSessionId);
-  const messages = useSessionStore((s) =>
-    activeSessionId ? (s.messages[activeSessionId] ?? []) : []
-  );
+  const messagesMap = useSessionStore((s) => s.messages);
+  const messages = (activeSessionId ? messagesMap[activeSessionId] : undefined) ?? EMPTY_MESSAGES;
   const editMessageInStore = useSessionStore((s) => s.editMessage);
   const { resendContext } = useChat();
   const isStreaming = useChatStore((s) => s.isStreaming);

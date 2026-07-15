@@ -186,12 +186,11 @@ function createMarkdownStyles(theme: Theme) {
     },
     code_inline: {
       ...theme.typography.code,
-      backgroundColor: theme.colors.codeBackground,
-      color: '#E8E8E8',
-      paddingHorizontal: theme.spacing.xs,
+      backgroundColor: theme.colors.inlineCodeBackground,
+      color: theme.colors.inlineCodeText,
+      paddingHorizontal: theme.spacing.xs + 2,
       paddingVertical: 2,
       borderRadius: theme.borderRadii.sm,
-      overflow: 'hidden' as const,
     },
     fence: {
       // Handled by custom rule (CodeBlock component)

@@ -1,0 +1,433 @@
+/**
+ * MessageFlow — Full-width flowing message layout without chat bubbles.
+ *
+ * Renders user and assistant messages with sender avatars, labels,
+ * token metadata, and action buttons. Uses react-native-reanimated
+ * entering animation for new messages (fade-up: translateY(10) + scale(0.98) → identity).
+ *
+ * Requirements: 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8
+ */
+
+import React, { useCallback } from 'react';
+import {
+  View,
+  Text,
+  Pressable,
+  StyleSheet,
+  Platform,
+  ViewStyle,
+  TextStyle,
+} from 'react-native';
+import { useTranslation } from 'react-i18next';
+import Animated, { FadeIn } from 'react-native-reanimated';
+import Markdown from 'react-native-markdown-display';
+
+import { useTheme, Theme } from '@/theme';
+import { usePressAnimation } from '@/hooks/usePressAnimation';
+import { formatTokenMetadata } from '@/utils/token-formatting';
+import { CodeBlock } from './CodeBlock';
+import type { Message } from '@/database/repositories/message-repo';
+
+export interface MessageFlowProps {
+  /** The message to render */
+  message: Message;
+  /** Display name of the model that produced this response */
+  modelName: string;
+  /** Whether to show the sender avatar */
+  showAvatars: boolean;
+  /** Whether the message is currently streaming */
+  isStreaming: boolean;
+  /** Handler to copy message content */
+  onCopy: () => void;
+  /** Handler to regenerate assistant response */
+  onRegenerate: () => void;
+  /** Handler to edit user message */
+  onEdit: () => void;
+  /** Handler to delete message */
+  onDelete: () => void;
+}
+
+/**
+ * Custom entering animation: fade-up with translateY(10) + scale(0.98) → identity over 300ms.
+ */
+const messageEntering = FadeIn.duration(300).withInitialValues({
+  transform: [{ translateY: 10 }, { scale: 0.98 }],
+});
+
+/**
+ * Full-width flowing text message component.
+ *
+ * Differentiates user vs assistant by avatar color and label style.
+ * Displays token metadata when available, and contextual action buttons
+ * (hidden while streaming).
+ */
+export function MessageFlow({
+  message,
+  modelName,
+  showAvatars,
+  isStreaming,
+  onCopy,
+  onRegenerate,
+  onEdit,
+  onDelete,
+}: MessageFlowProps) {
+  const { t } = useTranslation();
+  const theme = useTheme();
+  const styles = createStyles(theme, message.role);
+  const markdownStyles = createMarkdownStyles(theme);
+
+  const isUser = message.role === 'user';
+  const senderLabel = isUser
+    ? t('chat.roleUser', 'You')
+    : modelName;
+
+  // Format token metadata if tokens are available
+  const tokenMetadata =
+    message.promptTokens != null && message.completionTokens != null
+      ? formatTokenMetadata(
+          message.promptTokens,
+          message.completionTokens,
+          message.cost != null && message.promptTokens > 0
+            ? message.cost / (message.promptTokens + message.completionTokens) // approximate per-token
+            : undefined,
+          message.cost != null && message.completionTokens > 0
+            ? message.cost / (message.promptTokens + message.completionTokens)
+            : undefined
+        )
+      : null;
+
+  // Use cost directly if available — better than deriving from per-token
+  const formattedMetadata =
+    message.promptTokens != null && message.completionTokens != null
+      ? message.cost != null && message.cost > 0
+        ? `${formatTokenMetadata(message.promptTokens, message.completionTokens)} · $${message.cost.toFixed(3)}`
+        : formatTokenMetadata(message.promptTokens, message.completionTokens)
+      : null;
+
+  const showActions = !isStreaming;
+
+  return (
+    <Animated.View
+      entering={messageEntering}
+      style={styles.container}
+      accessibilityLabel={`${senderLabel}: ${message.content}`}
+      accessibilityRole="text"
+    >
+      {/* Sender row: avatar + label + token metadata */}
+      <View style={styles.senderRow}>
+        {showAvatars && (
+          <View style={[styles.avatar, isUser ? styles.userAvatar : styles.assistantAvatar]} />
+        )}
+        <Text style={[styles.senderLabel, isUser ? styles.userLabel : styles.assistantLabel]}>
+          {senderLabel}
+        </Text>
+        {formattedMetadata && (
+          <Text style={styles.tokenMetadata}>{formattedMetadata}</Text>
+        )}
+      </View>
+
+      {/* Message body */}
+      <View style={styles.bodyContainer}>
+        {message.role === 'assistant' ? (
+          <Markdown
+            style={markdownStyles}
+            rules={{
+              fence: (node) => {
+                const language = (node as unknown as { sourceInfo?: string }).sourceInfo || undefined;
+                const code = node.content || '';
+                return (
+                  <CodeBlock
+                    key={node.key}
+                    code={code.replace(/\n$/, '')}
+                    language={language}
+                  />
+                );
+              },
+              code_inline: (node) => (
+                <Text key={node.key} style={markdownStyles.code_inline}>
+                  {node.content}
+                </Text>
+              ),
+            }}
+          >
+            {message.content}
+          </Markdown>
+        ) : (
+          <Text style={styles.bodyText} selectable>
+            {message.content}
+          </Text>
+        )}
+      </View>
+
+      {/* Action buttons — hidden while streaming */}
+      {showActions && (
+        <View style={styles.actionsRow}>
+          <ActionButton
+            label={t('chat.copy', 'Copy')}
+            accessibilityLabel={t('accessibility.copyButton', 'Copy message')}
+            onPress={onCopy}
+            theme={theme}
+          />
+          {!isUser && (
+            <ActionButton
+              label={t('chat.regenerate', 'Regenerate')}
+              accessibilityLabel={t('accessibility.regenerateButton', 'Regenerate response')}
+              onPress={onRegenerate}
+              theme={theme}
+            />
+          )}
+          {isUser && (
+            <ActionButton
+              label={t('chat.edit', 'Edit')}
+              accessibilityLabel={t('accessibility.editButton', 'Edit message')}
+              onPress={onEdit}
+              theme={theme}
+            />
+          )}
+          <ActionButton
+            label={t('chat.delete', 'Delete')}
+            accessibilityLabel={t('accessibility.deleteButton', 'Delete message')}
+            onPress={onDelete}
+            theme={theme}
+          />
+        </View>
+      )}
+    </Animated.View>
+  );
+}
+
+// ─── Action Button ─────────────────────────────────────────────────────────────
+
+interface ActionButtonProps {
+  label: string;
+  accessibilityLabel: string;
+  onPress: () => void;
+  theme: Theme;
+}
+
+/**
+ * Individual action button with 44×44 tap target and press animation.
+ */
+function ActionButton({ label, accessibilityLabel, onPress, theme }: ActionButtonProps) {
+  const { animatedStyle, onPressIn, onPressOut } = usePressAnimation();
+
+  return (
+    <Animated.View style={animatedStyle}>
+      <Pressable
+        onPress={onPress}
+        onPressIn={onPressIn}
+        onPressOut={onPressOut}
+        accessibilityLabel={accessibilityLabel}
+        accessibilityRole="button"
+        hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+        style={actionButtonStyles.pressable}
+      >
+        <Text style={[actionButtonStyles.label, { color: theme.colors.textTertiary }]}>
+          {label}
+        </Text>
+      </Pressable>
+    </Animated.View>
+  );
+}
+
+const actionButtonStyles = StyleSheet.create({
+  pressable: {
+    minWidth: 44,
+    minHeight: 44,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 8,
+  },
+  label: {
+    fontSize: 13,
+    fontWeight: '500',
+  },
+});
+
+// ─── Styles ────────────────────────────────────────────────────────────────────
+
+function createStyles(theme: Theme, role: string) {
+  const isUser = role === 'user';
+
+  const container: ViewStyle = {
+    paddingHorizontal: 18,
+    marginBottom: 26,
+  };
+
+  const senderRow: ViewStyle = {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 6,
+  };
+
+  const avatar: ViewStyle = {
+    width: 23,
+    height: 23,
+    borderRadius: 7,
+    marginRight: 8,
+  };
+
+  const userAvatar: ViewStyle = {
+    backgroundColor: theme.colors.surfaceSecondary,
+  };
+
+  const assistantAvatar: ViewStyle = {
+    backgroundColor: `${theme.colors.accent}24`, // 14% accent opacity
+  };
+
+  const senderLabel: TextStyle = {
+    fontSize: 13,
+    fontWeight: '600',
+  };
+
+  const userLabel: TextStyle = {
+    color: theme.colors.textSecondary,
+  };
+
+  const assistantLabel: TextStyle = {
+    color: theme.colors.accent,
+  };
+
+  const tokenMetadata: TextStyle = {
+    fontSize: 11,
+    fontWeight: '400',
+    color: theme.colors.textTertiary,
+    marginLeft: 'auto',
+    ...(Platform.OS === 'ios'
+      ? { fontFamily: 'Menlo' }
+      : { fontFamily: 'monospace' }),
+  };
+
+  const bodyContainer: ViewStyle = {
+    // Full-width, no extra horizontal padding beyond container's 18px
+  };
+
+  const bodyText: TextStyle = {
+    fontSize: 15,
+    lineHeight: 22,
+    color: theme.colors.text,
+  };
+
+  const actionsRow: ViewStyle = {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 8,
+    gap: 16,
+  };
+
+  return StyleSheet.create({
+    container,
+    senderRow,
+    avatar,
+    userAvatar,
+    assistantAvatar,
+    senderLabel,
+    userLabel,
+    assistantLabel,
+    tokenMetadata,
+    bodyContainer,
+    bodyText,
+    actionsRow,
+  });
+}
+
+function createMarkdownStyles(theme: Theme) {
+  return {
+    body: {
+      fontSize: 15,
+      lineHeight: 22,
+      color: theme.colors.text,
+    },
+    heading1: {
+      ...theme.typography.title1,
+      color: theme.colors.text,
+      marginTop: theme.spacing.lg,
+      marginBottom: theme.spacing.sm,
+    },
+    heading2: {
+      ...theme.typography.title2,
+      color: theme.colors.text,
+      marginTop: theme.spacing.md,
+      marginBottom: theme.spacing.xs,
+    },
+    heading3: {
+      ...theme.typography.title3,
+      color: theme.colors.text,
+      marginTop: theme.spacing.md,
+      marginBottom: theme.spacing.xs,
+    },
+    paragraph: {
+      marginBottom: theme.spacing.sm,
+    },
+    strong: {
+      fontWeight: '700' as const,
+    },
+    em: {
+      fontStyle: 'italic' as const,
+    },
+    link: {
+      color: theme.colors.accent,
+      textDecorationLine: 'underline' as const,
+    },
+    list_item: {
+      marginBottom: theme.spacing.xs,
+    },
+    bullet_list: {
+      marginBottom: theme.spacing.sm,
+    },
+    ordered_list: {
+      marginBottom: theme.spacing.sm,
+    },
+    code_inline: {
+      ...theme.typography.code,
+      backgroundColor: theme.colors.inlineCodeBackground,
+      color: theme.colors.inlineCodeText,
+      paddingHorizontal: theme.spacing.xs + 2, // 6px for comfortable padding
+      paddingVertical: 2,
+      borderRadius: theme.borderRadii.sm,
+    },
+    fence: {
+      // Handled by custom rule (CodeBlock component)
+    },
+    table: {
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      borderRadius: theme.borderRadii.sm,
+      marginVertical: theme.spacing.sm,
+    },
+    thead: {
+      backgroundColor: theme.colors.surface,
+    },
+    th: {
+      ...theme.typography.subheadline,
+      fontWeight: '600' as const,
+      color: theme.colors.text,
+      padding: theme.spacing.sm,
+      borderBottomWidth: 1,
+      borderColor: theme.colors.border,
+    },
+    td: {
+      ...theme.typography.subheadline,
+      color: theme.colors.text,
+      padding: theme.spacing.sm,
+      borderBottomWidth: StyleSheet.hairlineWidth,
+      borderColor: theme.colors.border,
+    },
+    tr: {
+      borderBottomWidth: StyleSheet.hairlineWidth,
+      borderColor: theme.colors.border,
+    },
+    blockquote: {
+      borderLeftWidth: 3,
+      borderLeftColor: theme.colors.accent,
+      paddingLeft: theme.spacing.md,
+      marginVertical: theme.spacing.sm,
+      opacity: 0.85,
+    },
+    hr: {
+      backgroundColor: theme.colors.border,
+      height: StyleSheet.hairlineWidth,
+      marginVertical: theme.spacing.lg,
+    },
+  };
+}

@@ -18,6 +18,7 @@ The implementation keeps the existing Zustand stores (session-store, chat-store,
 | Toast system | Global ToastProvider + Animated.View overlay | Shared across all screens; non-blocking pointer events |
 | Gesture composition | Gesture.Exclusive / Gesture.Simultaneous | Edge-pan for sidebar; row-pan for swipe-delete; long-press for rename |
 | Model picker | Animated overlay anchored above input | Avoids navigation stack; dismiss on tap-outside |
+| Haptic feedback | expo-haptics `impactAsync(Light)` | Ambient threshold feedback without visual interruption |
 | Settings/Provider detail | Overlay screens with animated translateX | Matches prototype's slide-from-right pattern; no router push |
 
 ## Architecture
@@ -117,6 +118,7 @@ interface InputChromeProps {
   onAttach: () => void;
 }
 // Bottom bar: BlurView + model chip + thinking bars + context ring + input + send/stop
+// Attachment (paperclip) button is positioned to the LEFT of the textarea, always visible
 ```
 
 ### Message Components
@@ -134,6 +136,9 @@ interface MessageFlowProps {
   onDelete: () => void;
 }
 // Full-width flowing text with sender label row, metadata, and action buttons
+// New messages appear with a fade-up animation: translateY(10px) + scale(0.98) → identity
+// Uses react-native-reanimated's `entering` prop with a custom FadeUp animation
+// (FadeIn.duration(300).withInitialValues({ transform: [{ translateY: 10 }, { scale: 0.98 }] }))
 
 // src/components/chat/StreamingMessage.tsx
 interface StreamingMessageProps {
@@ -174,6 +179,7 @@ interface SessionSidebarProps {
   onSessionRename: (id: string) => void;
   onNewChat: () => void;
 }
+// Footer hint text: "Swipe left to delete · hold to rename" (caption2, tertiary color)
 
 // src/components/sidebar/SessionRow.tsx
 interface SessionRowProps {
@@ -184,6 +190,7 @@ interface SessionRowProps {
   onRename: () => void;
 }
 // Swipeable row with delete reveal + long-press rename trigger
+// Long-press recognition fires at 550ms with expo-haptics impactAsync(Light)
 ```
 
 ### Overlay Components
@@ -197,6 +204,9 @@ interface ModelPickerProps {
   onSelect: (providerId: string, modelId: string) => void;
   onDismiss: () => void;
 }
+// Each model row shows: model name + faint subline with context window size (e.g. "200K").
+// Pricing is intentionally omitted from the picker to keep the list scannable —
+// full pricing lives in the Provider Detail screen.
 
 // src/components/overlays/RenameDialog.tsx
 interface RenameDialogProps {
@@ -261,6 +271,20 @@ interface StreamingMetricsResult {
 ### Input Subcomponents
 
 ```typescript
+// src/hooks/usePressAnimation.ts
+// Shared press-state micro-interaction for all tappable elements.
+// Applies: scale to 0.97 + opacity 0.82 on press-in,
+// reverting to scale 1.0 + opacity 1.0 on press-out with spring timing.
+// Usage: wrap any Pressable/TouchableOpacity with the returned animatedStyle.
+interface PressAnimationResult {
+  animatedStyle: AnimatedStyle;  // Apply to Animated.View wrapping the pressable
+  onPressIn: () => void;
+  onPressOut: () => void;
+}
+function usePressAnimation(): PressAnimationResult;
+```
+
+```typescript
 // src/components/input/ModelChip.tsx
 interface ModelChipProps {
   modelName: string;
@@ -281,6 +305,8 @@ interface ContextRingProps {
   animated?: boolean;  // Trigger scale pop on threshold cross
 }
 // SVG circle gauge: accent < 50%, orange 50-74%, red 75%+
+// On threshold crossing (50% and 75%), fires expo-haptics impactAsync(Light)
+// alongside the scale pop animation (arlo-ringpop: scale 1→1.3→1)
 
 // src/components/input/SendStopButton.tsx
 interface SendStopButtonProps {
@@ -328,6 +354,8 @@ interface BorderRadiiExtensions {
   input: number;       // 17
   /** Card corners */
   card: number;        // 12 (same as lg)
+  /** Grouped list containers (iOS 26 Liquid Glass) */
+  groupedList: number; // 26
 }
 ```
 
@@ -487,3 +515,14 @@ Properties 1–10 above SHALL each be implemented as a single property-based tes
 - CodePanel with syntax highlighting
 - MessageFlow user vs assistant rendering
 - Toast appearance and positioning
+
+### Required Dependencies
+
+- `expo-haptics` — used for ambient haptic feedback on context ring threshold crossings (50%, 75%) and long-press recognition (550ms) on session rows
+- `react-native-reanimated` — worklet-based animations, `entering` prop for message fade-up
+- `react-native-gesture-handler` — Gesture.Pan, Gesture.Exclusive for sidebar and swipe interactions
+- `expo-blur` — BlurView for chrome bars
+- `react-native-svg` — inline SVG icons, context ring
+- `react-native-markdown-display` — markdown rendering with custom rules
+- `react-syntax-highlighter` — code block syntax highlighting with custom Prism theme
+- `fast-check` — property-based testing (devDependency)
