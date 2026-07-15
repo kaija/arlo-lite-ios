@@ -359,18 +359,18 @@ Build the Arlo Lite React Native app incrementally, starting with project scaffo
     - Allow read-only access to all locally persisted sessions when offline
     - _Requirements: 16.1, 16.2, 16.3, 16.4, 19.1, 19.2_
 
-- [ ] 21. Implement settings and about screens
-  - [-] 21.1 Build Settings screen
+- [x] 21. Implement settings and about screens
+  - [x] 21.1 Build Settings screen
     - Create `src/screens/SettingsScreen.tsx` with navigation to providers, system prompts, about
     - Create `src/components/settings/ThemeSelector.tsx` with dark/light/system options
     - _Requirements: 17.1_
 
-  - [-] 21.2 Build About screen
+  - [x] 21.2 Build About screen
     - Create `src/screens/AboutScreen.tsx` with app version, open source license info, links
     - _Requirements: 21.3_
 
-- [ ] 22. Implement cloud backup service
-  - [-] 22.1 Implement backup and sync
+- [x] 22. Implement cloud backup service
+  - [x] 22.1 Implement backup and sync
     - Create `src/services/backup-service.ts` with export/import logic
     - Sync sessions, providers (excluding API keys), models, messages, system prompts, settings
     - Exclude file attachments and generated images from sync
@@ -379,19 +379,19 @@ Build the Arlo Lite React Native app incrementally, starting with project scaffo
     - Ensure API keys are excluded from backup payloads
     - _Requirements: 15.1, 15.2, 15.3, 15.4, 15.5, 15.6_
 
-  - [~] 22.2 Write property test for sync conflict resolution
+  - [x] 22.2 Write property test for sync conflict resolution
     - **Property 13: Sync conflict resolution (last-write-wins)**
     - **Validates: Requirements 15.5**
 
-  - [~] 22.3 Write property test for API keys only in secure storage
+  - [x] 22.3 Write property test for API keys only in secure storage
     - **Property 10: API keys exist only in secure storage**
     - **Validates: Requirements 3.1, 3.2, 3.3, 15.6**
 
-  - [~] 22.4 Write property test for context never auto-truncated
+  - [x] 22.4 Write property test for context never auto-truncated
     - **Property 14: Context never auto-truncated**
     - **Validates: Requirements 11.4**
 
-- [~] 23. Final checkpoint - Ensure all tests pass
+- [x] 23. Final checkpoint - Ensure all tests pass
   - Ensure all tests pass, ask the user if questions arise.
 
 ## Notes

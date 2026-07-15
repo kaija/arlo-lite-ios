@@ -2,27 +2,14 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { createStackNavigator } from '@react-navigation/stack';
 import type { SettingsStackParamList } from './types';
+import { SettingsScreen } from '@/screens/SettingsScreen';
+import { ProviderListScreen } from '@/screens/ProviderListScreen';
 import { ProviderDetailScreen } from '@/screens/ProviderDetailScreen';
+import { AboutScreen } from '@/screens/AboutScreen';
 
 const Stack = createStackNavigator<SettingsStackParamList>();
 
 // -- Placeholder screens (replaced by real implementations in later tasks) --
-
-function SettingsMainPlaceholder() {
-  return (
-    <View style={styles.container}>
-      <Text style={styles.text}>Settings</Text>
-    </View>
-  );
-}
-
-function ProviderListPlaceholder() {
-  return (
-    <View style={styles.container}>
-      <Text style={styles.text}>Provider List</Text>
-    </View>
-  );
-}
 
 function ModelDetailPlaceholder() {
   return (
@@ -40,14 +27,6 @@ function SystemPromptsPlaceholder() {
   );
 }
 
-function AboutPlaceholder() {
-  return (
-    <View style={styles.container}>
-      <Text style={styles.text}>About</Text>
-    </View>
-  );
-}
-
 /**
  * Settings stack navigator — provides the full settings flow:
  * SettingsMain → ProviderList → ProviderDetail → ModelDetail
@@ -59,12 +38,12 @@ export function SettingsNavigator() {
     <Stack.Navigator>
       <Stack.Screen
         name="SettingsMain"
-        component={SettingsMainPlaceholder}
+        component={SettingsScreen}
         options={{ title: 'Settings' }}
       />
       <Stack.Screen
         name="ProviderList"
-        component={ProviderListPlaceholder}
+        component={ProviderListScreen}
         options={{ title: 'Providers' }}
       />
       <Stack.Screen
@@ -84,7 +63,7 @@ export function SettingsNavigator() {
       />
       <Stack.Screen
         name="About"
-        component={AboutPlaceholder}
+        component={AboutScreen}
         options={{ title: 'About' }}
       />
     </Stack.Navigator>
