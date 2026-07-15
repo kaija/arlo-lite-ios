@@ -198,6 +198,27 @@
     "expandThinking": "展開思考內容"
   },
 
+  "voiceDictation": {
+    "stopRecording": "停止錄音",
+    "permissionDeniedTitle": "需要麥克風權限",
+    "permissionDeniedMessage": "語音聽寫需要麥克風和語音辨識權限。請在設定中啟用。"
+  },
+
+  "attachments": {
+    "imagePickerTitle": "新增圖片",
+    "photoLibrary": "照片圖庫",
+    "camera": "相機",
+    "permissionDenied": "權限被拒絕",
+    "libraryPermissionMessage": "請在設定中允許存取照片圖庫以附加圖片。",
+    "cameraPermissionMessage": "請在設定中允許使用相機以拍照。",
+    "errorTitle": "附件錯誤",
+    "errorReading": "無法讀取所選檔案。",
+    "generatedImage": "生成的圖片",
+    "attachedImage": "附加圖片 {{index}}",
+    "removeAttachment": "移除附件",
+    "imageLoadError": "圖片載入失敗"
+  },
+
   "common": {
     "cancel": "取消",
     "confirm": "確認",

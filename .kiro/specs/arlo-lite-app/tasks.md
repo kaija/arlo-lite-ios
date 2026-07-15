@@ -274,7 +274,7 @@ Build the Arlo Lite React Native app incrementally, starting with project scaffo
     - **Property 11: Metadata lookup correctness**
     - **Validates: Requirements 2.2, 2.3**
 
-- [ ] 14. Implement chat screen and messaging
+- [x] 14. Implement chat screen and messaging
   - [x] 14.1 Build Chat Screen with message list
     - Create `src/screens/ChatScreen.tsx` with FlatList of messages, auto-scroll, keyboard avoidance
     - Create `src/components/chat/MessageBubble.tsx` with role-based styling (user/assistant)
@@ -283,7 +283,7 @@ Build the Arlo Lite React Native app incrementally, starting with project scaffo
     - All interactive elements must have accessibility labels
     - _Requirements: 10.1, 10.2, 10.3, 10.4, 17.3_
 
-  - [-] 14.2 Build message input and send flow
+  - [x] 14.2 Build message input and send flow
     - Create `src/components/chat/MessageInput.tsx` with text input, send button, attachment options
     - Wire send flow: add user message → build request → send to provider → add assistant message
     - Handle streaming: update UI incrementally as chunks arrive, show stop button
@@ -291,68 +291,68 @@ Build the Arlo Lite React Native app incrementally, starting with project scaffo
     - Disable input when offline
     - _Requirements: 4.5, 4.6, 8.1, 8.2, 8.3, 19.2_
 
-  - [-] 14.3 Implement streaming indicators and controls
+  - [x] 14.3 Implement streaming indicators and controls
     - Create `src/components/chat/StreamingIndicator.tsx` for in-progress streaming
     - Create `src/components/chat/ThinkingIndicator.tsx` with blinking animation during thinking phase
     - Implement stop generation button that aborts the SSE connection and discards partial message
     - Implement thinking content expand/collapse after completion
     - _Requirements: 8.1, 8.2, 8.3, 8.4, 8.5_
 
-  - [-] 14.4 Implement model switcher and thinking level selector
+  - [x] 14.4 Implement model switcher and thinking level selector
     - Create `src/components/chat/ModelSwitcher.tsx` accessible from chat screen without navigation
     - Create `src/components/chat/ThinkingLevelSelector.tsx` with off/minimal/low/medium/high/xhigh options
     - Show/hide thinking selector based on model reasoning support
     - Record model switch in session metadata
     - _Requirements: 6.1, 6.2, 6.3, 7.1, 7.2_
 
-  - [~] 14.5 Implement context usage bar and cost display
+  - [x] 14.5 Implement context usage bar and cost display
     - Create `src/components/chat/ContextUsageBar.tsx` showing percentage of context window used
     - Display per-message cost and running session total
     - Hide cost when prices not configured
     - _Requirements: 11.1, 11.2, 12.1, 12.2, 12.3_
 
-- [ ] 15. Implement message actions
-  - [~] 15.1 Implement regenerate, edit, and copy actions
+- [x] 15. Implement message actions
+  - [x] 15.1 Implement regenerate, edit, and copy actions
     - Add regenerate action on last assistant message (resend context, replace response)
     - Add edit action on user messages (discard subsequent messages, resend with updated content)
     - Add copy action on messages (full text to clipboard)
     - Add copy action on code blocks (code content to clipboard)
     - _Requirements: 9.1, 9.2, 9.3, 9.4_
 
-- [~] 16. Checkpoint - Ensure all tests pass
+- [x] 16. Checkpoint - Ensure all tests pass
   - Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 17. Implement session management screens
-  - [~] 17.1 Build Session List (Drawer content)
+- [x] 17. Implement session management screens
+  - [x] 17.1 Build Session List (Drawer content)
     - Create `src/screens/SessionListScreen.tsx` as drawer content showing sessions ordered by last-modified
     - Implement new session creation button
     - Implement session rename (inline edit)
     - Implement session delete with confirmation
     - _Requirements: 5.1, 5.3, 5.4, 5.5_
 
-- [ ] 18. Implement system prompt management
-  - [~] 18.1 Build System Prompts screen
+- [x] 18. Implement system prompt management
+  - [x] 18.1 Build System Prompts screen
     - Create `src/screens/SystemPromptsScreen.tsx` with list of prompts, create/edit/delete
     - Show built-in default system prompt (non-deletable)
     - Allow user to designate a prompt as default for new sessions
     - Apply default system prompt when creating new sessions
     - _Requirements: 14.1, 14.2, 14.3, 14.4, 14.5_
 
-- [ ] 19. Implement multimodal input
-  - [~] 19.1 Implement image and file attachments
+- [x] 19. Implement multimodal input
+  - [x] 19.1 Implement image and file attachments
     - Add image picker integration (photo library + camera) when model supports image input
     - Add file picker integration when model supports file input
     - Encode images as base64 content parts in message
     - Display generated images inline in chat when model supports image generation
     - _Requirements: 13.1, 13.2, 13.4_
 
-  - [~] 19.2 Implement voice dictation
+  - [x] 19.2 Implement voice dictation
     - Add voice dictation button using on-device speech-to-text (expo-speech or platform native)
     - Transcribe spoken input into text field
     - _Requirements: 13.3_
 
-- [ ] 20. Implement error handling and offline access
-  - [~] 20.1 Implement error display and retry flow
+- [x] 20. Implement error handling and offline access
+  - [x] 20.1 Implement error display and retry flow
     - Wire error handling in chat: compact inline error message, tap to expand full detail
     - Add retry button for transient errors (network, rate limit, server errors)
     - Show network unavailable indicator and prevent message sending when offline
@@ -360,17 +360,17 @@ Build the Arlo Lite React Native app incrementally, starting with project scaffo
     - _Requirements: 16.1, 16.2, 16.3, 16.4, 19.1, 19.2_
 
 - [ ] 21. Implement settings and about screens
-  - [~] 21.1 Build Settings screen
+  - [-] 21.1 Build Settings screen
     - Create `src/screens/SettingsScreen.tsx` with navigation to providers, system prompts, about
     - Create `src/components/settings/ThemeSelector.tsx` with dark/light/system options
     - _Requirements: 17.1_
 
-  - [~] 21.2 Build About screen
+  - [-] 21.2 Build About screen
     - Create `src/screens/AboutScreen.tsx` with app version, open source license info, links
     - _Requirements: 21.3_
 
 - [ ] 22. Implement cloud backup service
-  - [~] 22.1 Implement backup and sync
+  - [-] 22.1 Implement backup and sync
     - Create `src/services/backup-service.ts` with export/import logic
     - Sync sessions, providers (excluding API keys), models, messages, system prompts, settings
     - Exclude file attachments and generated images from sync

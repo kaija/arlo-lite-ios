@@ -5,19 +5,39 @@ import Markdown from 'react-native-markdown-display';
 
 import { useTheme, Theme } from '@/theme';
 import { CodeBlock } from './CodeBlock';
+import { ImageDisplay } from './ImageDisplay';
+import { MessageActions } from './MessageActions';
 import type { Message } from '@/database/repositories/message-repo';
 
 export interface MessageBubbleProps {
   /** The message to render */
   message: Message;
+  /** Whether this is the last assistant message (enables regenerate action) */
+  isLastAssistant?: boolean;
+  /** Image URLs to display inline (for generated images or user attachments) */
+  imageUrls?: string[];
+  /** Handler to copy message content */
+  onCopy?: (message: Message) => Promise<void>;
+  /** Handler to regenerate the last assistant response */
+  onRegenerate?: () => Promise<void>;
+  /** Handler to edit a user message */
+  onEdit?: (message: Message) => void;
 }
 
 /**
  * Full-width message component differentiated by sender label.
  * No chat bubbles — uses role labels and subtle background for user messages.
  * Assistant messages render markdown content including code blocks.
+ * Optionally displays action buttons (copy, edit, regenerate) beneath the message.
  */
-export function MessageBubble({ message }: MessageBubbleProps) {
+export function MessageBubble({
+  message,
+  isLastAssistant = false,
+  imageUrls,
+  onCopy,
+  onRegenerate,
+  onEdit,
+}: MessageBubbleProps) {
   const { t } = useTranslation();
   const theme = useTheme();
   const styles = createStyles(theme, message.role);
@@ -62,6 +82,27 @@ export function MessageBubble({ message }: MessageBubbleProps) {
         <Text style={styles.userText} selectable>
           {message.content}
         </Text>
+      )}
+      {/* Render inline images (generated images from assistant or user attachments) */}
+      {imageUrls && imageUrls.length > 0 && (
+        <View>
+          {imageUrls.map((url, index) => (
+            <ImageDisplay
+              key={`img-${index}`}
+              url={url}
+              alt={message.role === 'assistant' ? t('attachments.generatedImage') : t('attachments.attachedImage', { index: index + 1 })}
+            />
+          ))}
+        </View>
+      )}
+      {onCopy && onRegenerate && onEdit && (
+        <MessageActions
+          message={message}
+          isLastAssistant={isLastAssistant}
+          onCopy={onCopy}
+          onRegenerate={onRegenerate}
+          onEdit={onEdit}
+        />
       )}
     </View>
   );

@@ -1,27 +1,10 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import type { DrawerParamList } from './types';
+import { ChatScreen } from '@/screens/ChatScreen';
+import { SessionListScreen } from '@/screens/SessionListScreen';
 
 const Drawer = createDrawerNavigator<DrawerParamList>();
-
-/** Placeholder Chat screen — replaced by actual ChatScreen in task 14 */
-function ChatScreenPlaceholder() {
-  return (
-    <View style={styles.container}>
-      <Text style={styles.text}>Chat Screen</Text>
-    </View>
-  );
-}
-
-/** Placeholder Session List used as custom drawer content */
-function SessionListDrawerContent() {
-  return (
-    <View style={styles.container}>
-      <Text style={styles.text}>Session List</Text>
-    </View>
-  );
-}
 
 /**
  * Drawer navigator — the session list lives in the drawer panel,
@@ -30,7 +13,7 @@ function SessionListDrawerContent() {
 export function DrawerNavigator() {
   return (
     <Drawer.Navigator
-      drawerContent={() => <SessionListDrawerContent />}
+      drawerContent={() => <SessionListScreen />}
       screenOptions={{
         headerShown: true,
         drawerType: 'slide',
@@ -38,21 +21,9 @@ export function DrawerNavigator() {
     >
       <Drawer.Screen
         name="Chat"
-        component={ChatScreenPlaceholder}
+        component={ChatScreen}
         options={{ title: 'Arlo Lite' }}
       />
     </Drawer.Navigator>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  text: {
-    fontSize: 18,
-    color: '#666',
-  },
-});

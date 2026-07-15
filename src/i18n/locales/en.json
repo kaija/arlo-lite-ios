@@ -198,6 +198,27 @@
     "expandThinking": "Expand thinking content"
   },
 
+  "voiceDictation": {
+    "stopRecording": "Stop recording",
+    "permissionDeniedTitle": "Microphone Access Required",
+    "permissionDeniedMessage": "Voice dictation requires microphone and speech recognition permissions. Please enable them in Settings."
+  },
+
+  "attachments": {
+    "imagePickerTitle": "Add Image",
+    "photoLibrary": "Photo Library",
+    "camera": "Camera",
+    "permissionDenied": "Permission Denied",
+    "libraryPermissionMessage": "Please allow access to your photo library in Settings to attach images.",
+    "cameraPermissionMessage": "Please allow camera access in Settings to take photos.",
+    "errorTitle": "Attachment Error",
+    "errorReading": "Could not read the selected file.",
+    "generatedImage": "Generated image",
+    "attachedImage": "Attached image {{index}}",
+    "removeAttachment": "Remove attachment",
+    "imageLoadError": "Image failed to load"
+  },
+
   "common": {
     "cancel": "Cancel",
     "confirm": "Confirm",
