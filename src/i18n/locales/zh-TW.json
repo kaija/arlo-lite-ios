@@ -16,6 +16,9 @@
 
   "chat": {
     "newSession": "新對話",
+    "emptySubtitle": "在下方輸入訊息以開始對話。",
+    "roleUser": "你",
+    "roleAssistant": "助理",
     "placeholder": "輸入訊息...",
     "send": "傳送",
     "stopGeneration": "停止生成",

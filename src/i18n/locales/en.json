@@ -16,6 +16,9 @@
 
   "chat": {
     "newSession": "New Chat",
+    "emptySubtitle": "Start a conversation by typing a message below.",
+    "roleUser": "You",
+    "roleAssistant": "Assistant",
     "placeholder": "Type a message...",
     "send": "Send",
     "stopGeneration": "Stop generation",

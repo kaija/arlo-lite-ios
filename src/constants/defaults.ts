@@ -27,3 +27,17 @@ export const APP_METADATA = {
  * Session title configuration.
  */
 export const SESSION_TITLE_MAX_LENGTH = 50;
+
+/**
+ * Remote metadata table URL.
+ * Contains context window sizes, token prices, and capability flags for known models.
+ * Can be overridden via environment config in the future.
+ */
+export const MODEL_METADATA_URL =
+  'https://raw.githubusercontent.com/arlo-lite/model-metadata/main/metadata.json';
+
+/**
+ * Maximum age (in milliseconds) before metadata cache is considered stale.
+ * Default: 24 hours.
+ */
+export const METADATA_MAX_AGE_MS = 24 * 60 * 60 * 1000;

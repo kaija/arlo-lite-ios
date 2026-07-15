@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { createStackNavigator } from '@react-navigation/stack';
 import type { SettingsStackParamList } from './types';
+import { ProviderDetailScreen } from '@/screens/ProviderDetailScreen';
 
 const Stack = createStackNavigator<SettingsStackParamList>();
 
@@ -19,14 +20,6 @@ function ProviderListPlaceholder() {
   return (
     <View style={styles.container}>
       <Text style={styles.text}>Provider List</Text>
-    </View>
-  );
-}
-
-function ProviderDetailPlaceholder() {
-  return (
-    <View style={styles.container}>
-      <Text style={styles.text}>Provider Detail</Text>
     </View>
   );
 }
@@ -76,7 +69,7 @@ export function SettingsNavigator() {
       />
       <Stack.Screen
         name="ProviderDetail"
-        component={ProviderDetailPlaceholder}
+        component={ProviderDetailScreen}
         options={{ title: 'Provider' }}
       />
       <Stack.Screen

@@ -225,8 +225,8 @@ Build the Arlo Lite React Native app incrementally, starting with project scaffo
 - [x] 11. Checkpoint - Ensure all tests pass
   - Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 12. Implement common UI components
-  - [~] 12.1 Build common reusable components
+- [x] 12. Implement common UI components
+  - [x] 12.1 Build common reusable components
     - Create `src/components/common/Button.tsx` with accessibility labels, theme-aware styling
     - Create `src/components/common/Card.tsx` for list items
     - Create `src/components/common/ErrorBanner.tsx` with compact/expandable error display pattern
@@ -235,19 +235,19 @@ Build the Arlo Lite React Native app incrementally, starting with project scaffo
     - All components must include accessibilityLabel props
     - _Requirements: 16.1, 16.2, 16.4, 17.3_
 
-  - [~] 12.2 Implement network monitoring hook
+  - [x] 12.2 Implement network monitoring hook
     - Create `src/hooks/useNetwork.ts` using NetInfo to detect connectivity changes
     - Create `src/services/network-monitor.ts` for connectivity state management
     - _Requirements: 16.4, 19.2_
 
-- [ ] 13. Implement provider management screens
-  - [~] 13.1 Build Provider List screen
+- [x] 13. Implement provider management screens
+  - [x] 13.1 Build Provider List screen
     - Create `src/screens/ProviderListScreen.tsx` displaying all configured providers
     - Create `src/components/settings/ProviderCard.tsx` for provider list items
     - Include add provider button and navigation to detail
     - _Requirements: 1.1_
 
-  - [~] 13.2 Build Provider Detail screen (create/edit)
+  - [x] 13.2 Build Provider Detail screen (create/edit)
     - Create `src/screens/ProviderDetailScreen.tsx` with form for provider type selection, name, API key, base URL
     - Default base URLs per type (OpenAI: `https://api.openai.com/v1`, Anthropic: `https://api.anthropic.com`)
     - OpenAI API mode selector (Responses/Chat Completions, default Responses)
@@ -256,7 +256,7 @@ Build the Arlo Lite React Native app incrementally, starting with project scaffo
     - Prevent provider type change on edit
     - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9_
 
-  - [~] 13.3 Build Model Detail screen
+  - [x] 13.3 Build Model Detail screen
     - Create `src/screens/ModelDetailScreen.tsx` with model selection (from API list or manual entry)
     - Create `src/components/settings/ModelCard.tsx` for model list items
     - Integrate metadata service for prefilling context window and pricing
@@ -264,18 +264,18 @@ Build the Arlo Lite React Native app incrementally, starting with project scaffo
     - API key validation on first model add (minimal request, max_tokens: 10)
     - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5, 2.6_
 
-  - [~] 13.4 Implement metadata service
+  - [x] 13.4 Implement metadata service
     - Create `src/services/metadata-service.ts` fetching remote metadata table JSON
     - Cache results in model_metadata SQLite table
     - Lookup by model ID for prefilling
     - _Requirements: 2.2, 2.3_
 
-  - [~] 13.5 Write property test for metadata lookup correctness
+  - [x] 13.5 Write property test for metadata lookup correctness
     - **Property 11: Metadata lookup correctness**
     - **Validates: Requirements 2.2, 2.3**
 
 - [ ] 14. Implement chat screen and messaging
-  - [~] 14.1 Build Chat Screen with message list
+  - [x] 14.1 Build Chat Screen with message list
     - Create `src/screens/ChatScreen.tsx` with FlatList of messages, auto-scroll, keyboard avoidance
     - Create `src/components/chat/MessageBubble.tsx` with role-based styling (user/assistant)
     - Implement markdown rendering in assistant messages (headings, bold, italic, links, lists, tables)
@@ -283,7 +283,7 @@ Build the Arlo Lite React Native app incrementally, starting with project scaffo
     - All interactive elements must have accessibility labels
     - _Requirements: 10.1, 10.2, 10.3, 10.4, 17.3_
 
-  - [~] 14.2 Build message input and send flow
+  - [-] 14.2 Build message input and send flow
     - Create `src/components/chat/MessageInput.tsx` with text input, send button, attachment options
     - Wire send flow: add user message → build request → send to provider → add assistant message
     - Handle streaming: update UI incrementally as chunks arrive, show stop button
@@ -291,14 +291,14 @@ Build the Arlo Lite React Native app incrementally, starting with project scaffo
     - Disable input when offline
     - _Requirements: 4.5, 4.6, 8.1, 8.2, 8.3, 19.2_
 
-  - [~] 14.3 Implement streaming indicators and controls
+  - [-] 14.3 Implement streaming indicators and controls
     - Create `src/components/chat/StreamingIndicator.tsx` for in-progress streaming
     - Create `src/components/chat/ThinkingIndicator.tsx` with blinking animation during thinking phase
     - Implement stop generation button that aborts the SSE connection and discards partial message
     - Implement thinking content expand/collapse after completion
     - _Requirements: 8.1, 8.2, 8.3, 8.4, 8.5_
 
-  - [~] 14.4 Implement model switcher and thinking level selector
+  - [-] 14.4 Implement model switcher and thinking level selector
     - Create `src/components/chat/ModelSwitcher.tsx` accessible from chat screen without navigation
     - Create `src/components/chat/ThinkingLevelSelector.tsx` with off/minimal/low/medium/high/xhigh options
     - Show/hide thinking selector based on model reasoning support
