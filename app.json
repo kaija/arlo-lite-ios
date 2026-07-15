@@ -12,6 +12,7 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
+    "scheme": "arlolite",
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.arlolite.app"
@@ -27,7 +28,9 @@
       "expo-sqlite",
       "expo-secure-store",
       "expo-localization",
-      "expo-speech-recognition"
+      "expo-speech-recognition",
+      "expo-asset",
+      "expo-router"
     ]
   }
 }
