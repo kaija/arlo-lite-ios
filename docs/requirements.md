@@ -101,8 +101,7 @@ There is no free and open source, lightweight, and easy-to-use ChatGPT-like iOS 
 
 ## Non-Functional Requirements
 
-- Native iOS (Swift/SwiftUI), no cross-platform framework
-- Minimum iOS version: **iOS 17** (enables SwiftData, String Catalogs, Observation framework)
+- Minimum iOS version: **iOS 17** 
 - No backend server required — app talks directly to provider APIs
 - No telemetry/analytics by default
 - Offline access to past chat sessions (read-only when no network)

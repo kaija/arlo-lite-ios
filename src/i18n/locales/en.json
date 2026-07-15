@@ -1,0 +1,208 @@
+{
+  "app": {
+    "name": "Arlo Lite",
+    "version": "Version {{version}}"
+  },
+
+  "navigation": {
+    "chat": "Chat",
+    "sessions": "Sessions",
+    "settings": "Settings",
+    "providers": "Providers",
+    "models": "Models",
+    "systemPrompts": "System Prompts",
+    "about": "About"
+  },
+
+  "chat": {
+    "newSession": "New Chat",
+    "placeholder": "Type a message...",
+    "send": "Send",
+    "stopGeneration": "Stop generation",
+    "thinking": "Thinking...",
+    "thinkingExpand": "Show thinking",
+    "thinkingCollapse": "Hide thinking",
+    "contextUsage": "Context: {{percentage}}%",
+    "messageCost": "Cost: ${{cost}}",
+    "sessionCost": "Session total: ${{cost}}",
+    "regenerate": "Regenerate",
+    "edit": "Edit",
+    "copy": "Copy",
+    "copyCode": "Copy code",
+    "copied": "Copied to clipboard",
+    "retryMessage": "Retry"
+  },
+
+  "sessions": {
+    "title": "Sessions",
+    "empty": "No sessions yet",
+    "newSession": "New Session",
+    "rename": "Rename",
+    "delete": "Delete",
+    "deleteConfirm": "Are you sure you want to delete this session? This cannot be undone.",
+    "deleteTitle": "Delete Session"
+  },
+
+  "providers": {
+    "title": "Providers",
+    "add": "Add Provider",
+    "edit": "Edit Provider",
+    "delete": "Delete Provider",
+    "deleteConfirm": "Deleting this provider will also remove all associated models. Continue?",
+    "deleteTitle": "Delete Provider",
+    "name": "Display Name",
+    "namePlaceholder": "My Provider",
+    "type": "Provider Type",
+    "typeOpenAI": "OpenAI",
+    "typeAnthropic": "Anthropic",
+    "typeCustom": "Custom",
+    "apiKey": "API Key",
+    "apiKeyPlaceholder": "Enter your API key",
+    "baseUrl": "Base URL",
+    "baseUrlPlaceholder": "https://api.example.com/v1",
+    "apiMode": "API Mode",
+    "apiModeResponses": "Responses API",
+    "apiModeChatCompletions": "Chat Completions API",
+    "streaming": "Streaming",
+    "streamingEnabled": "Enabled",
+    "streamingDisabled": "Disabled",
+    "save": "Save",
+    "validating": "Validating API key...",
+    "validationSuccess": "API key validated successfully",
+    "validationFailed": "API key validation failed",
+    "empty": "No providers configured"
+  },
+
+  "models": {
+    "title": "Models",
+    "add": "Add Model",
+    "edit": "Edit Model",
+    "delete": "Delete Model",
+    "deleteConfirm": "Are you sure you want to delete this model?",
+    "deleteTitle": "Delete Model",
+    "modelId": "Model ID",
+    "modelIdPlaceholder": "e.g. gpt-4o",
+    "contextWindow": "Context Window (tokens)",
+    "inputPrice": "Input Price (per 1M tokens)",
+    "outputPrice": "Output Price (per 1M tokens)",
+    "cachedInputPrice": "Cached Input Price (per 1M tokens)",
+    "cachedOutputPrice": "Cached Output Price (per 1M tokens)",
+    "supportsReasoning": "Supports Reasoning",
+    "supportsImages": "Supports Image Input",
+    "supportsFiles": "Supports File Input",
+    "supportsImageGen": "Supports Image Generation",
+    "selectFromList": "Select from API",
+    "manualEntry": "Manual Entry",
+    "empty": "No models added",
+    "save": "Save"
+  },
+
+  "modelSwitcher": {
+    "title": "Switch Model",
+    "currentModel": "Current: {{model}}",
+    "noModel": "No model selected"
+  },
+
+  "thinkingLevel": {
+    "title": "Thinking Level",
+    "off": "Off",
+    "minimal": "Minimal",
+    "low": "Low",
+    "medium": "Medium",
+    "high": "High",
+    "xhigh": "Extra High"
+  },
+
+  "systemPrompts": {
+    "title": "System Prompts",
+    "add": "Add System Prompt",
+    "edit": "Edit System Prompt",
+    "delete": "Delete System Prompt",
+    "deleteConfirm": "Are you sure you want to delete this system prompt?",
+    "deleteTitle": "Delete System Prompt",
+    "name": "Prompt Name",
+    "namePlaceholder": "My Custom Prompt",
+    "content": "Prompt Content",
+    "contentPlaceholder": "Enter your system prompt...",
+    "setDefault": "Set as Default",
+    "isDefault": "Default",
+    "builtIn": "Built-in",
+    "empty": "No custom system prompts",
+    "save": "Save"
+  },
+
+  "settings": {
+    "title": "Settings",
+    "appearance": "Appearance",
+    "theme": "Theme",
+    "themeLight": "Light",
+    "themeDark": "Dark",
+    "themeSystem": "System",
+    "language": "Language",
+    "providers": "Providers",
+    "systemPrompts": "System Prompts",
+    "backup": "Backup & Sync",
+    "about": "About"
+  },
+
+  "about": {
+    "title": "About",
+    "description": "A lightweight LLM client. Bring your own API key.",
+    "version": "Version",
+    "license": "License",
+    "licenseValue": "MIT",
+    "sourceCode": "Source Code",
+    "openSource": "Open Source",
+    "noTelemetry": "No telemetry or analytics collected"
+  },
+
+  "errors": {
+    "network": "No network connection",
+    "networkDetail": "Please check your internet connection and try again.",
+    "apiError": "API request failed",
+    "apiErrorDetail": "{{message}}",
+    "invalidApiKey": "Invalid API key",
+    "rateLimited": "Rate limited. Please wait and try again.",
+    "serverError": "Server error. Please try again later.",
+    "timeout": "Request timed out",
+    "unknown": "An unexpected error occurred",
+    "retry": "Retry",
+    "tapForDetails": "Tap for details"
+  },
+
+  "accessibility": {
+    "sendButton": "Send message",
+    "stopButton": "Stop generating response",
+    "newChatButton": "Start new chat",
+    "settingsButton": "Open settings",
+    "backButton": "Go back",
+    "deleteButton": "Delete",
+    "editButton": "Edit",
+    "copyButton": "Copy to clipboard",
+    "regenerateButton": "Regenerate response",
+    "modelSwitcherButton": "Switch model",
+    "thinkingLevelButton": "Change thinking level",
+    "voiceInputButton": "Voice input",
+    "attachImageButton": "Attach image",
+    "attachFileButton": "Attach file",
+    "contextUsageIndicator": "Context usage: {{percentage}} percent",
+    "sessionItem": "Session: {{title}}, last modified {{date}}",
+    "providerItem": "Provider: {{name}}, type {{type}}",
+    "modelItem": "Model: {{name}}",
+    "themeSelector": "Theme selection",
+    "expandError": "Expand error details",
+    "collapseThinking": "Collapse thinking content",
+    "expandThinking": "Expand thinking content"
+  },
+
+  "common": {
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "done": "Done",
+    "loading": "Loading...",
+    "offline": "Offline"
+  }
+}

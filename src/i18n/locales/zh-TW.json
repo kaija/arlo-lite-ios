@@ -1,0 +1,208 @@
+{
+  "app": {
+    "name": "Arlo Lite",
+    "version": "版本 {{version}}"
+  },
+
+  "navigation": {
+    "chat": "聊天",
+    "sessions": "對話",
+    "settings": "設定",
+    "providers": "服務提供者",
+    "models": "模型",
+    "systemPrompts": "系統提示詞",
+    "about": "關於"
+  },
+
+  "chat": {
+    "newSession": "新對話",
+    "placeholder": "輸入訊息...",
+    "send": "傳送",
+    "stopGeneration": "停止生成",
+    "thinking": "思考中...",
+    "thinkingExpand": "顯示思考過程",
+    "thinkingCollapse": "隱藏思考過程",
+    "contextUsage": "上下文：{{percentage}}%",
+    "messageCost": "費用：${{cost}}",
+    "sessionCost": "對話總計：${{cost}}",
+    "regenerate": "重新生成",
+    "edit": "編輯",
+    "copy": "複製",
+    "copyCode": "複製程式碼",
+    "copied": "已複製到剪貼簿",
+    "retryMessage": "重試"
+  },
+
+  "sessions": {
+    "title": "對話",
+    "empty": "尚無對話",
+    "newSession": "新對話",
+    "rename": "重新命名",
+    "delete": "刪除",
+    "deleteConfirm": "確定要刪除此對話嗎？此操作無法復原。",
+    "deleteTitle": "刪除對話"
+  },
+
+  "providers": {
+    "title": "服務提供者",
+    "add": "新增提供者",
+    "edit": "編輯提供者",
+    "delete": "刪除提供者",
+    "deleteConfirm": "刪除此提供者將同時移除所有相關模型。確定要繼續嗎？",
+    "deleteTitle": "刪除提供者",
+    "name": "顯示名稱",
+    "namePlaceholder": "我的提供者",
+    "type": "提供者類型",
+    "typeOpenAI": "OpenAI",
+    "typeAnthropic": "Anthropic",
+    "typeCustom": "自訂",
+    "apiKey": "API 金鑰",
+    "apiKeyPlaceholder": "輸入您的 API 金鑰",
+    "baseUrl": "基礎網址",
+    "baseUrlPlaceholder": "https://api.example.com/v1",
+    "apiMode": "API 模式",
+    "apiModeResponses": "Responses API",
+    "apiModeChatCompletions": "Chat Completions API",
+    "streaming": "串流",
+    "streamingEnabled": "已啟用",
+    "streamingDisabled": "已停用",
+    "save": "儲存",
+    "validating": "驗證 API 金鑰中...",
+    "validationSuccess": "API 金鑰驗證成功",
+    "validationFailed": "API 金鑰驗證失敗",
+    "empty": "尚未設定提供者"
+  },
+
+  "models": {
+    "title": "模型",
+    "add": "新增模型",
+    "edit": "編輯模型",
+    "delete": "刪除模型",
+    "deleteConfirm": "確定要刪除此模型嗎？",
+    "deleteTitle": "刪除模型",
+    "modelId": "模型 ID",
+    "modelIdPlaceholder": "例如 gpt-4o",
+    "contextWindow": "上下文視窗（tokens）",
+    "inputPrice": "輸入價格（每百萬 tokens）",
+    "outputPrice": "輸出價格（每百萬 tokens）",
+    "cachedInputPrice": "快取輸入價格（每百萬 tokens）",
+    "cachedOutputPrice": "快取輸出價格（每百萬 tokens）",
+    "supportsReasoning": "支援推理",
+    "supportsImages": "支援圖片輸入",
+    "supportsFiles": "支援檔案輸入",
+    "supportsImageGen": "支援圖片生成",
+    "selectFromList": "從 API 選取",
+    "manualEntry": "手動輸入",
+    "empty": "尚未新增模型",
+    "save": "儲存"
+  },
+
+  "modelSwitcher": {
+    "title": "切換模型",
+    "currentModel": "目前：{{model}}",
+    "noModel": "未選擇模型"
+  },
+
+  "thinkingLevel": {
+    "title": "思考程度",
+    "off": "關閉",
+    "minimal": "最低",
+    "low": "低",
+    "medium": "中",
+    "high": "高",
+    "xhigh": "極高"
+  },
+
+  "systemPrompts": {
+    "title": "系統提示詞",
+    "add": "新增系統提示詞",
+    "edit": "編輯系統提示詞",
+    "delete": "刪除系統提示詞",
+    "deleteConfirm": "確定要刪除此系統提示詞嗎？",
+    "deleteTitle": "刪除系統提示詞",
+    "name": "提示詞名稱",
+    "namePlaceholder": "我的自訂提示詞",
+    "content": "提示詞內容",
+    "contentPlaceholder": "輸入您的系統提示詞...",
+    "setDefault": "設為預設",
+    "isDefault": "預設",
+    "builtIn": "內建",
+    "empty": "尚無自訂系統提示詞",
+    "save": "儲存"
+  },
+
+  "settings": {
+    "title": "設定",
+    "appearance": "外觀",
+    "theme": "主題",
+    "themeLight": "淺色",
+    "themeDark": "深色",
+    "themeSystem": "跟隨系統",
+    "language": "語言",
+    "providers": "服務提供者",
+    "systemPrompts": "系統提示詞",
+    "backup": "備份與同步",
+    "about": "關於"
+  },
+
+  "about": {
+    "title": "關於",
+    "description": "輕量級 LLM 客戶端。使用您自己的 API 金鑰。",
+    "version": "版本",
+    "license": "授權條款",
+    "licenseValue": "MIT",
+    "sourceCode": "原始碼",
+    "openSource": "開放原始碼",
+    "noTelemetry": "不收集遙測資料或分析數據"
+  },
+
+  "errors": {
+    "network": "無網路連線",
+    "networkDetail": "請檢查您的網路連線後再試一次。",
+    "apiError": "API 請求失敗",
+    "apiErrorDetail": "{{message}}",
+    "invalidApiKey": "無效的 API 金鑰",
+    "rateLimited": "請求過於頻繁，請稍後再試。",
+    "serverError": "伺服器錯誤，請稍後再試。",
+    "timeout": "請求逾時",
+    "unknown": "發生未預期的錯誤",
+    "retry": "重試",
+    "tapForDetails": "點選查看詳情"
+  },
+
+  "accessibility": {
+    "sendButton": "傳送訊息",
+    "stopButton": "停止生成回覆",
+    "newChatButton": "開始新對話",
+    "settingsButton": "開啟設定",
+    "backButton": "返回",
+    "deleteButton": "刪除",
+    "editButton": "編輯",
+    "copyButton": "複製到剪貼簿",
+    "regenerateButton": "重新生成回覆",
+    "modelSwitcherButton": "切換模型",
+    "thinkingLevelButton": "變更思考程度",
+    "voiceInputButton": "語音輸入",
+    "attachImageButton": "附加圖片",
+    "attachFileButton": "附加檔案",
+    "contextUsageIndicator": "上下文使用量：百分之{{percentage}}",
+    "sessionItem": "對話：{{title}}，最後修改 {{date}}",
+    "providerItem": "提供者：{{name}}，類型 {{type}}",
+    "modelItem": "模型：{{name}}",
+    "themeSelector": "主題選擇",
+    "expandError": "展開錯誤詳情",
+    "collapseThinking": "收合思考內容",
+    "expandThinking": "展開思考內容"
+  },
+
+  "common": {
+    "cancel": "取消",
+    "confirm": "確認",
+    "save": "儲存",
+    "delete": "刪除",
+    "edit": "編輯",
+    "done": "完成",
+    "loading": "載入中...",
+    "offline": "離線"
+  }
+}
