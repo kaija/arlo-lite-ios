@@ -2,10 +2,12 @@
  * Unit tests for the Custom provider adapter.
  *
  * The Custom provider uses OpenAI Chat Completions format
- * with a user-supplied base URL.
+ * with a user-supplied base URL. Implements the new IProvider
+ * interface with complete() and streamCompletion().
  */
 
 import { CustomProvider } from '../custom/custom-provider';
+import { ProviderError } from '../errors';
 import type { CompletionRequest, ProviderConfig } from '../types';
 
 describe('CustomProvider', () => {
@@ -14,7 +16,6 @@ describe('CustomProvider', () => {
 
   beforeEach(() => {
     provider = new CustomProvider();
-    provider.setApiKey('sk-test-key');
     config = {
       id: 'custom-1',
       type: 'custom',
@@ -32,8 +33,19 @@ describe('CustomProvider', () => {
     });
   });
 
-  describe('buildRequest', () => {
-    it('builds a request using the custom base URL', () => {
+  describe('complete()', () => {
+    it('sends request to the correct URL with proper headers', async () => {
+      const mockResponse = {
+        ok: true,
+        json: async () => ({
+          choices: [
+            { message: { content: 'Hello!' }, finish_reason: 'stop' },
+          ],
+          usage: { prompt_tokens: 5, completion_tokens: 2, total_tokens: 7 },
+        }),
+      };
+      global.fetch = jest.fn().mockResolvedValue(mockResponse);
+
       const request: CompletionRequest = {
         messages: [{ role: 'user', content: 'Hello' }],
         model: 'llama-3-8b',
@@ -41,50 +53,57 @@ describe('CustomProvider', () => {
         stream: false,
       };
 
-      const result = provider.buildRequest(config, request);
+      await provider.complete(config, request, 'sk-test-key');
 
-      expect(result.url).toBe('http://localhost:8080/v1/chat/completions');
-      expect(result.headers['Authorization']).toBe('Bearer sk-test-key');
-      expect(result.headers['Content-Type']).toBe('application/json');
+      expect(fetch).toHaveBeenCalledWith(
+        'http://localhost:8080/v1/chat/completions',
+        expect.objectContaining({
+          method: 'POST',
+          headers: expect.objectContaining({
+            'Authorization': 'Bearer sk-test-key',
+            'Content-Type': 'application/json',
+          }),
+        }),
+      );
     });
 
-    it('includes model and messages in body', () => {
+    it('returns parsed CompletionResponse', async () => {
+      global.fetch = jest.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({
+          choices: [
+            { message: { content: 'The answer is 42.', reasoning_content: 'Let me think...' }, finish_reason: 'stop' },
+          ],
+          usage: { prompt_tokens: 10, completion_tokens: 6, total_tokens: 16 },
+        }),
+      });
+
       const request: CompletionRequest = {
-        messages: [
-          { role: 'system', content: 'You are helpful.' },
-          { role: 'user', content: 'Hi' },
-        ],
-        model: 'mistral-7b',
-        thinkingLevel: 'off',
-        stream: true,
-      };
-
-      const result = provider.buildRequest(config, request);
-      const body = JSON.parse(result.body);
-
-      expect(body.model).toBe('mistral-7b');
-      expect(body.messages).toHaveLength(2);
-      expect(body.messages[0]).toEqual({ role: 'system', content: 'You are helpful.' });
-      expect(body.messages[1]).toEqual({ role: 'user', content: 'Hi' });
-      expect(body.stream).toBe(true);
-    });
-
-    it('includes max_tokens when specified', () => {
-      const request: CompletionRequest = {
-        messages: [{ role: 'user', content: 'Hello' }],
-        model: 'llama-3-8b',
-        thinkingLevel: 'off',
+        messages: [{ role: 'user', content: 'What is the meaning of life?' }],
+        model: 'deepseek-r1',
+        thinkingLevel: 'medium',
         stream: false,
-        maxTokens: 500,
       };
 
-      const result = provider.buildRequest(config, request);
-      const body = JSON.parse(result.body);
+      const result = await provider.complete(config, request, 'sk-test');
 
-      expect(body.max_tokens).toBe(500);
+      expect(result.content).toBe('The answer is 42.');
+      expect(result.thinkingContent).toBe('Let me think...');
+      expect(result.finishReason).toBe('stop');
+      expect(result.usage.promptTokens).toBe(10);
+      expect(result.usage.completionTokens).toBe(6);
+      expect(result.usage.totalTokens).toBe(16);
     });
 
-    it('includes reasoning_effort when thinking level is not off', () => {
+    it('includes reasoning_effort when thinking level is not off', async () => {
+      global.fetch = jest.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({
+          choices: [{ message: { content: 'ok' }, finish_reason: 'stop' }],
+          usage: { prompt_tokens: 5, completion_tokens: 1, total_tokens: 6 },
+        }),
+      });
+
       const request: CompletionRequest = {
         messages: [{ role: 'user', content: 'Think about this' }],
         model: 'deepseek-r1',
@@ -92,13 +111,22 @@ describe('CustomProvider', () => {
         stream: false,
       };
 
-      const result = provider.buildRequest(config, request);
-      const body = JSON.parse(result.body);
+      await provider.complete(config, request, 'sk-test');
 
+      const fetchCall = (fetch as jest.Mock).mock.calls[0];
+      const body = JSON.parse(fetchCall[1].body);
       expect(body.reasoning_effort).toBe('medium');
     });
 
-    it('omits reasoning_effort when thinking level is off', () => {
+    it('omits reasoning_effort when thinking level is off', async () => {
+      global.fetch = jest.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({
+          choices: [{ message: { content: 'ok' }, finish_reason: 'stop' }],
+          usage: { prompt_tokens: 5, completion_tokens: 1, total_tokens: 6 },
+        }),
+      });
+
       const request: CompletionRequest = {
         messages: [{ role: 'user', content: 'Hello' }],
         model: 'llama-3-8b',
@@ -106,188 +134,262 @@ describe('CustomProvider', () => {
         stream: false,
       };
 
-      const result = provider.buildRequest(config, request);
-      const body = JSON.parse(result.body);
+      await provider.complete(config, request, 'sk-test');
 
+      const fetchCall = (fetch as jest.Mock).mock.calls[0];
+      const body = JSON.parse(fetchCall[1].body);
       expect(body.reasoning_effort).toBeUndefined();
     });
 
-    it('uses different base URLs correctly', () => {
-      const customConfig: ProviderConfig = {
-        ...config,
-        baseUrl: 'https://my-proxy.example.com/api',
-      };
+    it('throws ProviderError on 401', async () => {
+      global.fetch = jest.fn().mockResolvedValue({
+        ok: false,
+        status: 401,
+        headers: new Map(),
+      });
 
       const request: CompletionRequest = {
         messages: [{ role: 'user', content: 'Hello' }],
-        model: 'gpt-4',
+        model: 'llama-3-8b',
         thinkingLevel: 'off',
         stream: false,
       };
 
-      const result = provider.buildRequest(customConfig, request);
-      expect(result.url).toBe('https://my-proxy.example.com/api/chat/completions');
+      await expect(provider.complete(config, request, 'sk-bad')).rejects.toThrow(ProviderError);
+      await expect(provider.complete(config, request, 'sk-bad')).rejects.toMatchObject({
+        category: 'authentication',
+      });
+    });
+
+    it('throws ProviderError with rate_limit on 429', async () => {
+      const headers = new Map([['Retry-After', '30']]);
+      global.fetch = jest.fn().mockResolvedValue({
+        ok: false,
+        status: 429,
+        headers: { get: (key: string) => headers.get(key) ?? null },
+      });
+
+      const request: CompletionRequest = {
+        messages: [{ role: 'user', content: 'Hello' }],
+        model: 'llama-3-8b',
+        thinkingLevel: 'off',
+        stream: false,
+      };
+
+      try {
+        await provider.complete(config, request, 'sk-test');
+        fail('Should have thrown');
+      } catch (error) {
+        expect(error).toBeInstanceOf(ProviderError);
+        const pe = error as ProviderError;
+        expect(pe.category).toBe('rate_limit');
+        expect(pe.retryAfterSeconds).toBe(30);
+      }
+    });
+
+    it('throws ProviderError with server category on 500', async () => {
+      global.fetch = jest.fn().mockResolvedValue({
+        ok: false,
+        status: 500,
+        headers: { get: () => null },
+      });
+
+      const request: CompletionRequest = {
+        messages: [{ role: 'user', content: 'Hello' }],
+        model: 'llama-3-8b',
+        thinkingLevel: 'off',
+        stream: false,
+      };
+
+      await expect(provider.complete(config, request, 'sk-test')).rejects.toMatchObject({
+        category: 'server',
+      });
     });
   });
 
-  describe('parseResponse', () => {
-    it('parses a standard Chat Completions response', () => {
-      const raw = {
-        choices: [
-          {
-            message: { content: 'Hello! How can I help?' },
-            finish_reason: 'stop',
-          },
-        ],
-        usage: {
-          prompt_tokens: 10,
-          completion_tokens: 6,
-          total_tokens: 16,
-        },
-      };
-
-      const result = provider.parseResponse(raw);
-
-      expect(result.content).toBe('Hello! How can I help?');
-      expect(result.finishReason).toBe('stop');
-      expect(result.usage.promptTokens).toBe(10);
-      expect(result.usage.completionTokens).toBe(6);
-      expect(result.usage.totalTokens).toBe(16);
-    });
-
-    it('parses response with reasoning_content', () => {
-      const raw = {
-        choices: [
-          {
-            message: {
-              content: 'The answer is 42.',
-              reasoning_content: 'Let me think step by step...',
-            },
-            finish_reason: 'stop',
-          },
-        ],
-        usage: {
-          prompt_tokens: 15,
-          completion_tokens: 20,
-          total_tokens: 35,
-        },
-      };
-
-      const result = provider.parseResponse(raw);
-
-      expect(result.content).toBe('The answer is 42.');
-      expect(result.thinkingContent).toBe('Let me think step by step...');
-    });
-
-    it('handles empty choices gracefully', () => {
-      const raw = {
-        choices: [],
-        usage: { prompt_tokens: 5, completion_tokens: 0, total_tokens: 5 },
-      };
-
-      const result = provider.parseResponse(raw);
-      expect(result.content).toBe('');
-    });
-  });
-
-  describe('parseStreamChunk', () => {
-    it('returns null for empty lines', () => {
-      expect(provider.parseStreamChunk('')).toBeNull();
-    });
-
-    it('returns null for SSE comments', () => {
-      expect(provider.parseStreamChunk(': keep-alive')).toBeNull();
-    });
-
-    it('returns null for lines without data: prefix', () => {
-      expect(provider.parseStreamChunk('event: message')).toBeNull();
-    });
-
-    it('returns done for [DONE] terminator', () => {
-      const result = provider.parseStreamChunk('data: [DONE]');
-      expect(result).toEqual({ type: 'done', content: '' });
-    });
-
-    it('parses text content from delta', () => {
-      const chunk = JSON.stringify({
-        choices: [{ delta: { content: 'Hello' } }],
-      });
-
-      const result = provider.parseStreamChunk(`data: ${chunk}`);
-      expect(result).toEqual({ type: 'text', content: 'Hello' });
-    });
-
-    it('parses thinking content from delta', () => {
-      const chunk = JSON.stringify({
-        choices: [{ delta: { reasoning_content: 'Thinking...' } }],
-      });
-
-      const result = provider.parseStreamChunk(`data: ${chunk}`);
-      expect(result).toEqual({ type: 'thinking', content: 'Thinking...' });
-    });
-
-    it('parses done with usage data', () => {
-      const chunk = JSON.stringify({
-        choices: [],
-        usage: {
-          prompt_tokens: 10,
-          completion_tokens: 20,
-          total_tokens: 30,
+  describe('streamCompletion()', () => {
+    function createMockSSEStream(lines: string[]): ReadableStream<Uint8Array> {
+      const encoder = new TextEncoder();
+      const data = lines.join('\n') + '\n';
+      return new ReadableStream({
+        start(controller) {
+          controller.enqueue(encoder.encode(data));
+          controller.close();
         },
       });
+    }
 
-      const result = provider.parseStreamChunk(`data: ${chunk}`);
-      expect(result).toEqual({
+    it('yields text chunks from SSE stream', async () => {
+      const sseData = [
+        'data: {"choices":[{"delta":{"content":"Hello"}}]}',
+        'data: {"choices":[{"delta":{"content":" world"}}]}',
+        'data: [DONE]',
+      ];
+
+      global.fetch = jest.fn().mockResolvedValue({
+        ok: true,
+        body: createMockSSEStream(sseData),
+      });
+
+      const request: CompletionRequest = {
+        messages: [{ role: 'user', content: 'Hi' }],
+        model: 'llama-3-8b',
+        thinkingLevel: 'off',
+        stream: true,
+      };
+
+      const controller = new AbortController();
+      const chunks = [];
+      for await (const chunk of provider.streamCompletion(config, request, 'sk-test', controller.signal)) {
+        chunks.push(chunk);
+      }
+
+      expect(chunks).toEqual([
+        { type: 'text', content: 'Hello' },
+        { type: 'text', content: ' world' },
+        { type: 'done', content: '' },
+      ]);
+    });
+
+    it('yields thinking chunks from SSE stream', async () => {
+      const sseData = [
+        'data: {"choices":[{"delta":{"reasoning_content":"Thinking..."}}]}',
+        'data: {"choices":[{"delta":{"content":"Answer"}}]}',
+        'data: [DONE]',
+      ];
+
+      global.fetch = jest.fn().mockResolvedValue({
+        ok: true,
+        body: createMockSSEStream(sseData),
+      });
+
+      const request: CompletionRequest = {
+        messages: [{ role: 'user', content: 'Think' }],
+        model: 'deepseek-r1',
+        thinkingLevel: 'high',
+        stream: true,
+      };
+
+      const controller = new AbortController();
+      const chunks = [];
+      for await (const chunk of provider.streamCompletion(config, request, 'sk-test', controller.signal)) {
+        chunks.push(chunk);
+      }
+
+      expect(chunks[0]).toEqual({ type: 'thinking', content: 'Thinking...' });
+      expect(chunks[1]).toEqual({ type: 'text', content: 'Answer' });
+      expect(chunks[2]).toEqual({ type: 'done', content: '' });
+    });
+
+    it('yields error chunk on non-OK HTTP response', async () => {
+      global.fetch = jest.fn().mockResolvedValue({
+        ok: false,
+        status: 429,
+        headers: { get: () => null },
+      });
+
+      const request: CompletionRequest = {
+        messages: [{ role: 'user', content: 'Hi' }],
+        model: 'llama-3-8b',
+        thinkingLevel: 'off',
+        stream: true,
+      };
+
+      const controller = new AbortController();
+      const chunks = [];
+      for await (const chunk of provider.streamCompletion(config, request, 'sk-test', controller.signal)) {
+        chunks.push(chunk);
+      }
+
+      expect(chunks[0].type).toBe('error');
+      expect(chunks[0].content).toContain('rate_limit');
+      expect(chunks[1]).toEqual({ type: 'done', content: '' });
+    });
+
+    it('yields error chunk on null response body', async () => {
+      global.fetch = jest.fn().mockResolvedValue({
+        ok: true,
+        body: null,
+      });
+
+      const request: CompletionRequest = {
+        messages: [{ role: 'user', content: 'Hi' }],
+        model: 'llama-3-8b',
+        thinkingLevel: 'off',
+        stream: true,
+      };
+
+      const controller = new AbortController();
+      const chunks = [];
+      for await (const chunk of provider.streamCompletion(config, request, 'sk-test', controller.signal)) {
+        chunks.push(chunk);
+      }
+
+      expect(chunks[0]).toEqual({ type: 'error', content: 'Response body is null' });
+      expect(chunks[1]).toEqual({ type: 'done', content: '' });
+    });
+
+    it('yields done chunk on abort during fetch', async () => {
+      const controller = new AbortController();
+      controller.abort();
+
+      const abortError = new Error('The operation was aborted');
+      abortError.name = 'AbortError';
+      global.fetch = jest.fn().mockRejectedValue(abortError);
+
+      const request: CompletionRequest = {
+        messages: [{ role: 'user', content: 'Hi' }],
+        model: 'llama-3-8b',
+        thinkingLevel: 'off',
+        stream: true,
+      };
+
+      const chunks = [];
+      for await (const chunk of provider.streamCompletion(config, request, 'sk-test', controller.signal)) {
+        chunks.push(chunk);
+      }
+
+      // When aborted, should get just a done chunk
+      expect(chunks[chunks.length - 1]).toEqual({ type: 'done', content: '' });
+    });
+
+    it('yields usage data from final stream chunk', async () => {
+      const sseData = [
+        'data: {"choices":[{"delta":{"content":"Hi"}}]}',
+        'data: {"choices":[],"usage":{"prompt_tokens":10,"completion_tokens":5,"total_tokens":15}}',
+        'data: [DONE]',
+      ];
+
+      global.fetch = jest.fn().mockResolvedValue({
+        ok: true,
+        body: createMockSSEStream(sseData),
+      });
+
+      const request: CompletionRequest = {
+        messages: [{ role: 'user', content: 'Hi' }],
+        model: 'llama-3-8b',
+        thinkingLevel: 'off',
+        stream: true,
+      };
+
+      const controller = new AbortController();
+      const chunks = [];
+      for await (const chunk of provider.streamCompletion(config, request, 'sk-test', controller.signal)) {
+        chunks.push(chunk);
+      }
+
+      expect(chunks[0]).toEqual({ type: 'text', content: 'Hi' });
+      // The usage-only chunk produces a done with usage
+      expect(chunks[1]).toEqual({
         type: 'done',
         content: '',
         usage: {
           promptTokens: 10,
-          completionTokens: 20,
-          totalTokens: 30,
+          completionTokens: 5,
+          totalTokens: 15,
           cachedTokens: undefined,
         },
       });
-    });
-
-    it('returns error for malformed JSON', () => {
-      const result = provider.parseStreamChunk('data: {invalid json}');
-      expect(result).toEqual({ type: 'error', content: 'Failed to parse stream chunk' });
-    });
-
-    it('returns done for finish_reason chunk', () => {
-      const chunk = JSON.stringify({
-        choices: [{ delta: {}, finish_reason: 'stop' }],
-      });
-
-      const result = provider.parseStreamChunk(`data: ${chunk}`);
-      // delta is empty object but has no content/reasoning_content, should return null
-      expect(result).toBeNull();
-    });
-  });
-
-  describe('mapThinkingLevel', () => {
-    it('returns empty object for "off"', () => {
-      expect(provider.mapThinkingLevel('off')).toEqual({});
-    });
-
-    it('returns reasoning_effort "low" for "minimal"', () => {
-      expect(provider.mapThinkingLevel('minimal')).toEqual({ reasoning_effort: 'low' });
-    });
-
-    it('returns reasoning_effort "low" for "low"', () => {
-      expect(provider.mapThinkingLevel('low')).toEqual({ reasoning_effort: 'low' });
-    });
-
-    it('returns reasoning_effort "medium" for "medium"', () => {
-      expect(provider.mapThinkingLevel('medium')).toEqual({ reasoning_effort: 'medium' });
-    });
-
-    it('returns reasoning_effort "high" for "high"', () => {
-      expect(provider.mapThinkingLevel('high')).toEqual({ reasoning_effort: 'high' });
-    });
-
-    it('clamps "xhigh" to "high"', () => {
-      expect(provider.mapThinkingLevel('xhigh')).toEqual({ reasoning_effort: 'high' });
     });
   });
 

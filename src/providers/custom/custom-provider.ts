@@ -4,6 +4,9 @@
  * Uses the OpenAI Chat Completions format with a user-supplied base URL,
  * allowing connection to any OpenAI-compatible API (e.g., local LLM servers,
  * alternative hosted endpoints, or proxy services).
+ *
+ * Performs raw fetch + inline SSE line parsing (does NOT depend on SSE_Manager)
+ * since the SSE_Manager still references the removed `parseStreamChunk` interface.
  */
 
 import type {
@@ -13,139 +16,239 @@ import type {
   ProviderConfig,
   ProviderType,
   StreamChunk,
-  ThinkingLevel,
+  TokenUsage,
 } from '../types';
+import { ProviderError } from '../errors';
 import { mapThinkingLevelOpenAI } from '../../domain/thinking-mapper';
 import { buildChatCompletionsRequest, parseChatCompletionsResponse } from '../openai/openai-chat';
+
+/**
+ * Classify an HTTP status code into a ProviderError.
+ *
+ * Maps common failure codes to structured error categories so that
+ * callers can branch on category without inspecting raw status codes.
+ */
+function classifyHttpError(status: number, retryAfter?: string): ProviderError {
+  if (status === 401 || status === 403) {
+    return new ProviderError('Authentication failed', 'authentication');
+  }
+  if (status === 429) {
+    const seconds = retryAfter ? parseInt(retryAfter, 10) : null;
+    return new ProviderError(
+      'Rate limited',
+      'rate_limit',
+      seconds !== null && !isNaN(seconds) ? seconds : null,
+    );
+  }
+  if (status >= 500) {
+    return new ProviderError('Server error', 'server');
+  }
+  return new ProviderError(`HTTP ${status}`, 'server');
+}
+
+/**
+ * Parse a single SSE line into a StreamChunk.
+ *
+ * Uses the OpenAI SSE format:
+ * - Lines starting with "data: " contain JSON payloads
+ * - "data: [DONE]" signals stream completion
+ * - Empty lines and comments (starting with ":") are skipped
+ */
+function parseSSELine(line: string): StreamChunk | null {
+  // Skip empty lines and SSE comments
+  if (!line || line.startsWith(':')) {
+    return null;
+  }
+
+  // Only handle "data: " prefixed lines
+  if (!line.startsWith('data: ')) {
+    return null;
+  }
+
+  const payload = line.slice(6); // Remove "data: "
+
+  // Handle stream terminator
+  if (payload === '[DONE]') {
+    return { type: 'done', content: '' };
+  }
+
+  try {
+    const data = JSON.parse(payload) as Record<string, unknown>;
+    const choices = data.choices as Array<Record<string, unknown>> | undefined;
+
+    if (!choices || choices.length === 0) {
+      // Usage-only chunk at end of stream
+      if (data.usage) {
+        const u = data.usage as Record<string, unknown>;
+        return {
+          type: 'done',
+          content: '',
+          usage: {
+            promptTokens: (u.prompt_tokens as number) || 0,
+            completionTokens: (u.completion_tokens as number) || 0,
+            totalTokens: (u.total_tokens as number) || 0,
+            cachedTokens: (u.prompt_tokens_details as Record<string, unknown>)?.cached_tokens as number | undefined,
+          },
+        };
+      }
+      return null;
+    }
+
+    const choice = choices[0];
+    const delta = choice.delta as Record<string, unknown> | undefined;
+
+    if (!delta) {
+      // finish_reason only chunk
+      if (choice.finish_reason) {
+        return { type: 'done', content: '' };
+      }
+      return null;
+    }
+
+    // Reasoning/thinking content
+    if (delta.reasoning_content) {
+      return { type: 'thinking', content: delta.reasoning_content as string };
+    }
+
+    // Regular text content
+    if (delta.content) {
+      return { type: 'text', content: delta.content as string };
+    }
+
+    return null;
+  } catch {
+    return { type: 'error', content: 'Failed to parse stream chunk' };
+  }
+}
 
 /**
  * Custom provider adapter.
  *
  * Delegates to the OpenAI Chat Completions format for request building
  * and response parsing, using a user-supplied base URL rather than the
- * default OpenAI endpoint.
+ * default OpenAI endpoint. Performs inline SSE parsing for streaming.
  */
 export class CustomProvider implements IProvider {
   readonly type: ProviderType = 'custom';
 
   /**
-   * Temporary in-memory API key storage for request building.
-   * Set externally before calling buildRequest.
-   */
-  private apiKey: string = '';
-
-  /**
-   * Set the API key for subsequent requests.
-   * This avoids passing apiKey through the IProvider.buildRequest signature.
-   */
-  setApiKey(key: string): void {
-    this.apiKey = key;
-  }
-
-  /**
-   * Build the HTTP request for a completion.
+   * Execute a non-streaming completion request.
    *
    * Uses OpenAI Chat Completions format: POST {baseUrl}/chat/completions
+   *
+   * @throws ProviderError on auth, network, or server failures
    */
-  buildRequest(
+  async complete(
     config: ProviderConfig,
-    request: CompletionRequest
-  ): { url: string; headers: Record<string, string>; body: string } {
-    const thinkingParams = this.mapThinkingLevel(request.thinkingLevel);
-    return buildChatCompletionsRequest(config, request, thinkingParams, this.apiKey);
+    request: CompletionRequest,
+    apiKey: string,
+  ): Promise<CompletionResponse> {
+    const thinkingParams = mapThinkingLevelOpenAI(request.thinkingLevel);
+    const { url, headers, body } = buildChatCompletionsRequest(config, request, thinkingParams, apiKey);
+
+    const response = await fetch(url, { method: 'POST', headers, body });
+
+    if (!response.ok) {
+      throw classifyHttpError(response.status, response.headers.get('Retry-After') ?? undefined);
+    }
+
+    return parseChatCompletionsResponse(await response.json());
   }
 
   /**
-   * Parse a non-streaming response.
+   * Execute a streaming completion request via inline SSE parsing.
    *
-   * Uses the OpenAI Chat Completions response format (choices[0].message).
-   */
-  parseResponse(raw: unknown): CompletionResponse {
-    return parseChatCompletionsResponse(raw);
-  }
-
-  /**
-   * Parse a single SSE line into a StreamChunk.
+   * Returns an AsyncIterable that yields StreamChunks as they arrive.
+   * Terminates with a 'done' chunk on success or an 'error' chunk on failure.
    *
-   * Uses the OpenAI SSE format:
-   * - Lines starting with "data: " contain JSON payloads
-   * - "data: [DONE]" signals stream completion
-   * - Empty lines and comments (starting with ":") are skipped
+   * @param config - Provider configuration
+   * @param request - The completion request parameters (stream flag forced to true)
+   * @param apiKey - API key for authentication
+   * @param signal - AbortSignal for cancellation
    */
-  parseStreamChunk(line: string): StreamChunk | null {
-    // Skip empty lines and SSE comments
-    if (!line || line.startsWith(':')) {
-      return null;
+  async *streamCompletion(
+    config: ProviderConfig,
+    request: CompletionRequest,
+    apiKey: string,
+    signal: AbortSignal,
+  ): AsyncIterable<StreamChunk> {
+    const thinkingParams = mapThinkingLevelOpenAI(request.thinkingLevel);
+    const streamRequest = { ...request, stream: true };
+    const { url, headers, body } = buildChatCompletionsRequest(config, streamRequest, thinkingParams, apiKey);
+
+    let response: Response;
+    try {
+      response = await fetch(url, {
+        method: 'POST',
+        headers: { ...headers, Accept: 'text/event-stream' },
+        body,
+        signal,
+      });
+    } catch (error: unknown) {
+      if (signal.aborted) {
+        yield { type: 'done', content: '' };
+        return;
+      }
+      yield { type: 'error', content: error instanceof Error ? error.message : 'Network error' };
+      yield { type: 'done', content: '' };
+      return;
     }
 
-    // Strip "data: " prefix
-    if (!line.startsWith('data: ')) {
-      return null;
+    if (!response.ok) {
+      const classified = classifyHttpError(
+        response.status,
+        response.headers.get('Retry-After') ?? undefined,
+      );
+      yield { type: 'error', content: `${classified.category}: ${classified.message}` };
+      yield { type: 'done', content: '' };
+      return;
     }
 
-    const payload = line.slice(6); // Remove "data: "
-
-    // Handle stream terminator
-    if (payload === '[DONE]') {
-      return { type: 'done', content: '' };
+    if (!response.body) {
+      yield { type: 'error', content: 'Response body is null' };
+      yield { type: 'done', content: '' };
+      return;
     }
+
+    // Read and parse SSE stream inline
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
 
     try {
-      const data = JSON.parse(payload) as Record<string, unknown>;
-      const choices = data.choices as Array<Record<string, unknown>> | undefined;
+      while (!signal.aborted) {
+        const { done: streamDone, value } = await reader.read();
+        if (streamDone) break;
 
-      if (!choices || choices.length === 0) {
-        // Usage-only chunk at end of stream
-        if (data.usage) {
-          const u = data.usage as Record<string, unknown>;
-          return {
-            type: 'done',
-            content: '',
-            usage: {
-              promptTokens: (u.prompt_tokens as number) || 0,
-              completionTokens: (u.completion_tokens as number) || 0,
-              totalTokens: (u.total_tokens as number) || 0,
-              cachedTokens: (u.prompt_tokens_details as Record<string, unknown>)?.cached_tokens as number | undefined,
-            },
-          };
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split(/\r?\n|\r/);
+        buffer = lines.pop() ?? '';
+
+        for (const line of lines) {
+          if (signal.aborted) break;
+          const chunk = parseSSELine(line);
+          if (chunk) {
+            yield chunk;
+            if (chunk.type === 'done') return;
+          }
         }
-        return null;
       }
 
-      const choice = choices[0];
-      const delta = choice.delta as Record<string, unknown> | undefined;
-
-      if (!delta) {
-        // finish_reason only chunk
-        if (choice.finish_reason) {
-          return { type: 'done', content: '' };
-        }
-        return null;
+      // Process remaining buffer
+      if (buffer.trim()) {
+        const chunk = parseSSELine(buffer);
+        if (chunk) yield chunk;
       }
 
-      // Reasoning/thinking content
-      if (delta.reasoning_content) {
-        return { type: 'thinking', content: delta.reasoning_content as string };
+      yield { type: 'done', content: '' };
+    } catch (error: unknown) {
+      if (!signal.aborted) {
+        yield { type: 'error', content: error instanceof Error ? error.message : 'Stream error' };
       }
-
-      // Regular text content
-      if (delta.content) {
-        return { type: 'text', content: delta.content as string };
-      }
-
-      return null;
-    } catch {
-      return { type: 'error', content: 'Failed to parse stream chunk' };
+      yield { type: 'done', content: '' };
+    } finally {
+      reader.releaseLock();
     }
-  }
-
-  /**
-   * Map an abstract ThinkingLevel to OpenAI-compatible request parameters.
-   *
-   * Custom providers use the same reasoning_effort mapping as OpenAI.
-   */
-  mapThinkingLevel(level: ThinkingLevel): Record<string, unknown> {
-    return mapThinkingLevelOpenAI(level);
   }
 
   /**
