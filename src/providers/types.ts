@@ -128,6 +128,8 @@ export interface CompletionRequest {
   thinkingLevel: ThinkingLevel;
   /** Whether to stream the response via SSE. */
   stream: boolean;
+  /** Sampling temperature (0.0–2.0). */
+  temperature?: number;
   /** Optional maximum number of tokens to generate. */
   maxTokens?: number;
 }
