@@ -73,6 +73,10 @@
     "validating": "驗證 API 金鑰中...",
     "validationSuccess": "API 金鑰驗證成功",
     "validationFailed": "API 金鑰驗證失敗",
+    "testConnection": "測試連線",
+    "connected": "已連線",
+    "connectionFailed": "連線失敗",
+    "connectionTimeout": "連線逾時，請檢查您的網路連線。",
     "empty": "尚未設定提供者",
     "addModels": "新增模型"
   },
