@@ -23,6 +23,7 @@ import type { CreateModelData, ModelConfig } from '@/stores/provider-store';
 import { getApiKey } from '@/database/secure-store';
 import { getModelMetadata } from '@/services/metadata-service';
 import { getProvider } from '@/providers/registry';
+import { ProviderError } from '@/providers/errors';
 import type { SettingsStackParamList } from '@/navigation/types';
 import type { ProviderConfig } from '@/providers/types';
 import { ModelCard } from '@/components/settings/ModelCard';
@@ -58,9 +59,19 @@ export function ModelDetailScreen({ route, navigation }: Props) {
 
   // Modal state
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [isLoadingApiModels, setIsLoadingApiModels] = useState(false);
   const [apiModelList, setApiModelList] = useState<string[]>([]);
   const [showApiList, setShowApiList] = useState(false);
+
+  // SDK model listing state (auto-fetched on modal open)
+  const [sdkModelList, setSdkModelList] = useState<string[]>([]);
+  const [sdkModelsLoading, setSdkModelsLoading] = useState(false);
+  const [sdkModelsFromCache, setSdkModelsFromCache] = useState(false);
+  const [sdkModelsError, setSdkModelsError] = useState<string | null>(null);
+  const [sdkModelsAuthError, setSdkModelsAuthError] = useState(false);
+  const [sdkModelsFetched, setSdkModelsFetched] = useState(false);
+
+  // Manual model ID validation
+  const [modelIdError, setModelIdError] = useState<string | null>(null);
 
   // Form state
   const [modelId, setModelId] = useState('');
@@ -84,44 +95,78 @@ export function ModelDetailScreen({ route, navigation }: Props) {
     });
   }, [navigation, t]);
 
-  // Reset form state
-  const resetForm = useCallback(() => {
-    setModelId('');
-    setDisplayName('');
-    setContextWindow('');
-    setInputPrice('');
-    setOutputPrice('');
-    setCachedInputPrice('');
-    setCachedOutputPrice('');
-    setSupportsReasoning(false);
-    setSupportsImageInput(false);
-    setSupportsImageGeneration(false);
-    setSupportsFileInput(false);
-    setShowApiList(false);
-    setApiModelList([]);
+  /**
+   * Ensures the models_cache table exists in SQLite.
+   * Uses IF NOT EXISTS to be safe for repeated calls.
+   */
+  const ensureModelsCacheTable = useCallback(async (db: SQLite.SQLiteDatabase) => {
+    await db.runAsync(
+      `CREATE TABLE IF NOT EXISTS models_cache (
+        provider_id TEXT PRIMARY KEY,
+        model_ids TEXT NOT NULL,
+        fetched_at INTEGER NOT NULL
+      )`
+    );
   }, []);
 
-  // Open the add model modal
-  const handleOpenModal = useCallback(() => {
-    resetForm();
-    setIsModalVisible(true);
-  }, [resetForm]);
+  /**
+   * Caches a model list to SQLite for offline fallback.
+   */
+  const cacheModelList = useCallback(async (providerIdVal: string, modelIds: string[]) => {
+    try {
+      const db = await SQLite.openDatabaseAsync('arlo-lite.db');
+      await ensureModelsCacheTable(db);
+      await db.runAsync(
+        `INSERT OR REPLACE INTO models_cache (provider_id, model_ids, fetched_at) VALUES (?, ?, ?)`,
+        providerIdVal,
+        JSON.stringify(modelIds),
+        Date.now()
+      );
+    } catch {
+      // Cache write failure is non-critical
+    }
+  }, [ensureModelsCacheTable]);
 
-  // Close the add model modal
-  const handleCloseModal = useCallback(() => {
-    setIsModalVisible(false);
-    resetForm();
-  }, [resetForm]);
+  /**
+   * Loads cached model list from SQLite.
+   */
+  const loadCachedModelList = useCallback(async (providerIdVal: string): Promise<string[] | null> => {
+    try {
+      const db = await SQLite.openDatabaseAsync('arlo-lite.db');
+      await ensureModelsCacheTable(db);
+      const row = await db.getFirstAsync<{ model_ids: string; fetched_at: number }>(
+        'SELECT model_ids, fetched_at FROM models_cache WHERE provider_id = ?',
+        providerIdVal
+      );
+      if (row) {
+        return JSON.parse(row.model_ids) as string[];
+      }
+      return null;
+    } catch {
+      return null;
+    }
+  }, [ensureModelsCacheTable]);
 
-  // Fetch models from the provider API
-  const handleSelectFromApi = useCallback(async () => {
+  /**
+   * Fetch models from the provider API on modal open.
+   * Handles caching, auth errors, and fallback to cache on network failure.
+   */
+  const fetchSdkModels = useCallback(async () => {
     if (!provider) return;
 
-    setIsLoadingApiModels(true);
+    setSdkModelsLoading(true);
+    setSdkModelsError(null);
+    setSdkModelsAuthError(false);
+    setSdkModelsFromCache(false);
+    setSdkModelsFetched(false);
+
     try {
       const apiKey = await getApiKey(provider.id);
       if (!apiKey) {
-        Alert.alert(t('errors.invalidApiKey'), t('providers.apiKeyPlaceholder'));
+        setSdkModelsAuthError(true);
+        setSdkModelsError(t('errors.invalidApiKey'));
+        setSdkModelsLoading(false);
+        setSdkModelsFetched(true);
         return;
       }
 
@@ -138,17 +183,83 @@ export function ModelDetailScreen({ route, navigation }: Props) {
       };
 
       const modelIds = await providerAdapter.listModels(providerConfig, apiKey);
-      setApiModelList(modelIds);
-      setShowApiList(true);
+
+      // Cache the successful result
+      await cacheModelList(provider.id, modelIds);
+
+      setSdkModelList(modelIds);
+      setSdkModelsFromCache(false);
     } catch (error) {
-      Alert.alert(
-        t('errors.apiError'),
-        error instanceof Error ? error.message : String(error),
-      );
+      // Auth error: show error, do NOT fall back to cache
+      if (error instanceof ProviderError && error.category === 'authentication') {
+        setSdkModelsAuthError(true);
+        setSdkModelsError(error.message || t('errors.invalidApiKey'));
+        setSdkModelList([]);
+      } else {
+        // Network/other error: fall back to cache
+        const cached = await loadCachedModelList(provider.id);
+        if (cached && cached.length > 0) {
+          setSdkModelList(cached);
+          setSdkModelsFromCache(true);
+        } else {
+          setSdkModelList([]);
+          setSdkModelsError(
+            error instanceof Error ? error.message : t('errors.network')
+          );
+        }
+      }
     } finally {
-      setIsLoadingApiModels(false);
+      setSdkModelsLoading(false);
+      setSdkModelsFetched(true);
     }
-  }, [provider, t]);
+  }, [provider, t, cacheModelList, loadCachedModelList]);
+
+  // Reset form state
+  const resetForm = useCallback(() => {
+    setModelId('');
+    setDisplayName('');
+    setContextWindow('');
+    setInputPrice('');
+    setOutputPrice('');
+    setCachedInputPrice('');
+    setCachedOutputPrice('');
+    setSupportsReasoning(false);
+    setSupportsImageInput(false);
+    setSupportsImageGeneration(false);
+    setSupportsFileInput(false);
+    setShowApiList(false);
+    setApiModelList([]);
+    setModelIdError(null);
+    // Reset SDK model list state
+    setSdkModelList([]);
+    setSdkModelsLoading(false);
+    setSdkModelsFromCache(false);
+    setSdkModelsError(null);
+    setSdkModelsAuthError(false);
+    setSdkModelsFetched(false);
+  }, []);
+
+  // Open the add model modal and auto-fetch SDK models
+  const handleOpenModal = useCallback(() => {
+    resetForm();
+    setIsModalVisible(true);
+    // Trigger SDK model fetching when modal opens
+    fetchSdkModels();
+  }, [resetForm, fetchSdkModels]);
+
+  // Close the add model modal
+  const handleCloseModal = useCallback(() => {
+    setIsModalVisible(false);
+    resetForm();
+  }, [resetForm]);
+
+  // Show the API model list (already fetched by SDK)
+  const handleSelectFromApi = useCallback(() => {
+    if (sdkModelList.length > 0) {
+      setApiModelList(sdkModelList);
+      setShowApiList(true);
+    }
+  }, [sdkModelList]);
 
   // When a model is selected from the API list, prefill metadata
   const handleApiModelSelect = useCallback(
@@ -192,15 +303,35 @@ export function ModelDetailScreen({ route, navigation }: Props) {
     }
   }, []);
 
-  // Handle manual model ID entry — prefill on blur
+  // Handle manual model ID entry — validate and prefill on blur
   const handleModelIdBlur = useCallback(() => {
-    if (modelId.trim()) {
-      if (!displayName.trim()) {
-        setDisplayName(modelId.trim());
+    const trimmed = modelId.trim();
+    if (trimmed) {
+      // Validate model ID length (1-256 characters)
+      if (trimmed.length > 256) {
+        setModelIdError(t('models.modelIdTooLong', { defaultValue: 'Model ID must be 256 characters or fewer' }));
+      } else {
+        setModelIdError(null);
       }
-      prefillMetadata(modelId.trim());
+      if (!displayName.trim()) {
+        setDisplayName(trimmed);
+      }
+      prefillMetadata(trimmed);
+    } else {
+      setModelIdError(null);
     }
-  }, [modelId, displayName, prefillMetadata]);
+  }, [modelId, displayName, prefillMetadata, t]);
+
+  // Validate model ID on change
+  const handleModelIdChange = useCallback((text: string) => {
+    setModelId(text);
+    const trimmed = text.trim();
+    if (trimmed.length > 256) {
+      setModelIdError(t('models.modelIdTooLong', { defaultValue: 'Model ID must be 256 characters or fewer' }));
+    } else {
+      setModelIdError(null);
+    }
+  }, [t]);
 
   // Validate API key before saving the first model
   const validateApiKeyIfNeeded = useCallback(async (): Promise<boolean> => {
@@ -250,7 +381,8 @@ export function ModelDetailScreen({ route, navigation }: Props) {
 
   // Form validation
   const isFormValid = useMemo(() => {
-    return modelId.trim().length > 0;
+    const trimmed = modelId.trim();
+    return trimmed.length >= 1 && trimmed.length <= 256;
   }, [modelId]);
 
   // Save handler
@@ -411,31 +543,74 @@ export function ModelDetailScreen({ route, navigation }: Props) {
             contentContainerStyle={styles.modalContent}
             keyboardShouldPersistTaps="handled"
           >
-            {/* Model Selection */}
-            {!showApiList && !modelId.trim() && (
+            {/* SDK Models Loading State */}
+            {sdkModelsLoading && !modelId.trim() && !showApiList && (
+              <View style={styles.sdkLoadingContainer}>
+                <ActivityIndicator size="small" color={theme.colors.accent} />
+                <Text style={styles.sdkLoadingText}>{t('common.loading')}</Text>
+              </View>
+            )}
+
+            {/* SDK Models Auth Error */}
+            {sdkModelsAuthError && !modelId.trim() && !showApiList && (
+              <View style={styles.sdkErrorContainer}>
+                <Text style={styles.sdkErrorText}>{sdkModelsError || t('errors.invalidApiKey')}</Text>
+              </View>
+            )}
+
+            {/* SDK Models Network Error with no cache (empty state) */}
+            {sdkModelsFetched && !sdkModelsLoading && !sdkModelsAuthError && sdkModelList.length === 0 && sdkModelsError && !modelId.trim() && !showApiList && (
+              <View style={styles.sdkEmptyContainer}>
+                <Text style={styles.sdkEmptyText}>
+                  {t('models.noModelsAvailable', { defaultValue: 'No models available. Enter a model ID manually.' })}
+                </Text>
+              </View>
+            )}
+
+            {/* SDK Models Empty result with no cache */}
+            {sdkModelsFetched && !sdkModelsLoading && !sdkModelsAuthError && !sdkModelsError && sdkModelList.length === 0 && !modelId.trim() && !showApiList && (
+              <View style={styles.sdkEmptyContainer}>
+                <Text style={styles.sdkEmptyText}>
+                  {t('models.noModelsAvailable', { defaultValue: 'No models available. Enter a model ID manually.' })}
+                </Text>
+              </View>
+            )}
+
+            {/* Model Selection — API model list available */}
+            {!showApiList && !modelId.trim() && sdkModelsFetched && !sdkModelsLoading && !sdkModelsAuthError && sdkModelList.length > 0 && (
               <View style={styles.section}>
+                {/* From cache indicator */}
+                {sdkModelsFromCache && (
+                  <View style={styles.cacheIndicatorContainer}>
+                    <Text style={styles.cacheIndicatorText}>
+                      {t('models.fromCache', { defaultValue: 'Loaded from cache' })}
+                    </Text>
+                  </View>
+                )}
                 <TouchableOpacity
                   style={styles.selectionButton}
                   onPress={handleSelectFromApi}
-                  disabled={isLoadingApiModels}
                   accessibilityLabel={t('models.selectFromList')}
                   accessibilityRole="button"
                 >
-                  {isLoadingApiModels ? (
-                    <ActivityIndicator size="small" color={theme.colors.accent} />
-                  ) : (
-                    <Text style={styles.selectionButtonText}>
-                      {t('models.selectFromList')}
-                    </Text>
-                  )}
+                  <Text style={styles.selectionButtonText}>
+                    {t('models.selectFromList')} ({sdkModelList.length})
+                  </Text>
                 </TouchableOpacity>
+              </View>
+            )}
 
-                <Text style={styles.orDivider}>— {t('models.manualEntry')} —</Text>
+            {/* Manual model ID entry — always shown unless API list or form is active */}
+            {!showApiList && !modelId.trim() && (
+              <View style={styles.section}>
+                {sdkModelsFetched && !sdkModelsLoading && sdkModelList.length > 0 && (
+                  <Text style={styles.orDivider}>— {t('models.manualEntry')} —</Text>
+                )}
 
                 <TextInput
-                  style={styles.input}
+                  style={[styles.input, modelIdError ? styles.inputError : undefined]}
                   value={modelId}
-                  onChangeText={setModelId}
+                  onChangeText={handleModelIdChange}
                   onBlur={handleModelIdBlur}
                   placeholder={t('models.modelIdPlaceholder')}
                   placeholderTextColor={theme.colors.textTertiary}
@@ -443,6 +618,9 @@ export function ModelDetailScreen({ route, navigation }: Props) {
                   autoCapitalize="none"
                   autoCorrect={false}
                 />
+                {modelIdError && (
+                  <Text style={styles.validationError}>{modelIdError}</Text>
+                )}
               </View>
             )}
 
@@ -477,9 +655,9 @@ export function ModelDetailScreen({ route, navigation }: Props) {
                 <View style={styles.section}>
                   <Text style={styles.label}>{t('models.modelId')}</Text>
                   <TextInput
-                    style={styles.input}
+                    style={[styles.input, modelIdError ? styles.inputError : undefined]}
                     value={modelId}
-                    onChangeText={setModelId}
+                    onChangeText={handleModelIdChange}
                     onBlur={handleModelIdBlur}
                     placeholder={t('models.modelIdPlaceholder')}
                     placeholderTextColor={theme.colors.textTertiary}
@@ -487,6 +665,9 @@ export function ModelDetailScreen({ route, navigation }: Props) {
                     autoCapitalize="none"
                     autoCorrect={false}
                   />
+                  {modelIdError && (
+                    <Text style={styles.validationError}>{modelIdError}</Text>
+                  )}
                 </View>
 
                 {/* Context Window */}
@@ -806,6 +987,62 @@ function createStyles(theme: Theme) {
       ...theme.typography.body,
       color: theme.colors.accentText,
       fontWeight: '600',
+    },
+
+    // SDK model listing styles
+    sdkLoadingContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingVertical: theme.spacing.xl,
+    },
+    sdkLoadingText: {
+      ...theme.typography.body,
+      color: theme.colors.textSecondary,
+      marginLeft: theme.spacing.sm,
+    },
+    sdkErrorContainer: {
+      backgroundColor: theme.colors.surface,
+      borderRadius: theme.borderRadii.sm,
+      padding: theme.spacing.lg,
+      marginBottom: theme.spacing.xl,
+      borderWidth: 1,
+      borderColor: theme.colors.error,
+    },
+    sdkErrorText: {
+      ...theme.typography.body,
+      color: theme.colors.error,
+      textAlign: 'center',
+    },
+    sdkEmptyContainer: {
+      paddingVertical: theme.spacing.xl,
+      marginBottom: theme.spacing.lg,
+    },
+    sdkEmptyText: {
+      ...theme.typography.body,
+      color: theme.colors.textSecondary,
+      textAlign: 'center',
+    },
+    cacheIndicatorContainer: {
+      backgroundColor: theme.colors.surface,
+      borderRadius: theme.borderRadii.sm,
+      paddingVertical: theme.spacing.sm,
+      paddingHorizontal: theme.spacing.md,
+      marginBottom: theme.spacing.md,
+      alignItems: 'center',
+    },
+    cacheIndicatorText: {
+      ...theme.typography.caption1,
+      color: theme.colors.textTertiary,
+      fontStyle: 'italic',
+    },
+    inputError: {
+      borderColor: theme.colors.error,
+    },
+    validationError: {
+      ...theme.typography.caption1,
+      color: theme.colors.error,
+      marginTop: theme.spacing.sm,
     },
   });
 }
