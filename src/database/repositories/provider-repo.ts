@@ -5,6 +5,19 @@ import { getCurrentTimestamp } from '@/utils/date';
 export type ProviderType = 'openai' | 'anthropic' | 'custom';
 export type OpenAIApiMode = 'responses' | 'chat-completions';
 
+/** Per-provider generation settings sent with completion requests. */
+export interface GenerationParams {
+  /** Sampling temperature: 0.0–2.0, default 0.7 */
+  temperature: number;
+  /** Maximum tokens to generate, default 4096 */
+  maxTokens: number;
+}
+
+const DEFAULT_GENERATION_PARAMS: GenerationParams = {
+  temperature: 0.7,
+  maxTokens: 4096,
+};
+
 export interface ProviderRow {
   id: string;
   type: ProviderType;
@@ -12,6 +25,7 @@ export interface ProviderRow {
   base_url: string;
   api_mode: OpenAIApiMode | null;
   streaming_enabled: number;
+  generation_params: string;
   created_at: number;
   updated_at: number;
 }
@@ -22,6 +36,7 @@ export interface CreateProviderData {
   baseUrl: string;
   apiMode?: OpenAIApiMode;
   streamingEnabled?: boolean;
+  generationParams?: GenerationParams;
 }
 
 export interface UpdateProviderData {
@@ -29,6 +44,7 @@ export interface UpdateProviderData {
   baseUrl?: string;
   apiMode?: OpenAIApiMode | null;
   streamingEnabled?: boolean;
+  generationParams?: GenerationParams;
 }
 
 export interface Provider {
@@ -38,11 +54,19 @@ export interface Provider {
   baseUrl: string;
   apiMode: OpenAIApiMode | null;
   streamingEnabled: boolean;
+  generationParams: GenerationParams;
   createdAt: number;
   updatedAt: number;
 }
 
 function rowToProvider(row: ProviderRow): Provider {
+  let generationParams: GenerationParams;
+  try {
+    generationParams = JSON.parse(row.generation_params) as GenerationParams;
+  } catch {
+    generationParams = { ...DEFAULT_GENERATION_PARAMS };
+  }
+
   return {
     id: row.id,
     type: row.type,
@@ -50,6 +74,7 @@ function rowToProvider(row: ProviderRow): Provider {
     baseUrl: row.base_url,
     apiMode: row.api_mode,
     streamingEnabled: row.streaming_enabled === 1,
+    generationParams,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -65,16 +90,19 @@ export async function createProvider(
   const id = generateId();
   const now = getCurrentTimestamp();
   const streamingEnabled = data.streamingEnabled !== false ? 1 : 0;
+  const generationParams = data.generationParams ?? { ...DEFAULT_GENERATION_PARAMS };
+  const generationParamsJson = JSON.stringify(generationParams);
 
   await db.runAsync(
-    `INSERT INTO providers (id, type, name, base_url, api_mode, streaming_enabled, created_at, updated_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+    `INSERT INTO providers (id, type, name, base_url, api_mode, streaming_enabled, generation_params, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     id,
     data.type,
     data.name,
     data.baseUrl,
     data.apiMode ?? null,
     streamingEnabled,
+    generationParamsJson,
     now,
     now
   );
@@ -86,6 +114,7 @@ export async function createProvider(
     baseUrl: data.baseUrl,
     apiMode: data.apiMode ?? null,
     streamingEnabled: streamingEnabled === 1,
+    generationParams,
     createdAt: now,
     updatedAt: now,
   };
@@ -141,6 +170,10 @@ export async function updateProvider(
   if (updates.streamingEnabled !== undefined) {
     setClauses.push('streaming_enabled = ?');
     params.push(updates.streamingEnabled ? 1 : 0);
+  }
+  if (updates.generationParams !== undefined) {
+    setClauses.push('generation_params = ?');
+    params.push(JSON.stringify(updates.generationParams));
   }
 
   if (setClauses.length === 0) {

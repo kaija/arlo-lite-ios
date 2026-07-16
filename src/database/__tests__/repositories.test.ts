@@ -79,6 +79,7 @@ describe('provider-repo', () => {
         'https://api.openai.com/v1',
         'responses',
         1,
+        '{"temperature":0.7,"maxTokens":4096}',
         1700000000000,
         1700000000000
       );
@@ -88,6 +89,7 @@ describe('provider-repo', () => {
       expect(result.baseUrl).toBe('https://api.openai.com/v1');
       expect(result.apiMode).toBe('responses');
       expect(result.streamingEnabled).toBe(true);
+      expect(result.generationParams).toEqual({ temperature: 0.7, maxTokens: 4096 });
     });
 
     it('defaults streamingEnabled to true', async () => {
@@ -106,6 +108,7 @@ describe('provider-repo', () => {
         'https://api.anthropic.com',
         null,
         1, // streaming_enabled = 1
+        '{"temperature":0.7,"maxTokens":4096}',
         expect.any(Number),
         expect.any(Number)
       );
@@ -148,6 +151,7 @@ describe('provider-repo', () => {
         base_url: 'https://api.openai.com/v1',
         api_mode: 'responses',
         streaming_enabled: 1,
+        generation_params: '{"temperature":0.7,"maxTokens":4096}',
         created_at: 1700000000000,
         updated_at: 1700000000000,
       });
@@ -161,6 +165,7 @@ describe('provider-repo', () => {
         baseUrl: 'https://api.openai.com/v1',
         apiMode: 'responses',
         streamingEnabled: true,
+        generationParams: { temperature: 0.7, maxTokens: 4096 },
         createdAt: 1700000000000,
         updatedAt: 1700000000000,
       });
@@ -176,22 +181,24 @@ describe('provider-repo', () => {
 
     it('maps all rows to provider objects', async () => {
       db.getAllAsync.mockResolvedValue([
-        { id: 'p1', type: 'openai', name: 'OAI', base_url: 'url1', api_mode: null, streaming_enabled: 1, created_at: 100, updated_at: 100 },
-        { id: 'p2', type: 'anthropic', name: 'ANT', base_url: 'url2', api_mode: null, streaming_enabled: 0, created_at: 200, updated_at: 200 },
+        { id: 'p1', type: 'openai', name: 'OAI', base_url: 'url1', api_mode: null, streaming_enabled: 1, generation_params: '{"temperature":0.7,"maxTokens":4096}', created_at: 100, updated_at: 100 },
+        { id: 'p2', type: 'anthropic', name: 'ANT', base_url: 'url2', api_mode: null, streaming_enabled: 0, generation_params: '{"temperature":1.0,"maxTokens":2048}', created_at: 200, updated_at: 200 },
       ]);
 
       const result = await getAllProviders(db);
 
       expect(result).toHaveLength(2);
       expect(result[0].id).toBe('p1');
+      expect(result[0].generationParams).toEqual({ temperature: 0.7, maxTokens: 4096 });
       expect(result[1].streamingEnabled).toBe(false);
+      expect(result[1].generationParams).toEqual({ temperature: 1.0, maxTokens: 2048 });
     });
   });
 
   describe('updateProvider', () => {
     it('updates only specified fields', async () => {
       db.getFirstAsync.mockResolvedValue({
-        id: 'p1', type: 'openai', name: 'Updated', base_url: 'url', api_mode: null, streaming_enabled: 1, created_at: 100, updated_at: 1700000000000,
+        id: 'p1', type: 'openai', name: 'Updated', base_url: 'url', api_mode: null, streaming_enabled: 1, generation_params: '{"temperature":0.7,"maxTokens":4096}', created_at: 100, updated_at: 1700000000000,
       });
 
       await updateProvider(db, 'p1', { name: 'Updated' });
@@ -206,7 +213,7 @@ describe('provider-repo', () => {
 
     it('returns current provider when no updates provided', async () => {
       db.getFirstAsync.mockResolvedValue({
-        id: 'p1', type: 'openai', name: 'Test', base_url: 'url', api_mode: null, streaming_enabled: 1, created_at: 100, updated_at: 100,
+        id: 'p1', type: 'openai', name: 'Test', base_url: 'url', api_mode: null, streaming_enabled: 1, generation_params: '{"temperature":0.7,"maxTokens":4096}', created_at: 100, updated_at: 100,
       });
 
       const result = await updateProvider(db, 'p1', {});
