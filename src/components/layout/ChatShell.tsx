@@ -35,6 +35,7 @@ import { InputChrome } from '@/components/layout/InputChrome';
 import { SessionSidebar } from '@/components/sidebar/SessionSidebar';
 import { MessageFlow } from '@/components/chat/MessageFlow';
 import { StreamingMessage } from '@/components/chat/StreamingMessage';
+import { ErrorBanner } from '@/components/chat/ErrorBanner';
 import { ModelPicker } from '@/components/overlays/ModelPicker';
 import { RenameDialog } from '@/components/overlays/RenameDialog';
 import { SettingsScreen } from '@/components/overlays/SettingsScreen';
@@ -126,7 +127,7 @@ export function ChatShell({ children }: ChatShellProps) {
 
   // ─── Chat Hook ──────────────────────────────────────────────────────
 
-  const { sendMessage, stopGeneration } = useChat();
+  const { sendMessage, stopGeneration, error, retry, clearError } = useChat();
   const { copyMessage, regenerate, editMessage } = useMessageActions();
 
   // ─── FlatList Ref ───────────────────────────────────────────────────
@@ -310,18 +311,38 @@ export function ChatShell({ children }: ChatShellProps) {
   // ─── Render Footer (Streaming) ─────────────────────────────────────
 
   const renderFooter = useCallback(() => {
-    if (!isStreaming || !streamContent) return null;
+    const streamingFooter =
+      isStreaming && streamContent ? (
+        <StreamingMessage
+          content={streamContent}
+          thinkingContent={thinkingContent}
+          isThinking={!!thinkingContent && !streamContent}
+          modelName={activeModel?.displayName ?? 'Assistant'}
+          tokenRate={0}
+          showAvatars={true}
+        />
+      ) : null;
+
+    const errorFooter =
+      error && !isStreaming ? (
+        <ErrorBanner
+          message={error.message}
+          detail={error.detail}
+          isRetryable={error.isRetryable}
+          onRetry={retry}
+          onDismiss={clearError}
+        />
+      ) : null;
+
+    if (!streamingFooter && !errorFooter) return null;
+
     return (
-      <StreamingMessage
-        content={streamContent}
-        thinkingContent={thinkingContent}
-        isThinking={!!thinkingContent && !streamContent}
-        modelName={activeModel?.displayName ?? 'Assistant'}
-        tokenRate={0}
-        showAvatars={true}
-      />
+      <>
+        {streamingFooter}
+        {errorFooter}
+      </>
     );
-  }, [isStreaming, streamContent, thinkingContent, activeModel]);
+  }, [isStreaming, streamContent, thinkingContent, activeModel, error, retry, clearError]);
 
   // ─── Render Empty State ─────────────────────────────────────────────
 
