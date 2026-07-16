@@ -17,12 +17,10 @@
 import React, { useCallback, useRef, useState } from 'react';
 import {
   KeyboardAvoidingView,
-  NativeSyntheticEvent,
   Platform,
   Pressable,
   StyleSheet,
   TextInput,
-  TextInputKeyPressEventData,
   View,
 } from 'react-native';
 import { BlurView } from 'expo-blur';
@@ -96,7 +94,6 @@ export function InputChrome({
   const { colors, borderRadii, isDark } = useTheme();
 
   const [text, setText] = useState('');
-  const [inputHeight, setInputHeight] = useState(MIN_INPUT_HEIGHT);
   const inputRef = useRef<TextInput>(null);
 
   const hasText = text.trim().length > 0;
@@ -108,40 +105,12 @@ export function InputChrome({
     if (trimmed.length > 0 && !isStreaming) {
       onSend(trimmed);
       setText('');
-      setInputHeight(MIN_INPUT_HEIGHT);
     }
   }, [text, isStreaming, onSend]);
 
   const handleStop = useCallback(() => {
     onStop();
   }, [onStop]);
-
-  const handleKeyPress = useCallback(
-    (e: NativeSyntheticEvent<TextInputKeyPressEventData>) => {
-      // Send on Enter without Shift when text has non-whitespace
-      // Note: on iOS, hardware keyboard sends 'Enter' key; Shift state
-      // isn't reliably detectable in React Native TextInput onKeyPress.
-      // This is primarily for external keyboards.
-      if (e.nativeEvent.key === 'Enter') {
-        if (hasText && !isStreaming) {
-          e.preventDefault?.();
-          handleSend();
-        }
-      }
-    },
-    [hasText, isStreaming, handleSend],
-  );
-
-  const handleContentSizeChange = useCallback(
-    (event: { nativeEvent: { contentSize: { height: number } } }) => {
-      const newHeight = Math.min(
-        Math.max(event.nativeEvent.contentSize.height, MIN_INPUT_HEIGHT),
-        MAX_INPUT_HEIGHT,
-      );
-      setInputHeight(newHeight);
-    },
-    [],
-  );
 
   // ─── Render ───────────────────────────────────────────────────────────
 
@@ -193,12 +162,9 @@ export function InputChrome({
             ref={inputRef}
             value={text}
             onChangeText={setText}
-            onContentSizeChange={handleContentSizeChange}
-            onKeyPress={handleKeyPress}
             placeholder="Message"
             placeholderTextColor={colors.textTertiary}
             multiline
-            scrollEnabled={inputHeight >= MAX_INPUT_HEIGHT}
             blurOnSubmit={false}
             returnKeyType="default"
             textAlignVertical="top"
@@ -207,7 +173,6 @@ export function InputChrome({
             style={[
               styles.textInput,
               {
-                height: inputHeight,
                 backgroundColor: colors.surfaceSecondary,
                 color: colors.text,
                 borderRadius: borderRadii.input,
@@ -284,6 +249,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingTop: 8,
     paddingBottom: 8,
+    minHeight: MIN_INPUT_HEIGHT,
     maxHeight: MAX_INPUT_HEIGHT,
   },
 });

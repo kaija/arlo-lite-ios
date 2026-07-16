@@ -16,6 +16,7 @@ import { useChatStore } from '@/stores/chat-store';
 import { useChat } from '@/hooks/useChat';
 import { buildRegenerationContext } from '@/domain/session-manager';
 import { copyToClipboard } from '@/utils/clipboard';
+import { useToast } from '@/components/overlays/ToastProvider';
 import type { Message } from '@/database/repositories/message-repo';
 
 /** Stable empty array to avoid infinite re-render loops in selectors */
@@ -37,6 +38,7 @@ export interface UseMessageActionsResult {
  */
 export function useMessageActions(): UseMessageActionsResult {
   const { t } = useTranslation();
+  const toast = useToast();
 
   const activeSessionId = useSessionStore((s) => s.activeSessionId);
   const messagesMap = useSessionStore((s) => s.messages);
@@ -46,11 +48,12 @@ export function useMessageActions(): UseMessageActionsResult {
   const isStreaming = useChatStore((s) => s.isStreaming);
 
   /**
-   * Copy full message text to system clipboard.
+   * Copy full message text to system clipboard with toast feedback.
    */
   const copyMessage = useCallback(async (message: Message) => {
     await copyToClipboard(message.content);
-  }, []);
+    toast.show(t('chat.copied', { defaultValue: 'Copied' }));
+  }, [toast, t]);
 
   /**
    * Determine if a message is the last assistant message in the session.

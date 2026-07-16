@@ -156,7 +156,7 @@ export function ChatShell({ children }: ChatShellProps) {
 
   // ─── Chat Hook ──────────────────────────────────────────────────────
 
-  const { sendMessage: rawSendMessage, stopGeneration, error, retry, clearError } = useChat();
+  const { sendMessage: rawSendMessage, stopGeneration, tokenRate, error, retry, clearError } = useChat();
   const { copyMessage, regenerate, editMessage } = useMessageActions();
 
   // ─── FlatList Ref ───────────────────────────────────────────────────
@@ -186,10 +186,6 @@ export function ChatShell({ children }: ChatShellProps) {
   const handleSidebarToggle = useCallback(() => {
     toggleSidebar();
   }, [toggleSidebar]);
-
-  const handleSidebarClose = useCallback(() => {
-    closeSidebar();
-  }, [closeSidebar]);
 
   // ─── Dim Overlay Animated Style ─────────────────────────────────────
 
@@ -283,12 +279,18 @@ export function ChatShell({ children }: ChatShellProps) {
       }
     }
 
-    if (providerId && modelId) {
-      const newSessionId = await createSession(providerId, modelId);
-      await setActiveSession(newSessionId);
-      switchModel(providerId, modelId);
+    try {
+      if (providerId && modelId) {
+        const newSessionId = await createSession(providerId, modelId);
+        await setActiveSession(newSessionId);
+        switchModel(providerId, modelId);
+      }
+    } catch (error) {
+      // Log but don't crash — session creation failures shouldn't block UI
+      console.warn('[handleNewChat] Failed to create session:', error);
+    } finally {
+      closeSidebar();
     }
-    closeSidebar();
   }, [activeProviderId, activeModelId, providers, models, createSession, setActiveSession, switchModel, closeSidebar]);
 
   // ─── Delete Message Handler ──────────────────────────────────────────
@@ -413,7 +415,7 @@ export function ChatShell({ children }: ChatShellProps) {
           thinkingContent={thinkingContent}
           isThinking={!!thinkingContent && !streamContent}
           modelName={activeModel?.displayName ?? 'Assistant'}
-          tokenRate={0}
+          tokenRate={tokenRate}
           showAvatars={true}
         />
       ) : null;
@@ -480,23 +482,19 @@ export function ChatShell({ children }: ChatShellProps) {
 
           {/* Layer 2: Chat Layer (z=2) */}
           <Animated.View
+            pointerEvents={sidebarActive ? 'none' : 'auto'}
             style={[
               styles.chatLayer,
               { backgroundColor: colors.background },
               chatAnimatedStyle,
             ]}
           >
-            {/* Semi-transparent overlay when sidebar is open (tap to close) */}
+            {/* Semi-transparent dim overlay (visual only when sidebar is open; 
+                 touch handling is disabled by parent pointerEvents="none") */}
             <Animated.View
               style={[styles.dimOverlay, dimOverlayStyle]}
-              pointerEvents={sidebarActive ? 'auto' : 'none'}
+              pointerEvents="none"
             >
-              <Pressable
-                onPress={handleSidebarClose}
-                style={StyleSheet.absoluteFill}
-                accessibilityLabel={t('sidebar.closeSidebar', 'Close sidebar')}
-                accessibilityRole="button"
-              />
             </Animated.View>
 
             {/* Navigation Chrome */}

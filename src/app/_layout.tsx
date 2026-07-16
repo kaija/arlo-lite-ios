@@ -7,6 +7,7 @@ import i18n from 'i18next';
 import { initI18n } from '@/i18n/index';
 import { initDatabase } from '@/database/database';
 import { ThemeProvider } from '@/theme';
+import { ToastProvider } from '@/components/overlays/ToastProvider';
 import { useProviderStore } from '@/stores/provider-store';
 import { useSessionStore } from '@/stores/session-store';
 import { useSettingsStore } from '@/stores/settings-store';
@@ -116,7 +117,9 @@ export default function RootLayout() {
   return (
     <SafeAreaProvider>
       <ThemeProvider mode={themeMode}>
-        <Slot />
+        <ToastProvider>
+          <Slot />
+        </ToastProvider>
       </ThemeProvider>
     </SafeAreaProvider>
   );

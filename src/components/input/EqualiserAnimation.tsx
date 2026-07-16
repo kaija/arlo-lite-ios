@@ -68,21 +68,23 @@ export function EqualiserAnimation({ isActive }: EqualiserAnimationProps) {
     if (isActive) {
       // Start staggered repeating animation for each bar
       scales.forEach((scale, index) => {
+        // Reset to min before starting to ensure clean animation start
+        scale.value = SCALE_MIN;
         scale.value = withDelay(
           index * PHASE_OFFSET,
           withRepeat(
             withSequence(
               withTiming(SCALE_MAX, {
                 duration: CYCLE_DURATION,
-                easing: Easing.inOut(Easing.sin),
+                easing: Easing.inOut(Easing.ease),
               }),
               withTiming(SCALE_MIN, {
                 duration: CYCLE_DURATION,
-                easing: Easing.inOut(Easing.sin),
+                easing: Easing.inOut(Easing.ease),
               }),
             ),
             -1, // infinite repeat
-            false,
+            true, // reverse on each iteration for smooth bounce
           ),
         );
       });

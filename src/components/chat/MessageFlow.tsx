@@ -26,6 +26,7 @@ import { useTheme, Theme } from '@/theme';
 import { usePressAnimation } from '@/hooks/usePressAnimation';
 import { formatTokenMetadata } from '@/utils/token-formatting';
 import { CodeBlock } from './CodeBlock';
+import { CopyIcon, RegenerateIcon, EditIcon, DeleteIcon } from '@/components/icons';
 import type { Message } from '@/database/repositories/message-repo';
 
 export interface MessageFlowProps {
@@ -148,32 +149,28 @@ export function MessageFlow({
       {showActions && (
         <View style={styles.actionsRow}>
           <ActionButton
-            label={t('chat.copy', 'Copy')}
+            icon={<CopyIcon size={20} color={theme.colors.textTertiary} />}
             accessibilityLabel={t('accessibility.copyButton', 'Copy message')}
             onPress={onCopy}
-            theme={theme}
           />
           {!isUser && (
             <ActionButton
-              label={t('chat.regenerate', 'Regenerate')}
+              icon={<RegenerateIcon size={20} color={theme.colors.textTertiary} />}
               accessibilityLabel={t('accessibility.regenerateButton', 'Regenerate response')}
               onPress={onRegenerate}
-              theme={theme}
             />
           )}
           {isUser && (
             <ActionButton
-              label={t('chat.edit', 'Edit')}
+              icon={<EditIcon size={20} color={theme.colors.textTertiary} />}
               accessibilityLabel={t('accessibility.editButton', 'Edit message')}
               onPress={onEdit}
-              theme={theme}
             />
           )}
           <ActionButton
-            label={t('chat.delete', 'Delete')}
+            icon={<DeleteIcon size={20} color={theme.colors.textTertiary} />}
             accessibilityLabel={t('accessibility.deleteButton', 'Delete message')}
             onPress={onDelete}
-            theme={theme}
           />
         </View>
       )}
@@ -184,16 +181,16 @@ export function MessageFlow({
 // ─── Action Button ─────────────────────────────────────────────────────────────
 
 interface ActionButtonProps {
-  label: string;
+  icon: React.ReactNode;
   accessibilityLabel: string;
   onPress: () => void;
-  theme: Theme;
 }
 
 /**
  * Individual action button with 44×44 tap target and press animation.
+ * Renders an SVG icon instead of a text label.
  */
-function ActionButton({ label, accessibilityLabel, onPress, theme }: ActionButtonProps) {
+function ActionButton({ icon, accessibilityLabel, onPress }: ActionButtonProps) {
   const { animatedStyle, onPressIn, onPressOut } = usePressAnimation();
 
   return (
@@ -207,9 +204,7 @@ function ActionButton({ label, accessibilityLabel, onPress, theme }: ActionButto
         hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
         style={actionButtonStyles.pressable}
       >
-        <Text style={[actionButtonStyles.label, { color: theme.colors.textTertiary }]}>
-          {label}
-        </Text>
+        {icon}
       </Pressable>
     </Animated.View>
   );
@@ -221,11 +216,6 @@ const actionButtonStyles = StyleSheet.create({
     minHeight: 44,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 8,
-  },
-  label: {
-    fontSize: 13,
-    fontWeight: '500',
   },
 });
 
@@ -390,6 +380,7 @@ function createMarkdownStyles(theme: Theme) {
       padding: theme.spacing.sm,
       borderBottomWidth: 1,
       borderColor: theme.colors.border,
+      flexShrink: 1,
     },
     td: {
       ...theme.typography.subheadline,
@@ -397,6 +388,7 @@ function createMarkdownStyles(theme: Theme) {
       padding: theme.spacing.sm,
       borderBottomWidth: StyleSheet.hairlineWidth,
       borderColor: theme.colors.border,
+      flexShrink: 1,
     },
     tr: {
       borderBottomWidth: StyleSheet.hairlineWidth,
@@ -405,9 +397,10 @@ function createMarkdownStyles(theme: Theme) {
     blockquote: {
       borderLeftWidth: 3,
       borderLeftColor: theme.colors.accent,
+      backgroundColor: 'transparent',
       paddingLeft: theme.spacing.md,
+      paddingVertical: theme.spacing.xs,
       marginVertical: theme.spacing.sm,
-      opacity: 0.85,
     },
     hr: {
       backgroundColor: theme.colors.border,

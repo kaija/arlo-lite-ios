@@ -47,6 +47,8 @@ export interface UseChatResult {
   streamContent: string;
   /** Current streaming thinking content */
   thinkingContent: string;
+  /** Estimated tokens per second (rolling 2-second window) */
+  tokenRate: number;
   /** Last error from send flow, or null */
   error: ChatError | null;
   /** Retry the last failed request */
@@ -84,6 +86,12 @@ export function useChat(): UseChatResult {
   const abortControllerRef = useRef<AbortController | null>(null);
   const lastMessageRef = useRef<string>('');
 
+  // Token rate tracking: rolling window of (timestamp, tokenCount) samples
+  const tokenSamplesRef = useRef<Array<{ time: number; tokens: number }>>([]);
+  const [tokenRate, setTokenRate] = useState(0);
+  const streamStartRef = useRef<number>(0);
+  const totalStreamTokensRef = useRef<number>(0);
+
   // Store selectors
   const activeSessionId = useSessionStore((s) => s.activeSessionId);
   const addMessage = useSessionStore((s) => s.addMessage);
@@ -112,6 +120,59 @@ export function useChat(): UseChatResult {
   const clearError = useCallback(() => {
     setError(null);
   }, []);
+
+  /**
+   * Estimate token count from a text chunk.
+   * Heuristic: ~4 characters per token (GPT tokenizer average).
+   */
+  function estimateTokens(text: string): number {
+    return Math.max(1, Math.ceil(text.length / 4));
+  }
+
+  /**
+   * Record a token sample and recalculate the rolling rate (2-second window).
+   */
+  function recordTokenSample(chunkText: string) {
+    const now = Date.now();
+    const tokens = estimateTokens(chunkText);
+    totalStreamTokensRef.current += tokens;
+
+    tokenSamplesRef.current.push({ time: now, tokens });
+
+    // Keep only samples within the last 2 seconds
+    const windowStart = now - 2000;
+    tokenSamplesRef.current = tokenSamplesRef.current.filter(
+      (s) => s.time >= windowStart
+    );
+
+    // Calculate rate: total tokens in window / window duration
+    const samples = tokenSamplesRef.current;
+    if (samples.length < 2) {
+      // Not enough data for a rate — use total average since stream start
+      const elapsed = (now - streamStartRef.current) / 1000;
+      if (elapsed > 0.1) {
+        setTokenRate(totalStreamTokensRef.current / elapsed);
+      }
+      return;
+    }
+
+    const windowTokens = samples.reduce((sum, s) => sum + s.tokens, 0);
+    const windowDuration = (samples[samples.length - 1].time - samples[0].time) / 1000;
+
+    if (windowDuration > 0) {
+      setTokenRate(windowTokens / windowDuration);
+    }
+  }
+
+  /**
+   * Reset token rate tracking for a new stream.
+   */
+  function resetTokenRate() {
+    tokenSamplesRef.current = [];
+    totalStreamTokensRef.current = 0;
+    streamStartRef.current = Date.now();
+    setTokenRate(0);
+  }
 
   /**
    * Build ChatMessage array from session messages for the provider request.
@@ -149,6 +210,7 @@ export function useChat(): UseChatResult {
   ) {
     clearStream();
     setStreaming(true);
+    resetTokenRate();
 
     const controller = new AbortController();
     abortControllerRef.current = controller;
@@ -163,6 +225,7 @@ export function useChat(): UseChatResult {
           case 'text':
             accumulatedContent += chunk.content;
             appendStreamContent(chunk.content);
+            recordTokenSample(chunk.content);
             break;
           case 'thinking':
             accumulatedThinking += chunk.content;
@@ -220,6 +283,7 @@ export function useChat(): UseChatResult {
       abortControllerRef.current = null;
       setStreaming(false);
       clearStream();
+      setTokenRate(0);
     }
   }
 
@@ -492,6 +556,7 @@ export function useChat(): UseChatResult {
     isStreaming,
     streamContent,
     thinkingContent,
+    tokenRate,
     error,
     retry,
     clearError,
