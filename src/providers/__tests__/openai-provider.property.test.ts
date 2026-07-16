@@ -865,3 +865,76 @@ describe('Property 12: OpenAI error classification', () => {
     );
   });
 });
+
+
+// ─── Property 17: Model list alphabetical sorting ────────────────────────────
+
+// Feature: sdk-provider-integration, Property 17: Model list alphabetical sorting
+describe('Property 17: Model list alphabetical sorting', () => {
+  /**
+   * **Validates: Requirements 9.1**
+   *
+   * For any non-empty list of model IDs returned by the OpenAI models endpoint,
+   * the listModels method SHALL return those IDs in case-insensitive alphabetical order.
+   */
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  /** Generate a non-empty array of random model ID strings (alphanumeric with dashes). */
+  const arbModelId = fc.stringMatching(/^[a-zA-Z][a-zA-Z0-9\-]{0,49}$/);
+  const arbModelIdList = fc.array(arbModelId, { minLength: 1, maxLength: 50 });
+
+  it('listModels returns model IDs sorted case-insensitively regardless of input order', async () => {
+    await fc.assert(
+      fc.asyncProperty(arbModelIdList, async (modelIds) => {
+        const provider = new OpenAIProvider();
+        const config = makeChatConfig();
+
+        // Mock client.models.list() to return shuffled model IDs as an async iterable
+        mockModelsList.mockResolvedValue({
+          [Symbol.asyncIterator]: async function* () {
+            for (const id of modelIds) yield { id };
+          },
+        });
+
+        const result = await provider.listModels(config, 'test-key');
+
+        // Verify the result is sorted case-insensitively
+        for (let i = 0; i < result.length - 1; i++) {
+          const cmp = result[i].toLowerCase().localeCompare(result[i + 1].toLowerCase());
+          expect(cmp).toBeLessThanOrEqual(0);
+        }
+
+        // Verify same elements are present (same length, same set)
+        expect(result).toHaveLength(modelIds.length);
+        expect([...result].sort()).toEqual([...modelIds].sort());
+      }),
+      { numRuns: 100 },
+    );
+  });
+
+  it('listModels preserves original casing of model IDs while sorting case-insensitively', async () => {
+    await fc.assert(
+      fc.asyncProperty(arbModelIdList, async (modelIds) => {
+        const provider = new OpenAIProvider();
+        const config = makeChatConfig();
+
+        mockModelsList.mockResolvedValue({
+          [Symbol.asyncIterator]: async function* () {
+            for (const id of modelIds) yield { id };
+          },
+        });
+
+        const result = await provider.listModels(config, 'test-key');
+
+        // Every returned ID should be exactly one of the input IDs (preserving case)
+        for (const id of result) {
+          expect(modelIds).toContain(id);
+        }
+      }),
+      { numRuns: 100 },
+    );
+  });
+});
