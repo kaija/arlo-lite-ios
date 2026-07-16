@@ -1,4 +1,6 @@
 import { create } from 'zustand';
+import { useSessionStore } from '@/stores/session-store';
+import { updateSession } from '@/database/repositories/session-repo';
 
 /**
  * Abstract reasoning effort level.
@@ -36,7 +38,7 @@ export interface ChatActions {
   clearStream: () => void;
   /** Update the thinking/reasoning effort level */
   setThinkingLevel: (level: ThinkingLevel) => void;
-  /** Switch the active provider and model */
+  /** Switch the active provider and model, persisting to the active session */
   switchModel: (providerId: string, modelId: string) => void;
 }
 
@@ -74,5 +76,13 @@ export const useChatStore = create<ChatStore>((set) => ({
 
   switchModel: (providerId: string, modelId: string) => {
     set({ activeProviderId: providerId, activeModelId: modelId });
+
+    // Persist model selection to the active session
+    const { activeSessionId, db } = useSessionStore.getState();
+    if (activeSessionId && db) {
+      updateSession(db, activeSessionId, { providerId, modelId }).catch(() => {
+        // Persistence is best-effort — UI state is already updated
+      });
+    }
   },
 }));

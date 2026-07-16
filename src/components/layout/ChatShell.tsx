@@ -102,6 +102,7 @@ export function ChatShell({ children }: ChatShellProps) {
   const renameSession = useSessionStore((state) => state.renameSession);
   const createSession = useSessionStore((state) => state.createSession);
   const setActiveSession = useSessionStore((state) => state.setActiveSession);
+  const updateSession = useSessionStore((state) => state.updateSession);
 
   // ─── Chat Store ─────────────────────────────────────────────────────
 
@@ -176,9 +177,23 @@ export function ChatShell({ children }: ChatShellProps) {
   const handleSessionSelect = useCallback(
     (id: string) => {
       setActiveSession?.(id);
+
+      // Restore model and thinking level from the selected session
+      const session = sessions.find((s) => s.id === id);
+      if (session) {
+        if (session.providerId && session.modelId) {
+          switchModel(session.providerId, session.modelId);
+        }
+        if (session.thinkingLevel) {
+          setThinkingLevel(session.thinkingLevel as typeof thinkingLevel);
+        } else {
+          setThinkingLevel('off');
+        }
+      }
+
       closeSidebar();
     },
-    [setActiveSession, closeSidebar],
+    [setActiveSession, sessions, switchModel, setThinkingLevel, thinkingLevel, closeSidebar],
   );
 
   const handleSessionDelete = useCallback(
@@ -225,9 +240,13 @@ export function ChatShell({ children }: ChatShellProps) {
   const handleModelSelect = useCallback(
     (providerId: string, modelId: string) => {
       switchModel(providerId, modelId);
+      // Persist model selection to the active session
+      if (activeSessionId) {
+        updateSession(activeSessionId, { providerId, modelId });
+      }
       closeModelPicker();
     },
-    [switchModel, closeModelPicker],
+    [switchModel, activeSessionId, updateSession, closeModelPicker],
   );
 
   // ─── Thinking Level Cycle ───────────────────────────────────────────
@@ -243,8 +262,14 @@ export function ChatShell({ children }: ChatShellProps) {
     ];
     const currentIndex = levels.indexOf(thinkingLevel);
     const nextIndex = (currentIndex + 1) % levels.length;
-    setThinkingLevel(levels[nextIndex]);
-  }, [thinkingLevel, setThinkingLevel]);
+    const nextLevel = levels[nextIndex];
+    setThinkingLevel(nextLevel);
+
+    // Persist the new thinking level to the active session
+    if (activeSessionId) {
+      updateSession(activeSessionId, { thinkingLevel: nextLevel });
+    }
+  }, [thinkingLevel, setThinkingLevel, activeSessionId, updateSession]);
 
   // ─── Context Usage ──────────────────────────────────────────────────
 

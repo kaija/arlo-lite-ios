@@ -63,6 +63,9 @@ export interface SessionStore {
   /** Edit a message at a given ID and discard all subsequent messages */
   editMessage: (sessionId: string, messageId: string, newContent: string) => Promise<void>;
 
+  /** Update a session with partial data */
+  updateSession: (id: string, data: { providerId?: string; modelId?: string; thinkingLevel?: string | null }) => Promise<void>;
+
   /** Set the active session and load its messages */
   setActiveSession: (sessionId: string | null) => Promise<void>;
 }
@@ -219,6 +222,20 @@ export const useSessionStore = create<SessionStore>((set, get) => ({
         },
       };
     });
+  },
+
+  updateSession: async (id: string, data: { providerId?: string; modelId?: string; thinkingLevel?: string | null }) => {
+    const { db } = get();
+    if (!db) {
+      throw new Error('Database not initialized. Call setDatabase first.');
+    }
+
+    const updated = await updateSessionInDb(db, id, data);
+    if (!updated) return;
+
+    set((state) => ({
+      sessions: state.sessions.map((s) => (s.id === id ? updated : s)),
+    }));
   },
 
   setActiveSession: async (sessionId: string | null) => {
