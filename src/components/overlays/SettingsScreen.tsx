@@ -10,7 +10,7 @@
  * - Centered "Settings" title
  * - Provider cards: 34×34pt icon, name, model count, API type, masked key
  * - System prompts section with name, preview, edit, default checkmark
- * - Generation params: Temperature (0.0–2.0), Max Tokens
+ * - Generation params: Max Tokens
  * - Empty state when no providers configured
  * - Grouped inset list, system-grouped background
  * - Translucent blur header pinned on scroll
@@ -140,12 +140,11 @@ export function SettingsScreen({ visible, onClose }: SettingsScreenProps) {
     if (activeProvider) {
       return activeProvider.generationParams;
     }
-    return { temperature: 0.7, maxTokens: 4096 };
+    return { maxTokens: 4096 };
   }, [activeProvider]);
 
   // Edit modal state for generation params
   const [editParamModalVisible, setEditParamModalVisible] = useState(false);
-  const [editingParam, setEditingParam] = useState<'temperature' | 'maxTokens' | null>(null);
   const [editParamValue, setEditParamValue] = useState('');
 
   // Animation
@@ -263,49 +262,31 @@ export function SettingsScreen({ visible, onClose }: SettingsScreenProps) {
     useUIStore.getState().openProviderDetail('');
   }, []);
 
-  /** Open the edit modal for a generation parameter. */
-  const handleParamPress = useCallback((param: 'temperature' | 'maxTokens') => {
-    setEditingParam(param);
-    setEditParamValue(
-      param === 'temperature'
-        ? String(generationParams.temperature)
-        : String(generationParams.maxTokens)
-    );
+  /** Open the edit modal for max tokens. */
+  const handleParamPress = useCallback(() => {
+    setEditParamValue(String(generationParams.maxTokens));
     setEditParamModalVisible(true);
   }, [generationParams]);
 
   /** Save the edited generation parameter value. */
   const handleParamSave = useCallback(() => {
-    if (!activeProvider || !editingParam) return;
+    if (!activeProvider) return;
 
-    if (editingParam === 'temperature') {
-      const parsed = parseFloat(editParamValue);
-      if (isNaN(parsed) || parsed < 0 || parsed > 2) {
-        Alert.alert('Invalid Value', 'Temperature must be between 0.0 and 2.0.');
-        return;
-      }
-      updateProvider(activeProvider.id, {
-        generationParams: { ...generationParams, temperature: parsed },
-      });
-    } else {
-      const parsed = parseInt(editParamValue, 10);
-      if (isNaN(parsed) || parsed <= 0) {
-        Alert.alert('Invalid Value', 'Max Tokens must be a positive integer.');
-        return;
-      }
-      updateProvider(activeProvider.id, {
-        generationParams: { ...generationParams, maxTokens: parsed },
-      });
+    const parsed = parseInt(editParamValue, 10);
+    if (isNaN(parsed) || parsed <= 0) {
+      Alert.alert('Invalid Value', 'Max Tokens must be a positive integer.');
+      return;
     }
+    updateProvider(activeProvider.id, {
+      generationParams: { ...generationParams, maxTokens: parsed },
+    });
 
     setEditParamModalVisible(false);
-    setEditingParam(null);
-  }, [activeProvider, editingParam, editParamValue, generationParams, updateProvider]);
+  }, [activeProvider, editParamValue, generationParams, updateProvider]);
 
   /** Cancel the edit modal. */
   const handleParamCancel = useCallback(() => {
     setEditParamModalVisible(false);
-    setEditingParam(null);
   }, []);
 
   if (!shouldRender) return null;
@@ -413,6 +394,18 @@ export function SettingsScreen({ visible, onClose }: SettingsScreenProps) {
                     isLast={index === providers.length - 1}
                   />
                 ))}
+
+                {/* Add Provider action */}
+                <Pressable
+                  style={styles.addActionRow}
+                  onPress={handleAddProvider}
+                  accessibilityRole="button"
+                  accessibilityLabel="Add Provider"
+                >
+                  <Text style={[styles.addActionText, { color: colors.accent }]}>
+                    Add Provider
+                  </Text>
+                </Pressable>
               </View>
             </View>
 
@@ -476,15 +469,9 @@ export function SettingsScreen({ visible, onClose }: SettingsScreenProps) {
                 ]}
               >
                 <GenerationParamRow
-                  label="Temperature"
-                  value={String(generationParams.temperature)}
-                  onPress={() => handleParamPress('temperature')}
-                  isLast={false}
-                />
-                <GenerationParamRow
                   label="Max Tokens"
                   value={String(generationParams.maxTokens)}
-                  onPress={() => handleParamPress('maxTokens')}
+                  onPress={handleParamPress}
                   isLast
                 />
               </View>
@@ -509,12 +496,10 @@ export function SettingsScreen({ visible, onClose }: SettingsScreenProps) {
             onPress={() => {}}
           >
             <Text style={[styles.modalTitle, { color: colors.text }]}>
-              {editingParam === 'temperature' ? 'Temperature' : 'Max Tokens'}
+              Max Tokens
             </Text>
             <Text style={[styles.modalDescription, { color: colors.textSecondary }]}>
-              {editingParam === 'temperature'
-                ? 'Sampling temperature (0.0–2.0). Higher values produce more varied output.'
-                : 'Maximum number of tokens to generate in the response.'}
+              Maximum number of tokens to generate in the response.
             </Text>
             <TextInput
               style={[
@@ -527,10 +512,10 @@ export function SettingsScreen({ visible, onClose }: SettingsScreenProps) {
               ]}
               value={editParamValue}
               onChangeText={setEditParamValue}
-              keyboardType={editingParam === 'temperature' ? 'decimal-pad' : 'number-pad'}
+              keyboardType="number-pad"
               autoFocus
               selectTextOnFocus
-              accessibilityLabel={editingParam === 'temperature' ? 'Temperature value' : 'Max Tokens value'}
+              accessibilityLabel="Max Tokens value"
             />
             <View style={styles.modalButtons}>
               <Pressable

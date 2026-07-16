@@ -10,6 +10,7 @@ import { ThemeProvider } from '@/theme';
 import { useProviderStore } from '@/stores/provider-store';
 import { useSessionStore } from '@/stores/session-store';
 import { useSettingsStore } from '@/stores/settings-store';
+import { useChatStore } from '@/stores/chat-store';
 
 // Initialize i18n synchronously at module load (safe to call multiple times)
 try {
@@ -55,6 +56,7 @@ export default function RootLayout() {
         const models = useProviderStore.getState().models;
 
         if (sessions.length === 0 && providers.length > 0 && models.length > 0) {
+          // No sessions — auto-create one with the first available provider/model
           const defaultProvider = providers[0];
           const defaultModel = models.find(
             (m) => m.providerId === defaultProvider.id
@@ -62,8 +64,25 @@ export default function RootLayout() {
           if (defaultModel) {
             const sessionId = await useSessionStore
               .getState()
-              .createSession(defaultProvider.id, defaultModel.id);
+              .createSession(defaultProvider.id, defaultModel.modelId);
             await useSessionStore.getState().setActiveSession(sessionId);
+            useChatStore.getState().switchModel(defaultProvider.id, defaultModel.modelId);
+          }
+        } else if (sessions.length > 0) {
+          // Existing sessions — activate the most recent one
+          const mostRecent = sessions[0]; // sessions are sorted by updatedAt desc
+          await useSessionStore.getState().setActiveSession(mostRecent.id);
+          if (mostRecent.providerId && mostRecent.modelId) {
+            useChatStore.getState().switchModel(mostRecent.providerId, mostRecent.modelId);
+          } else if (providers.length > 0 && models.length > 0) {
+            // Session has no model — use the first available
+            const defaultProvider = providers[0];
+            const defaultModel = models.find(
+              (m) => m.providerId === defaultProvider.id
+            );
+            if (defaultModel) {
+              useChatStore.getState().switchModel(defaultProvider.id, defaultModel.modelId);
+            }
           }
         }
       } catch (error) {

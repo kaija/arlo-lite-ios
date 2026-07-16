@@ -1,14 +1,16 @@
 /**
  * Custom provider adapter — implements IProvider for OpenAI-compatible endpoints.
  *
- * Uses the OpenAI Chat Completions format with a user-supplied base URL,
- * allowing connection to any OpenAI-compatible API (e.g., local LLM servers,
- * alternative hosted endpoints, or proxy services).
+ * Uses the official OpenAI SDK with a user-supplied base URL, allowing connection
+ * to any OpenAI-compatible API (e.g., local LLM servers, alternative hosted
+ * endpoints, or proxy services like OpenRouter, Together AI, etc.).
  *
- * Performs raw fetch + inline SSE line parsing (does NOT depend on SSE_Manager)
- * since the SSE_Manager still references the removed `parseStreamChunk` interface.
+ * The SDK handles streaming properly in React Native (no ReadableStream required).
+ * Always operates in Chat Completions mode since that's the universal compatibility format.
  */
 
+import OpenAI, { APIError } from 'openai';
+import { fetch } from 'expo/fetch';
 import type {
   CompletionRequest,
   CompletionResponse,
@@ -20,121 +22,82 @@ import type {
 } from '../types';
 import { ProviderError } from '../errors';
 import { mapThinkingLevelOpenAI } from '../../domain/thinking-mapper';
-import { buildChatCompletionsRequest, parseChatCompletionsResponse } from '../openai/openai-chat';
 
 /**
- * Classify an HTTP status code into a ProviderError.
- *
- * Maps common failure codes to structured error categories so that
- * callers can branch on category without inspecting raw status codes.
+ * Classify an OpenAI SDK error into a ProviderError.
  */
-function classifyHttpError(status: number, retryAfter?: string): ProviderError {
-  if (status === 401 || status === 403) {
-    return new ProviderError('Authentication failed', 'authentication');
-  }
-  if (status === 429) {
-    const seconds = retryAfter ? parseInt(retryAfter, 10) : null;
+function classifyOpenAIError(error: unknown): ProviderError {
+  if (error instanceof APIError) {
+    if (error.status === 401 || error.status === 403) {
+      return new ProviderError('Authentication failed', 'authentication');
+    }
+    if (error.status === 429) {
+      const retryAfter = error.headers?.['retry-after'];
+      const seconds = retryAfter ? parseInt(retryAfter, 10) : null;
+      return new ProviderError(
+        'Rate limited',
+        'rate_limit',
+        seconds !== null && !isNaN(seconds) ? seconds : null,
+      );
+    }
+    if (error.status && error.status >= 500) {
+      return new ProviderError('Server error', 'server');
+    }
     return new ProviderError(
-      'Rate limited',
-      'rate_limit',
-      seconds !== null && !isNaN(seconds) ? seconds : null,
+      error.message || `HTTP ${error.status}`,
+      'server',
     );
   }
-  if (status >= 500) {
-    return new ProviderError('Server error', 'server');
+  if (error instanceof Error) {
+    return new ProviderError(error.message, 'network');
   }
-  return new ProviderError(`HTTP ${status}`, 'server');
-}
-
-/**
- * Parse a single SSE line into a StreamChunk.
- *
- * Uses the OpenAI SSE format:
- * - Lines starting with "data: " contain JSON payloads
- * - "data: [DONE]" signals stream completion
- * - Empty lines and comments (starting with ":") are skipped
- */
-function parseSSELine(line: string): StreamChunk | null {
-  // Skip empty lines and SSE comments
-  if (!line || line.startsWith(':')) {
-    return null;
-  }
-
-  // Only handle "data: " prefixed lines
-  if (!line.startsWith('data: ')) {
-    return null;
-  }
-
-  const payload = line.slice(6); // Remove "data: "
-
-  // Handle stream terminator
-  if (payload === '[DONE]') {
-    return { type: 'done', content: '' };
-  }
-
-  try {
-    const data = JSON.parse(payload) as Record<string, unknown>;
-    const choices = data.choices as Array<Record<string, unknown>> | undefined;
-
-    if (!choices || choices.length === 0) {
-      // Usage-only chunk at end of stream
-      if (data.usage) {
-        const u = data.usage as Record<string, unknown>;
-        return {
-          type: 'done',
-          content: '',
-          usage: {
-            promptTokens: (u.prompt_tokens as number) || 0,
-            completionTokens: (u.completion_tokens as number) || 0,
-            totalTokens: (u.total_tokens as number) || 0,
-            cachedTokens: (u.prompt_tokens_details as Record<string, unknown>)?.cached_tokens as number | undefined,
-          },
-        };
-      }
-      return null;
-    }
-
-    const choice = choices[0];
-    const delta = choice.delta as Record<string, unknown> | undefined;
-
-    if (!delta) {
-      // finish_reason only chunk
-      if (choice.finish_reason) {
-        return { type: 'done', content: '' };
-      }
-      return null;
-    }
-
-    // Reasoning/thinking content
-    if (delta.reasoning_content) {
-      return { type: 'thinking', content: delta.reasoning_content as string };
-    }
-
-    // Regular text content
-    if (delta.content) {
-      return { type: 'text', content: delta.content as string };
-    }
-
-    return null;
-  } catch {
-    return { type: 'error', content: 'Failed to parse stream chunk' };
-  }
+  return new ProviderError('Unknown error', 'server');
 }
 
 /**
  * Custom provider adapter.
  *
- * Delegates to the OpenAI Chat Completions format for request building
- * and response parsing, using a user-supplied base URL rather than the
- * default OpenAI endpoint. Performs inline SSE parsing for streaming.
+ * Delegates to the OpenAI SDK in Chat Completions mode with a user-supplied
+ * base URL. This approach works reliably in React Native since the SDK
+ * handles streaming without requiring ReadableStream support.
  */
 export class CustomProvider implements IProvider {
   readonly type: ProviderType = 'custom';
 
+  /** Cached SDK client instance. */
+  private client: OpenAI | null = null;
+
+  /** API key used to construct the cached client. */
+  private clientKey: string = '';
+
+  /** Base URL used to construct the cached client. */
+  private clientBaseUrl: string = '';
+
+  /**
+   * Get or create an OpenAI SDK client with the custom base URL.
+   *
+   * The client is cached and reused as long as apiKey and baseUrl remain unchanged.
+   */
+  private getClient(apiKey: string, baseUrl: string): OpenAI {
+    if (this.client && this.clientKey === apiKey && this.clientBaseUrl === baseUrl) {
+      return this.client;
+    }
+    this.client = new OpenAI({
+      apiKey,
+      baseURL: baseUrl,
+      maxRetries: 2,
+      dangerouslyAllowBrowser: true,
+      fetch,
+    });
+    this.clientKey = apiKey;
+    this.clientBaseUrl = baseUrl;
+    return this.client;
+  }
+
   /**
    * Execute a non-streaming completion request.
    *
-   * Uses OpenAI Chat Completions format: POST {baseUrl}/chat/completions
+   * Uses OpenAI Chat Completions format via the SDK.
    *
    * @throws ProviderError on auth, network, or server failures
    */
@@ -143,28 +106,68 @@ export class CustomProvider implements IProvider {
     request: CompletionRequest,
     apiKey: string,
   ): Promise<CompletionResponse> {
+    const client = this.getClient(apiKey, config.baseUrl);
     const thinkingParams = mapThinkingLevelOpenAI(request.thinkingLevel);
-    const { url, headers, body } = buildChatCompletionsRequest(config, request, thinkingParams, apiKey);
 
-    const response = await fetch(url, { method: 'POST', headers, body });
+    try {
+      const messages = request.messages.map((msg) => ({
+        role: msg.role as 'system' | 'user' | 'assistant',
+        content: typeof msg.content === 'string'
+          ? msg.content
+          : msg.content.map((part) =>
+              part.type === 'text'
+                ? { type: 'text' as const, text: part.text }
+                : { type: 'image_url' as const, image_url: { url: part.image_url.url } }
+            ),
+      }));
 
-    if (!response.ok) {
-      throw classifyHttpError(response.status, response.headers.get('Retry-After') ?? undefined);
+      const params: Record<string, unknown> = {
+        model: request.model,
+        messages,
+        stream: false,
+      };
+
+      if (request.maxTokens !== undefined) {
+        params.max_tokens = request.maxTokens;
+      }
+
+      if (request.thinkingLevel !== 'off' && thinkingParams.reasoning_effort) {
+        params.reasoning_effort = thinkingParams.reasoning_effort;
+      }
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const response = await client.chat.completions.create(params as any);
+
+      const choice = response.choices?.[0];
+      const content = choice?.message?.content || '';
+      const reasoningContent = (choice?.message as Record<string, unknown>)?.reasoning_content as string | undefined;
+      const finishReason = choice?.finish_reason || 'stop';
+
+      const usage: TokenUsage = {
+        promptTokens: response.usage?.prompt_tokens || 0,
+        completionTokens: response.usage?.completion_tokens || 0,
+        totalTokens: response.usage?.total_tokens || 0,
+        cachedTokens: (response.usage as Record<string, unknown>)?.prompt_tokens_details
+          ? ((response.usage as Record<string, unknown>).prompt_tokens_details as Record<string, unknown>)?.cached_tokens as number | undefined
+          : undefined,
+      };
+
+      return {
+        content,
+        thinkingContent: reasoningContent,
+        usage,
+        finishReason,
+      };
+    } catch (error) {
+      throw classifyOpenAIError(error);
     }
-
-    return parseChatCompletionsResponse(await response.json());
   }
 
   /**
-   * Execute a streaming completion request via inline SSE parsing.
+   * Execute a streaming completion request via the OpenAI SDK.
    *
-   * Returns an AsyncIterable that yields StreamChunks as they arrive.
-   * Terminates with a 'done' chunk on success or an 'error' chunk on failure.
-   *
-   * @param config - Provider configuration
-   * @param request - The completion request parameters (stream flag forced to true)
-   * @param apiKey - API key for authentication
-   * @param signal - AbortSignal for cancellation
+   * Uses the SDK's built-in streaming which works in React Native
+   * (no ReadableStream/response.body required).
    */
   async *streamCompletion(
     config: ProviderConfig,
@@ -172,82 +175,99 @@ export class CustomProvider implements IProvider {
     apiKey: string,
     signal: AbortSignal,
   ): AsyncIterable<StreamChunk> {
-    const thinkingParams = mapThinkingLevelOpenAI(request.thinkingLevel);
-    const streamRequest = { ...request, stream: true };
-    const { url, headers, body } = buildChatCompletionsRequest(config, streamRequest, thinkingParams, apiKey);
+    if (signal.aborted) {
+      yield { type: 'error', content: 'Request cancelled' };
+      yield { type: 'done', content: '' };
+      return;
+    }
 
-    let response: Response;
+    const client = this.getClient(apiKey, config.baseUrl);
+    const thinkingParams = mapThinkingLevelOpenAI(request.thinkingLevel);
+
     try {
-      response = await fetch(url, {
-        method: 'POST',
-        headers: { ...headers, Accept: 'text/event-stream' },
-        body,
-        signal,
-      });
-    } catch (error: unknown) {
+      const messages = request.messages.map((msg) => ({
+        role: msg.role as 'system' | 'user' | 'assistant',
+        content: typeof msg.content === 'string'
+          ? msg.content
+          : msg.content.map((part) =>
+              part.type === 'text'
+                ? { type: 'text' as const, text: part.text }
+                : { type: 'image_url' as const, image_url: { url: part.image_url.url } }
+            ),
+      }));
+
+      const params: Record<string, unknown> = {
+        model: request.model,
+        messages,
+        stream: true,
+        stream_options: { include_usage: true },
+      };
+
+      if (request.maxTokens !== undefined) {
+        params.max_tokens = request.maxTokens;
+      }
+
+      if (request.thinkingLevel !== 'off' && thinkingParams.reasoning_effort) {
+        params.reasoning_effort = thinkingParams.reasoning_effort;
+      }
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const stream = await client.chat.completions.create(
+        params as any,
+        { signal },
+      );
+
+      let usage: TokenUsage | undefined;
+
+      for await (const chunk of stream as unknown as AsyncIterable<Record<string, unknown>>) {
+        if (signal.aborted) {
+          yield { type: 'done', content: '' };
+          return;
+        }
+
+        const choices = chunk.choices as Array<Record<string, unknown>> | undefined;
+
+        if (choices && choices.length > 0) {
+          const choice = choices[0];
+          const delta = choice.delta as Record<string, unknown> | undefined;
+
+          if (delta) {
+            // Reasoning/thinking content
+            if (delta.reasoning_content) {
+              yield { type: 'thinking', content: delta.reasoning_content as string };
+              continue;
+            }
+
+            // Regular text content
+            if (delta.content) {
+              yield { type: 'text', content: delta.content as string };
+              continue;
+            }
+          }
+        }
+
+        // Usage-only chunk (typically at end of stream with stream_options.include_usage)
+        if (chunk.usage) {
+          const u = chunk.usage as Record<string, unknown>;
+          usage = {
+            promptTokens: (u.prompt_tokens as number) || 0,
+            completionTokens: (u.completion_tokens as number) || 0,
+            totalTokens: (u.total_tokens as number) || 0,
+            cachedTokens: (u.prompt_tokens_details as Record<string, unknown>)?.cached_tokens as number | undefined,
+          };
+        }
+      }
+
+      // Emit final done chunk with accumulated usage
+      yield { type: 'done', content: '', ...(usage ? { usage } : {}) };
+    } catch (error) {
       if (signal.aborted) {
         yield { type: 'done', content: '' };
         return;
       }
-      yield { type: 'error', content: error instanceof Error ? error.message : 'Network error' };
-      yield { type: 'done', content: '' };
-      return;
-    }
-
-    if (!response.ok) {
-      const classified = classifyHttpError(
-        response.status,
-        response.headers.get('Retry-After') ?? undefined,
-      );
+      const classified = classifyOpenAIError(error);
       yield { type: 'error', content: `${classified.category}: ${classified.message}` };
       yield { type: 'done', content: '' };
-      return;
-    }
-
-    if (!response.body) {
-      yield { type: 'error', content: 'Response body is null' };
-      yield { type: 'done', content: '' };
-      return;
-    }
-
-    // Read and parse SSE stream inline
-    const reader = response.body.getReader();
-    const decoder = new TextDecoder();
-    let buffer = '';
-
-    try {
-      while (!signal.aborted) {
-        const { done: streamDone, value } = await reader.read();
-        if (streamDone) break;
-
-        buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split(/\r?\n|\r/);
-        buffer = lines.pop() ?? '';
-
-        for (const line of lines) {
-          if (signal.aborted) break;
-          const chunk = parseSSELine(line);
-          if (chunk) {
-            yield chunk;
-            if (chunk.type === 'done') return;
-          }
-        }
-      }
-
-      // Process remaining buffer
-      if (buffer.trim()) {
-        const chunk = parseSSELine(buffer);
-        if (chunk) yield chunk;
-      }
-
-      yield { type: 'done', content: '' };
-    } catch (error: unknown) {
-      if (!signal.aborted) {
-        yield { type: 'error', content: error instanceof Error ? error.message : 'Stream error' };
-      }
-      yield { type: 'done', content: '' };
-    } finally {
-      reader.releaseLock();
     }
   }
 
@@ -258,97 +278,46 @@ export class CustomProvider implements IProvider {
    * the OpenAI models listing format.
    */
   async listModels(config: ProviderConfig, apiKey: string): Promise<string[]> {
-    const url = `${config.baseUrl}/models`;
+    const client = this.getClient(apiKey, config.baseUrl);
 
     try {
-      const response = await fetch(url, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${apiKey}`,
-        },
-      });
-
-      if (!response.ok) {
-        // Many custom endpoints don't support /models — fail gracefully
-        return [];
+      const list = await client.models.list();
+      const modelIds: string[] = [];
+      for await (const model of list) {
+        modelIds.push(model.id);
       }
-
-      const data = (await response.json()) as { data?: Array<{ id: string }> };
-
-      if (!data.data || !Array.isArray(data.data)) {
-        return [];
-      }
-
-      return data.data.map((model) => model.id);
+      return modelIds.sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
     } catch {
-      // Graceful failure — custom endpoints may not support model listing
+      // Many custom endpoints don't support /models — fail gracefully
       return [];
     }
   }
 
   /**
-   * Validate an API key by attempting a minimal completion request.
+   * Validate an API key by attempting to list models or a minimal completion.
    *
-   * Falls back to the models list endpoint if chat completions isn't available.
+   * Falls back gracefully since not all custom endpoints support the same features.
    */
   async validateApiKey(config: ProviderConfig, apiKey: string): Promise<boolean> {
-    // First try a minimal chat completion
-    const chatUrl = `${config.baseUrl}/chat/completions`;
+    const client = this.getClient(apiKey, config.baseUrl);
 
     try {
-      const response = await fetch(chatUrl, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          model: 'gpt-4o-mini',
-          messages: [{ role: 'user', content: 'hi' }],
-          max_tokens: 10,
-        }),
-      });
-
-      if (response.ok) {
+      // Try listing models first
+      const list = await client.models.list();
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      for await (const _model of list) {
+        break; // Only need one to confirm validity
+      }
+      return true;
+    } catch (error) {
+      if (error instanceof APIError) {
+        if (error.status === 401 || error.status === 403) {
+          return false;
+        }
+        // Other errors (429, 500, etc.) mean the key is likely valid
         return true;
       }
-
-      // If chat completions fails with 404 (endpoint doesn't exist),
-      // try the models endpoint instead
-      if (response.status === 404) {
-        return this.validateViaModels(config, apiKey);
-      }
-
-      // 401/403 means the key is invalid
-      if (response.status === 401 || response.status === 403) {
-        return false;
-      }
-
-      // Other errors (e.g., model not found) — key might still be valid
-      // Try models endpoint as fallback
-      return this.validateViaModels(config, apiKey);
-    } catch {
-      // Network error — try models endpoint as fallback
-      return this.validateViaModels(config, apiKey);
-    }
-  }
-
-  /**
-   * Validate the API key using the models list endpoint.
-   */
-  private async validateViaModels(config: ProviderConfig, apiKey: string): Promise<boolean> {
-    const modelsUrl = `${config.baseUrl}/models`;
-
-    try {
-      const response = await fetch(modelsUrl, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${apiKey}`,
-        },
-      });
-
-      return response.ok;
-    } catch {
+      // Network errors — can't validate, but don't reject the key
       return false;
     }
   }

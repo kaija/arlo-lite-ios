@@ -39,8 +39,6 @@ export interface CompletionServiceOptions {
   modelId: string;
   /** The thinking/reasoning effort level for this request. */
   thinkingLevel: ThinkingLevel;
-  /** Sampling temperature (0.0–2.0). Passed through to the provider adapter. */
-  temperature?: number;
   /** Maximum number of tokens to generate. Passed through to the provider adapter. */
   maxTokens?: number;
 }
@@ -73,7 +71,6 @@ export async function* streamCompletion(
     model: options.modelId,
     thinkingLevel: options.thinkingLevel,
     stream: true,
-    temperature: options.temperature,
     maxTokens: options.maxTokens,
   };
 
@@ -105,7 +102,6 @@ export async function complete(
     model: options.modelId,
     thinkingLevel: options.thinkingLevel,
     stream: false,
-    temperature: options.temperature,
     maxTokens: options.maxTokens,
   };
 

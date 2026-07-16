@@ -7,14 +7,11 @@ export type OpenAIApiMode = 'responses' | 'chat-completions';
 
 /** Per-provider generation settings sent with completion requests. */
 export interface GenerationParams {
-  /** Sampling temperature: 0.0–2.0, default 0.7 */
-  temperature: number;
   /** Maximum tokens to generate, default 4096 */
   maxTokens: number;
 }
 
 const DEFAULT_GENERATION_PARAMS: GenerationParams = {
-  temperature: 0.7,
   maxTokens: 4096,
 };
 

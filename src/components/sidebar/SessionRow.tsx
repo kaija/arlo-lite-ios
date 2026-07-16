@@ -81,7 +81,7 @@ export function SessionRow({
     onDelete();
   }, [onDelete, reset]);
 
-  const activeBackground = isActive ? colors.accent + '1F' : 'transparent'; // 12% opacity
+  // Use opaque backgrounds so the delete button behind is fully hidden
   const titleColor = isActive ? colors.accent : colors.text;
   const titleWeight = isActive ? '600' : '400';
 
@@ -102,8 +102,21 @@ export function SessionRow({
       {/* Swipeable row content */}
       <GestureDetector gesture={panGesture}>
         <Animated.View
-          style={[styles.rowContent, rowAnimatedStyle, { backgroundColor: activeBackground }]}
+          style={[
+            styles.rowContent,
+            rowAnimatedStyle,
+            { backgroundColor: colors.background },
+          ]}
         >
+          {/* Active tint overlay */}
+          {isActive && (
+            <View
+              style={[
+                StyleSheet.absoluteFill,
+                { backgroundColor: colors.accent, opacity: 0.12, borderRadius: 8 },
+              ]}
+            />
+          )}
           <Animated.View style={pressStyle}>
             <Pressable
               onPress={onSelect}

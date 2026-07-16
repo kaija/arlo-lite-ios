@@ -6,7 +6,7 @@
  * and floating action button visibility state.
  */
 
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { FlatList } from 'react-native';
 import type { NativeScrollEvent, NativeSyntheticEvent, LayoutChangeEvent } from 'react-native';
 
@@ -26,6 +26,8 @@ export interface ScrollBehavior {
   onLayout: (event: LayoutChangeEvent) => void;
   /** Scroll to bottom programmatically (for FAB tap) */
   scrollToBottom: () => void;
+  /** Notify that a new message was sent (forces scroll to bottom) */
+  onMessageSent: () => void;
 }
 
 /**
@@ -57,14 +59,18 @@ export function isNearBottom(
  * - Auto-scrolling to bottom when near bottom and new content arrives
  * - Showing/hiding a scroll-to-bottom FAB when scrolled away
  * - Programmatic scroll-to-bottom on FAB press
+ * - Force scroll on message sent
+ *
+ * @param messageCount - The current number of messages, used to trigger scroll on new messages
  */
-export function useScrollBehavior(): ScrollBehavior {
+export function useScrollBehavior(messageCount: number = 0): ScrollBehavior {
   const flatListRef = useRef<FlatList>(null);
   const [showFAB, setShowFAB] = useState(false);
 
   const contentHeightRef = useRef(0);
   const layoutHeightRef = useRef(0);
   const isNearBottomRef = useRef(true);
+  const shouldForceScrollRef = useRef(false);
 
   const onScroll = useCallback(
     (event: NativeSyntheticEvent<NativeScrollEvent>) => {
@@ -81,10 +87,15 @@ export function useScrollBehavior(): ScrollBehavior {
   );
 
   const onContentSizeChange = useCallback((_w: number, h: number) => {
+    const prevHeight = contentHeightRef.current;
     contentHeightRef.current = h;
-    // Auto-scroll only if user was already near bottom
-    if (isNearBottomRef.current && flatListRef.current) {
-      flatListRef.current.scrollToEnd({ animated: true });
+
+    // Auto-scroll if user was near bottom or we're forcing (message just sent)
+    if ((isNearBottomRef.current || shouldForceScrollRef.current) && flatListRef.current && h > prevHeight) {
+      shouldForceScrollRef.current = false;
+      setTimeout(() => {
+        flatListRef.current?.scrollToEnd({ animated: true });
+      }, 50);
     }
   }, []);
 
@@ -97,6 +108,26 @@ export function useScrollBehavior(): ScrollBehavior {
     setShowFAB(false);
   }, []);
 
+  const onMessageSent = useCallback(() => {
+    shouldForceScrollRef.current = true;
+    isNearBottomRef.current = true;
+  }, []);
+
+  // Scroll to bottom when message count increases (new messages arrive)
+  const prevMessageCountRef = useRef(messageCount);
+  useEffect(() => {
+    if (messageCount > prevMessageCountRef.current) {
+      // New message added — scroll to bottom if near bottom or if user just sent
+      if (isNearBottomRef.current || shouldForceScrollRef.current) {
+        setTimeout(() => {
+          flatListRef.current?.scrollToEnd({ animated: true });
+        }, 100);
+        shouldForceScrollRef.current = false;
+      }
+    }
+    prevMessageCountRef.current = messageCount;
+  }, [messageCount]);
+
   return {
     flatListRef,
     showFAB,
@@ -104,5 +135,6 @@ export function useScrollBehavior(): ScrollBehavior {
     onContentSizeChange,
     onLayout,
     scrollToBottom,
+    onMessageSent,
   };
 }

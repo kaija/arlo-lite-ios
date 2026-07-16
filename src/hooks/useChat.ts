@@ -9,7 +9,7 @@
  * - Stop/abort support via AbortController
  */
 
-import { useCallback, useRef } from 'react';
+import { useCallback, useRef, useState } from 'react';
 
 import { useSessionStore } from '@/stores/session-store';
 import { useChatStore } from '@/stores/chat-store';
@@ -106,11 +106,11 @@ export function useChat(): UseChatResult {
   const providers = useProviderStore((s) => s.providers);
   const models = useProviderStore((s) => s.models);
 
-  // Local error state
-  const errorRef = useRef<ChatError | null>(null);
+  // Local error state (reactive so UI re-renders on error)
+  const [error, setError] = useState<ChatError | null>(null);
 
   const clearError = useCallback(() => {
-    errorRef.current = null;
+    setError(null);
   }, []);
 
   /**
@@ -172,10 +172,10 @@ export function useChat(): UseChatResult {
             finalUsage = chunk.usage;
             break;
           case 'error':
-            errorRef.current = {
+            setError({
               message: chunk.content,
               isRetryable: true,
-            };
+            });
             break;
         }
       }
@@ -208,13 +208,13 @@ export function useChat(): UseChatResult {
       }
     } catch (err: unknown) {
       if (err instanceof ProviderError) {
-        errorRef.current = providerErrorToChatError(err);
+        setError(providerErrorToChatError(err));
       } else {
-        const error = err instanceof Error ? err : new Error(String(err));
-        errorRef.current = {
-          message: error.message || 'Streaming failed',
+        const caughtError = err instanceof Error ? err : new Error(String(err));
+        setError({
+          message: caughtError.message || 'Streaming failed',
           isRetryable: true,
-        };
+        });
       }
     } finally {
       abortControllerRef.current = null;
@@ -261,13 +261,13 @@ export function useChat(): UseChatResult {
       });
     } catch (err: unknown) {
       if (err instanceof ProviderError) {
-        errorRef.current = providerErrorToChatError(err);
+        setError(providerErrorToChatError(err));
       } else {
-        const error = err instanceof Error ? err : new Error(String(err));
-        errorRef.current = {
-          message: error.message || 'Request failed',
+        const caughtError = err instanceof Error ? err : new Error(String(err));
+        setError({
+          message: caughtError.message || 'Request failed',
           isRetryable: true,
-        };
+        });
       }
     } finally {
       setStreaming(false);
@@ -282,7 +282,7 @@ export function useChat(): UseChatResult {
       if (!text.trim() && (!attachments || attachments.length === 0)) return;
 
       // Clear previous error
-      errorRef.current = null;
+      setError(null);
       lastMessageRef.current = text;
 
       // Auto-create session if no active session exists
@@ -290,11 +290,11 @@ export function useChat(): UseChatResult {
 
       if (!sessionId) {
         if (!activeProviderId || !activeModelId) {
-          errorRef.current = {
+          setError({
             message: 'No provider configured',
             detail: 'Please configure a provider and model in settings.',
             isRetryable: false,
-          };
+          });
           return;
         }
         sessionId = await useSessionStore.getState().createSession(
@@ -304,7 +304,14 @@ export function useChat(): UseChatResult {
         await useSessionStore.getState().setActiveSession(sessionId);
       }
 
-      if (!activeProviderId || !activeModelId) return;
+      if (!activeProviderId || !activeModelId) {
+        setError({
+          message: 'No model selected',
+          detail: 'Please select a model before sending a message.',
+          isRetryable: false,
+        });
+        return;
+      }
 
       // Find provider config and model config
       const providerConfig = providers.find((p) => p.id === activeProviderId);
@@ -313,11 +320,11 @@ export function useChat(): UseChatResult {
       );
 
       if (!providerConfig || !modelConfig) {
-        errorRef.current = {
+        setError({
           message: 'Provider or model not configured',
           detail: 'Please select a valid provider and model in settings.',
           isRetryable: false,
-        };
+        });
         return;
       }
 
@@ -362,7 +369,6 @@ export function useChat(): UseChatResult {
         providerConfig: providerConfigForService,
         modelId: activeModelId,
         thinkingLevel,
-        temperature: providerConfig.generationParams.temperature,
         maxTokens: providerConfig.generationParams.maxTokens,
       };
 
@@ -402,7 +408,7 @@ export function useChat(): UseChatResult {
       if (currentMessages.length === 0) return;
 
       // Clear previous error
-      errorRef.current = null;
+      setError(null);
 
       // Find provider config and model config
       const providerConfig = providers.find((p) => p.id === activeProviderId);
@@ -411,11 +417,11 @@ export function useChat(): UseChatResult {
       );
 
       if (!providerConfig || !modelConfig) {
-        errorRef.current = {
+        setError({
           message: 'Provider or model not configured',
           detail: 'Please select a valid provider and model in settings.',
           isRetryable: false,
-        };
+        });
         return;
       }
 
@@ -433,7 +439,6 @@ export function useChat(): UseChatResult {
         providerConfig: providerConfigForService,
         modelId: activeModelId,
         thinkingLevel,
-        temperature: providerConfig.generationParams.temperature,
         maxTokens: providerConfig.generationParams.maxTokens,
       };
 
@@ -487,7 +492,7 @@ export function useChat(): UseChatResult {
     isStreaming,
     streamContent,
     thinkingContent,
-    error: errorRef.current,
+    error,
     retry,
     clearError,
   };

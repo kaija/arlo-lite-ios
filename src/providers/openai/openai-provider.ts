@@ -12,6 +12,7 @@
  */
 
 import OpenAI, { APIError } from 'openai';
+import { fetch } from 'expo/fetch';
 import type {
   CompletionRequest,
   CompletionResponse,
@@ -56,6 +57,7 @@ export class OpenAIProvider implements IProvider {
       baseURL: baseUrl,
       maxRetries: 2,
       dangerouslyAllowBrowser: true,
+      fetch,
     });
     this.clientKey = apiKey;
     this.clientBaseUrl = baseUrl;
@@ -195,10 +197,6 @@ export class OpenAIProvider implements IProvider {
       stream: false,
     };
 
-    if (request.temperature !== undefined) {
-      params.temperature = request.temperature;
-    }
-
     if (request.maxTokens !== undefined) {
       params.max_tokens = request.maxTokens;
     }
@@ -220,7 +218,7 @@ export class OpenAIProvider implements IProvider {
     request: CompletionRequest,
     thinkingParams: Record<string, unknown>,
   ): Promise<CompletionResponse> {
-    const input = convertToResponsesInput(request.messages);
+    const { input, instructions } = convertToResponsesInput(request.messages);
 
     const params: Record<string, unknown> = {
       model: request.model,
@@ -228,8 +226,8 @@ export class OpenAIProvider implements IProvider {
       stream: false,
     };
 
-    if (request.temperature !== undefined) {
-      params.temperature = request.temperature;
+    if (instructions) {
+      params.instructions = instructions;
     }
 
     if (request.maxTokens !== undefined) {
@@ -239,6 +237,8 @@ export class OpenAIProvider implements IProvider {
     if (request.thinkingLevel !== 'off' && thinkingParams.reasoning_effort) {
       params.reasoning = { effort: thinkingParams.reasoning_effort };
     }
+
+    console.log('[OpenAI Responses API] Request params:', JSON.stringify(params, null, 2));
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const response = await client.responses.create(params as any);
@@ -265,10 +265,6 @@ export class OpenAIProvider implements IProvider {
       stream: true,
       stream_options: { include_usage: true },
     };
-
-    if (request.temperature !== undefined) {
-      params.temperature = request.temperature;
-    }
 
     if (request.maxTokens !== undefined) {
       params.max_tokens = request.maxTokens;
@@ -339,7 +335,7 @@ export class OpenAIProvider implements IProvider {
     thinkingParams: Record<string, unknown>,
     signal: AbortSignal,
   ): AsyncGenerator<StreamChunk> {
-    const input = convertToResponsesInput(request.messages);
+    const { input, instructions } = convertToResponsesInput(request.messages);
 
     const params: Record<string, unknown> = {
       model: request.model,
@@ -347,8 +343,8 @@ export class OpenAIProvider implements IProvider {
       stream: true,
     };
 
-    if (request.temperature !== undefined) {
-      params.temperature = request.temperature;
+    if (instructions) {
+      params.instructions = instructions;
     }
 
     if (request.maxTokens !== undefined) {
@@ -358,6 +354,8 @@ export class OpenAIProvider implements IProvider {
     if (request.thinkingLevel !== 'off' && thinkingParams.reasoning_effort) {
       params.reasoning = { effort: thinkingParams.reasoning_effort };
     }
+
+    console.log('[OpenAI Responses API Stream] Request params:', JSON.stringify(params, null, 2));
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const stream = await client.responses.create(
@@ -447,25 +445,44 @@ function toChatCompletionMessage(
 
 /**
  * Convert messages to the Responses API input format.
+ *
+ * The Responses API does not accept 'system' role in the input array.
+ * System messages are extracted and returned separately as `instructions`.
+ * Each input item must have role 'user' or 'assistant'.
  */
 function convertToResponsesInput(
   messages: ChatMessage[],
-): Array<{ role: string; content: string | Array<Record<string, unknown>> }> {
-  return messages.map((msg) => {
-    if (typeof msg.content === 'string') {
-      return { role: msg.role, content: msg.content };
+): { input: Array<{ role: string; content: string | Array<Record<string, unknown>> }>; instructions: string | undefined } {
+  const systemMessages: string[] = [];
+  const input: Array<{ role: string; content: string | Array<Record<string, unknown>> }> = [];
+
+  for (const msg of messages) {
+    if (msg.role === 'system') {
+      // Collect system messages for the instructions parameter
+      const text = typeof msg.content === 'string'
+        ? msg.content
+        : msg.content.filter((p) => p.type === 'text').map((p) => (p as { type: 'text'; text: string }).text).join('\n');
+      if (text) systemMessages.push(text);
+      continue;
     }
 
-    // Multimodal content parts in Responses format
-    const parts = (msg.content as ContentPart[]).map((part) => {
-      if (part.type === 'text') {
-        return { type: 'input_text', text: part.text };
-      }
-      return { type: 'input_image', image_url: part.image_url.url };
-    });
+    if (typeof msg.content === 'string') {
+      input.push({ role: msg.role, content: msg.content });
+    } else {
+      // Multimodal content parts in Responses format
+      const parts = (msg.content as ContentPart[]).map((part) => {
+        if (part.type === 'text') {
+          return { type: 'input_text', text: part.text };
+        }
+        return { type: 'input_image', image_url: part.image_url.url };
+      });
+      input.push({ role: msg.role, content: parts });
+    }
+  }
 
-    return { role: msg.role, content: parts };
-  });
+  const instructions = systemMessages.length > 0 ? systemMessages.join('\n\n') : undefined;
+
+  return { input, instructions };
 }
 
 /**
@@ -599,6 +616,15 @@ function classifyOpenAIError(error: unknown): ProviderError {
   if (error instanceof APIError) {
     const status = error.status;
 
+    // Log full error details for debugging
+    console.warn('[OpenAI API Error]', {
+      status,
+      message: error.message,
+      code: (error as Record<string, unknown>).code,
+      type: (error as Record<string, unknown>).type,
+      body: JSON.stringify(error.error, null, 2),
+    });
+
     if (status === 401 || status === 403) {
       return new ProviderError(
         'Authentication failed. Please check your API key.',
@@ -624,9 +650,10 @@ function classifyOpenAIError(error: unknown): ProviderError {
       );
     }
 
-    // Other API errors — classify as server
+    // Other API errors (400, etc.) — include the actual error message for debugging
+    const detail = error.message || `HTTP ${status}`;
     return new ProviderError(
-      `API error (${status || 'unknown'}). Please try again.`,
+      `API error ${status}: ${detail}`,
       'server',
     );
   }

@@ -6,6 +6,7 @@
  */
 
 import Anthropic from '@anthropic-ai/sdk';
+import { fetch } from 'expo/fetch';
 import {
   APIError,
   APIConnectionError,
@@ -79,6 +80,7 @@ export class AnthropicProvider implements IProvider {
       apiKey,
       baseURL: baseUrl,
       defaultHeaders: { 'anthropic-version': ANTHROPIC_VERSION },
+      fetch,
     });
     this.clientKey = apiKey;
     this.clientBaseUrl = baseUrl;
@@ -106,7 +108,6 @@ export class AnthropicProvider implements IProvider {
         stream: false,
         ...(systemMessage ? { system: systemMessage } : {}),
         ...(thinkingParams.thinking ? { thinking: thinkingParams.thinking as any } : {}),
-        ...(request.temperature !== undefined ? { temperature: request.temperature } : {}),
       });
 
       return mapResponse(response);
@@ -141,7 +142,6 @@ export class AnthropicProvider implements IProvider {
           max_tokens: request.maxTokens ?? DEFAULT_MAX_TOKENS,
           ...(systemMessage ? { system: systemMessage } : {}),
           ...(thinkingParams.thinking ? { thinking: thinkingParams.thinking as any } : {}),
-          ...(request.temperature !== undefined ? { temperature: request.temperature } : {}),
         },
         { signal },
       );

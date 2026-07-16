@@ -18,6 +18,7 @@ import {
   Animated,
   Dimensions,
   Easing,
+  FlatList,
   Modal,
   Pressable,
   ScrollView,
@@ -83,10 +84,10 @@ function maskApiKey(key: string): string {
 
 /**
  * Formats a context window size into a human-readable string.
- * e.g. 200000 → "200K tokens"
+ * e.g. 200000 → "200K tokens". Returns null when unknown.
  */
-function formatContextWindow(contextWindow: number | null): string {
-  if (contextWindow == null || contextWindow <= 0) return 'Unknown';
+function formatContextWindow(contextWindow: number | null): string | null {
+  if (contextWindow == null || contextWindow <= 0) return null;
   if (contextWindow >= 1000) {
     const k = Math.round(contextWindow / 1000);
     return `${k}K tokens`;
@@ -109,10 +110,11 @@ function formatPrice(pricePerToken: number | null): string | null {
 interface ModelRowProps {
   model: ModelConfig;
   onDelete: (modelId: string) => void;
+  onEdit: (model: ModelConfig) => void;
   colors: ReturnType<typeof useTheme>['colors'];
 }
 
-function ModelRow({ model, onDelete, colors }: ModelRowProps) {
+function ModelRow({ model, onDelete, onEdit, colors }: ModelRowProps) {
   const contextLabel = formatContextWindow(model.contextWindow);
   const inputPriceLabel = formatPrice(model.inputPrice);
   const outputPriceLabel = formatPrice(model.outputPrice);
@@ -124,6 +126,13 @@ function ModelRow({ model, onDelete, colors }: ModelRowProps) {
     if (outputPriceLabel) parts.push(`Out: ${outputPriceLabel}`);
     return parts.join(' · ');
   }, [inputPriceLabel, outputPriceLabel]);
+
+  const detailsText = useMemo(() => {
+    const parts: string[] = [];
+    if (contextLabel) parts.push(contextLabel);
+    if (pricingText) parts.push(pricingText);
+    return parts.length > 0 ? parts.join(' · ') : null;
+  }, [contextLabel, pricingText]);
 
   const { translateX, panGesture, reset } = useSwipeToDelete();
 
@@ -165,21 +174,30 @@ function ModelRow({ model, onDelete, colors }: ModelRowProps) {
       {/* Swipeable model row */}
       <GestureDetector gesture={panGesture}>
         <Reanimated.View style={[styles.modelRow, rowAnimatedStyle, { backgroundColor: colors.surface }]}>
-          <View style={styles.modelRowContent}>
+          <Pressable
+            style={styles.modelRowContent}
+            onPress={() => onEdit(model)}
+            accessibilityRole="button"
+            accessibilityLabel={`Edit ${model.displayName}`}
+          >
             <Text
               style={[styles.modelName, { color: colors.text }]}
               numberOfLines={1}
             >
               {model.displayName}
             </Text>
-            <Text
-              style={[styles.modelDetails, { color: colors.textTertiary }]}
-              numberOfLines={1}
-            >
-              {contextLabel}
-              {pricingText ? ` · ${pricingText}` : ''}
-            </Text>
-          </View>
+            {detailsText && (
+              <Text
+                style={[styles.modelDetails, { color: colors.textTertiary }]}
+                numberOfLines={1}
+              >
+                {detailsText}
+              </Text>
+            )}
+          </Pressable>
+          <Text style={[styles.modelEditChevron, { color: colors.textTertiary }]}>
+            {'\u203A'}
+          </Text>
         </Reanimated.View>
       </GestureDetector>
     </View>
@@ -243,6 +261,9 @@ export function ProviderDetailScreen({
   // API key state
   const [apiKey, setApiKey] = useState<string | null>(null);
   const [keyRevealed, setKeyRevealed] = useState(false);
+  const [isEditingKey, setIsEditingKey] = useState(false);
+  const [editKeyValue, setEditKeyValue] = useState('');
+  const [isSavingKey, setIsSavingKey] = useState(false);
 
   useEffect(() => {
     if (visible && providerId && !isAddMode) {
@@ -250,9 +271,11 @@ export function ProviderDetailScreen({
         setApiKey(key);
       });
       setKeyRevealed(false);
+      setIsEditingKey(false);
     } else if (visible && isAddMode) {
       setApiKey('');
       setKeyRevealed(false);
+      setIsEditingKey(false);
     }
   }, [visible, providerId, isAddMode]);
 
@@ -321,6 +344,122 @@ export function ProviderDetailScreen({
     [deleteModel]
   );
 
+  // ─── Edit API Key Handlers ─────────────────────────────────────────
+
+  const handleStartEditKey = useCallback(() => {
+    setEditKeyValue(apiKey ?? '');
+    setIsEditingKey(true);
+  }, [apiKey]);
+
+  const handleCancelEditKey = useCallback(() => {
+    setIsEditingKey(false);
+    setEditKeyValue('');
+  }, []);
+
+  const handleSaveKey = useCallback(async () => {
+    if (!providerId || isAddMode || isSavingKey) return;
+    const trimmedKey = editKeyValue.trim();
+    if (!trimmedKey) {
+      Alert.alert('Invalid', 'API key cannot be empty.');
+      return;
+    }
+    setIsSavingKey(true);
+    try {
+      await storeApiKey(providerId, trimmedKey);
+      setApiKey(trimmedKey);
+      setIsEditingKey(false);
+    } catch (error) {
+      Alert.alert(
+        'Error',
+        error instanceof Error ? error.message : 'Failed to save API key.',
+      );
+    } finally {
+      setIsSavingKey(false);
+    }
+  }, [providerId, isAddMode, isSavingKey, editKeyValue]);
+
+  // ─── Delete Provider Handler ───────────────────────────────────────
+
+  const deleteProvider = useProviderStore((s) => s.deleteProvider);
+
+  const handleDeleteProvider = useCallback(() => {
+    if (!provider) return;
+    Alert.alert(
+      'Delete Provider',
+      `Remove "${provider.name}" and all its models? This cannot be undone.`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await deleteProvider(provider.id);
+              onClose();
+            } catch (error) {
+              Alert.alert(
+                'Error',
+                error instanceof Error ? error.message : 'Failed to delete provider.',
+              );
+            }
+          },
+        },
+      ]
+    );
+  }, [provider, deleteProvider, onClose]);
+
+  // ─── Edit Model Modal State ────────────────────────────────────────
+
+  const [isEditModelModalVisible, setIsEditModelModalVisible] = useState(false);
+  const [editingModel, setEditingModel] = useState<ModelConfig | null>(null);
+  const [editModelId, setEditModelId] = useState('');
+  const [editModelDisplayName, setEditModelDisplayName] = useState('');
+  const [isEditModelSaving, setIsEditModelSaving] = useState(false);
+
+  const handleOpenEditModel = useCallback((model: ModelConfig) => {
+    setEditingModel(model);
+    setEditModelId(model.modelId);
+    setEditModelDisplayName(model.displayName);
+    setIsEditModelModalVisible(true);
+  }, []);
+
+  const handleCloseEditModel = useCallback(() => {
+    setIsEditModelModalVisible(false);
+    setEditingModel(null);
+  }, []);
+
+  const handleSaveEditModel = useCallback(async () => {
+    if (!editingModel || isEditModelSaving) return;
+    const trimmedId = editModelId.trim();
+    if (!trimmedId) {
+      Alert.alert('Invalid', 'Model ID cannot be empty.');
+      return;
+    }
+
+    setIsEditModelSaving(true);
+    try {
+      const { db } = useProviderStore.getState();
+      if (!db) throw new Error('Database not initialized.');
+      await db.runAsync(
+        `UPDATE models SET model_id = ?, display_name = ? WHERE id = ?`,
+        trimmedId,
+        editModelDisplayName.trim() || trimmedId,
+        editingModel.id,
+      );
+      // Refresh models in store
+      await useProviderStore.getState().loadModels();
+      setIsEditModelModalVisible(false);
+      setEditingModel(null);
+    } catch (error) {
+      Alert.alert(
+        'Error',
+        error instanceof Error ? error.message : 'Failed to update model.',
+      );
+    } finally {
+      setIsEditModelSaving(false);
+    }
+  }, [editingModel, isEditModelSaving, editModelId, editModelDisplayName]);
+
   // ─── Add Model Modal State ─────────────────────────────────────────
 
   const [isModelModalVisible, setIsModelModalVisible] = useState(false);
@@ -329,12 +468,14 @@ export function ProviderDetailScreen({
   const [isModelSaving, setIsModelSaving] = useState(false);
   const [availableModels, setAvailableModels] = useState<string[]>([]);
   const [isLoadingModels, setIsLoadingModels] = useState(false);
+  const [modelSearchQuery, setModelSearchQuery] = useState('');
   const addModel = useProviderStore((s) => s.addModel);
 
   const handleOpenModelModal = useCallback(() => {
     setNewModelId('');
     setNewModelDisplayName('');
     setAvailableModels([]);
+    setModelSearchQuery('');
     setIsModelModalVisible(true);
 
     // Fetch available models from provider API
@@ -376,6 +517,12 @@ export function ProviderDetailScreen({
     setNewModelId(modelId);
     setNewModelDisplayName(modelId);
   }, []);
+
+  const filteredModels = useMemo(() => {
+    if (!modelSearchQuery.trim()) return availableModels;
+    const query = modelSearchQuery.toLowerCase();
+    return availableModels.filter((id) => id.toLowerCase().includes(query));
+  }, [availableModels, modelSearchQuery]);
 
   const handleSaveModel = useCallback(async () => {
     const trimmedId = newModelId.trim();
@@ -782,38 +929,104 @@ export function ProviderDetailScreen({
                   { backgroundColor: colors.surface, borderRadius: borderRadii.groupedList },
                 ]}
               >
-                <View style={styles.apiKeyRow}>
-                  <Text
-                    style={[styles.apiKeyText, { color: colors.text }]}
-                    numberOfLines={1}
-                    accessibilityLabel={
-                      keyRevealed ? 'API key revealed' : 'API key masked'
-                    }
-                  >
-                    {apiKey
-                      ? keyRevealed
-                        ? apiKey
-                        : maskApiKey(apiKey)
-                      : '••••••••'}
-                  </Text>
-                  <Pressable
-                    onPressIn={() => setKeyRevealed(true)}
-                    onPressOut={() => setKeyRevealed(false)}
-                    style={styles.eyeToggle}
-                    accessibilityRole="button"
-                    accessibilityLabel={
-                      keyRevealed ? 'Hide API key' : 'Reveal API key'
-                    }
-                    hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                  >
-                    <Text style={[styles.eyeIcon, { color: colors.textTertiary }]}>
-                      {keyRevealed ? '👁' : '👁‍🗨'}
+                {isEditingKey ? (
+                  /* Editing API key */
+                  <>
+                    <TextInput
+                      style={[
+                        styles.configInput,
+                        {
+                          color: colors.text,
+                          backgroundColor: colors.inputBackground,
+                          borderColor: colors.border,
+                        },
+                      ]}
+                      value={editKeyValue}
+                      onChangeText={setEditKeyValue}
+                      placeholder="Enter new API key"
+                      placeholderTextColor={colors.textTertiary}
+                      accessibilityLabel="Edit API key"
+                      secureTextEntry={false}
+                      autoCapitalize="none"
+                      autoCorrect={false}
+                      autoFocus
+                    />
+                    <View style={styles.editKeyActions}>
+                      <Pressable
+                        style={[styles.editKeyButton, { backgroundColor: colors.surfaceSecondary }]}
+                        onPress={handleCancelEditKey}
+                        accessibilityRole="button"
+                        accessibilityLabel="Cancel editing API key"
+                      >
+                        <Text style={[styles.editKeyButtonText, { color: colors.text }]}>
+                          Cancel
+                        </Text>
+                      </Pressable>
+                      <Pressable
+                        style={[
+                          styles.editKeyButton,
+                          { backgroundColor: colors.accent },
+                          isSavingKey && styles.saveButtonDisabled,
+                        ]}
+                        onPress={handleSaveKey}
+                        disabled={isSavingKey}
+                        accessibilityRole="button"
+                        accessibilityLabel="Save API key"
+                      >
+                        <Text style={[styles.editKeyButtonText, { color: colors.accentText }]}>
+                          {isSavingKey ? 'Saving…' : 'Save'}
+                        </Text>
+                      </Pressable>
+                    </View>
+                  </>
+                ) : (
+                  /* Display API key (read-only with reveal + edit) */
+                  <>
+                    <View style={styles.apiKeyRow}>
+                      <Text
+                        style={[styles.apiKeyText, { color: colors.text }]}
+                        numberOfLines={1}
+                        accessibilityLabel={
+                          keyRevealed ? 'API key revealed' : 'API key masked'
+                        }
+                      >
+                        {apiKey
+                          ? keyRevealed
+                            ? apiKey
+                            : maskApiKey(apiKey)
+                          : '••••••••'}
+                      </Text>
+                      <Pressable
+                        onPressIn={() => setKeyRevealed(true)}
+                        onPressOut={() => setKeyRevealed(false)}
+                        style={styles.eyeToggle}
+                        accessibilityRole="button"
+                        accessibilityLabel={
+                          keyRevealed ? 'Hide API key' : 'Reveal API key'
+                        }
+                        hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                      >
+                        <Text style={[styles.eyeIcon, { color: colors.textTertiary }]}>
+                          {keyRevealed ? '👁' : '👁‍🗨'}
+                        </Text>
+                      </Pressable>
+                      <Pressable
+                        onPress={handleStartEditKey}
+                        style={styles.editKeyInlineButton}
+                        accessibilityRole="button"
+                        accessibilityLabel="Edit API key"
+                        hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                      >
+                        <Text style={[styles.editKeyInlineText, { color: colors.accent }]}>
+                          Edit
+                        </Text>
+                      </Pressable>
+                    </View>
+                    <Text style={[styles.keychainNote, { color: colors.textTertiary }]}>
+                      Stored in the iOS Keychain. Never synced to iCloud.
                     </Text>
-                  </Pressable>
-                </View>
-                <Text style={[styles.keychainNote, { color: colors.textTertiary }]}>
-                  Stored in the iOS Keychain. Never synced to iCloud.
-                </Text>
+                  </>
+                )}
               </View>
             </View>
 
@@ -987,6 +1200,7 @@ export function ProviderDetailScreen({
                         <ModelRow
                           model={model}
                           onDelete={handleDeleteModel}
+                          onEdit={handleOpenEditModel}
                           colors={colors}
                         />
                       </React.Fragment>
@@ -1007,6 +1221,20 @@ export function ProviderDetailScreen({
                   </>
                 )}
               </View>
+            </View>
+
+            {/* Delete Provider */}
+            <View style={styles.section}>
+              <Pressable
+                style={[styles.deleteProviderButton]}
+                onPress={handleDeleteProvider}
+                accessibilityRole="button"
+                accessibilityLabel="Delete provider"
+              >
+                <Text style={styles.deleteProviderText}>
+                  Delete Provider
+                </Text>
+              </Pressable>
             </View>
           </>
         )}
@@ -1053,21 +1281,53 @@ export function ProviderDetailScreen({
             {!isLoadingModels && availableModels.length > 0 && !newModelId.trim() && (
               <View style={styles.modelListSection}>
                 <Text style={[styles.modelListHeader, { color: colors.textTertiary }]}>
-                  AVAILABLE MODELS
+                  AVAILABLE MODELS ({filteredModels.length})
                 </Text>
-                {availableModels.map((modelId) => (
-                  <Pressable
-                    key={modelId}
-                    style={[styles.modelListItem, { backgroundColor: colors.surface }]}
-                    onPress={() => handleSelectModel(modelId)}
-                    accessibilityRole="button"
-                    accessibilityLabel={modelId}
-                  >
-                    <Text style={[styles.modelListItemText, { color: colors.text }]}>
-                      {modelId}
-                    </Text>
-                  </Pressable>
-                ))}
+                <TextInput
+                  style={[
+                    styles.modelSearchInput,
+                    {
+                      color: colors.text,
+                      backgroundColor: colors.inputBackground,
+                      borderColor: colors.border,
+                    },
+                  ]}
+                  value={modelSearchQuery}
+                  onChangeText={setModelSearchQuery}
+                  placeholder="Filter models…"
+                  placeholderTextColor={colors.textTertiary}
+                  accessibilityLabel="Filter models"
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  clearButtonMode="while-editing"
+                />
+                <View style={[styles.modelListContainer, { borderColor: colors.border }]}>
+                  <FlatList
+                    data={filteredModels}
+                    keyExtractor={(item) => item}
+                    renderItem={({ item: modelId }) => (
+                      <Pressable
+                        style={[styles.modelListItem, { backgroundColor: colors.surface }]}
+                        onPress={() => handleSelectModel(modelId)}
+                        accessibilityRole="button"
+                        accessibilityLabel={modelId}
+                      >
+                        <Text style={[styles.modelListItemText, { color: colors.text }]}>
+                          {modelId}
+                        </Text>
+                      </Pressable>
+                    )}
+                    keyboardShouldPersistTaps="handled"
+                    showsVerticalScrollIndicator={true}
+                    ListEmptyComponent={
+                      <View style={styles.modelListEmpty}>
+                        <Text style={[styles.modelListEmptyText, { color: colors.textTertiary }]}>
+                          No models match "{modelSearchQuery}"
+                        </Text>
+                      </View>
+                    }
+                  />
+                </View>
               </View>
             )}
 
@@ -1133,6 +1393,100 @@ export function ProviderDetailScreen({
             >
               <Text style={[styles.modelSaveButtonText, { color: colors.accentText }]}>
                 {isModelSaving ? 'Saving…' : 'Add Model'}
+              </Text>
+            </Pressable>
+          </ScrollView>
+        </View>
+      </Modal>
+
+      {/* Edit Model Modal */}
+      <Modal
+        visible={isEditModelModalVisible}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onRequestClose={handleCloseEditModel}
+      >
+        <View style={[styles.modalContainer, { backgroundColor: colors.background }]}>
+          {/* Modal Header */}
+          <View style={[styles.modalHeader, { borderBottomColor: colors.border }]}>
+            <Pressable
+              onPress={handleCloseEditModel}
+              accessibilityRole="button"
+              accessibilityLabel="Cancel"
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            >
+              <Text style={[styles.modalCancelText, { color: colors.accent }]}>Cancel</Text>
+            </Pressable>
+            <Text style={[styles.modalTitle, { color: colors.text }]}>Edit Model</Text>
+            <View style={styles.modalHeaderSpacer} />
+          </View>
+
+          <ScrollView
+            style={styles.modalScroll}
+            contentContainerStyle={styles.modalContent}
+            keyboardShouldPersistTaps="handled"
+          >
+            <View style={styles.modelFormSection}>
+              <Text style={[styles.modelFormLabel, { color: colors.textSecondary }]}>
+                Model ID
+              </Text>
+              <TextInput
+                style={[
+                  styles.modelFormInput,
+                  {
+                    color: colors.text,
+                    backgroundColor: colors.inputBackground,
+                    borderColor: colors.border,
+                  },
+                ]}
+                value={editModelId}
+                onChangeText={setEditModelId}
+                placeholder="e.g. gpt-4o"
+                placeholderTextColor={colors.textTertiary}
+                accessibilityLabel="Model ID"
+                autoCapitalize="none"
+                autoCorrect={false}
+              />
+            </View>
+
+            <View style={styles.modelFormSection}>
+              <Text style={[styles.modelFormLabel, { color: colors.textSecondary }]}>
+                Display Name
+              </Text>
+              <TextInput
+                style={[
+                  styles.modelFormInput,
+                  {
+                    color: colors.text,
+                    backgroundColor: colors.inputBackground,
+                    borderColor: colors.border,
+                  },
+                ]}
+                value={editModelDisplayName}
+                onChangeText={setEditModelDisplayName}
+                placeholder={editModelId || 'Same as Model ID'}
+                placeholderTextColor={colors.textTertiary}
+                accessibilityLabel="Display name"
+                autoCapitalize="words"
+                autoCorrect={false}
+              />
+            </View>
+
+            {/* Save Button */}
+            <Pressable
+              style={[
+                styles.modelSaveButton,
+                { backgroundColor: colors.accent },
+                (!editModelId.trim() || isEditModelSaving) && styles.saveButtonDisabled,
+              ]}
+              onPress={handleSaveEditModel}
+              disabled={!editModelId.trim() || isEditModelSaving}
+              accessibilityRole="button"
+              accessibilityLabel="Save model changes"
+              accessibilityState={{ disabled: !editModelId.trim() || isEditModelSaving }}
+            >
+              <Text style={[styles.modelSaveButtonText, { color: colors.accentText }]}>
+                {isEditModelSaving ? 'Saving…' : 'Save Changes'}
               </Text>
             </Pressable>
           </ScrollView>
@@ -1379,6 +1733,19 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     marginLeft: 4,
   },
+  modelSearchInput: {
+    fontSize: 15,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    borderRadius: 8,
+    borderWidth: StyleSheet.hairlineWidth,
+    marginBottom: 8,
+  },
+  modelListContainer: {
+    maxHeight: 300,
+    borderRadius: 8,
+    overflow: 'hidden',
+  },
   modelListItem: {
     paddingVertical: 12,
     paddingHorizontal: 16,
@@ -1388,6 +1755,13 @@ const styles = StyleSheet.create({
   modelListItemText: {
     fontSize: 14,
     fontWeight: '400',
+  },
+  modelListEmpty: {
+    paddingVertical: 20,
+    alignItems: 'center',
+  },
+  modelListEmptyText: {
+    fontSize: 14,
   },
   modelFormSection: {
     marginBottom: 16,
@@ -1413,6 +1787,53 @@ const styles = StyleSheet.create({
   modelSaveButtonText: {
     fontSize: 16,
     fontWeight: '600',
+  },
+  editKeyActions: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    gap: 8,
+    marginTop: 12,
+  },
+  editKeyButton: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minWidth: 72,
+  },
+  editKeyButtonText: {
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  editKeyInlineButton: {
+    paddingHorizontal: 8,
+    minHeight: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  editKeyInlineText: {
+    fontSize: 15,
+    fontWeight: '500',
+  },
+  deleteProviderButton: {
+    paddingVertical: 14,
+    borderRadius: 10,
+    alignItems: 'center',
+    backgroundColor: 'transparent',
+  },
+  deleteProviderText: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#FF3B30',
+  },
+  modelEditChevron: {
+    fontSize: 20,
+    fontWeight: '300',
+    position: 'absolute',
+    right: 16,
+    top: '50%',
+    marginTop: -10,
   },
 });
 

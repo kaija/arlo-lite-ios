@@ -14,7 +14,7 @@
  * Requirements: 7.1, 7.2, 7.3, 7.4, 7.5, 14.1, 14.4
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Alert, FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
 import Animated, { useAnimatedStyle, interpolate, useAnimatedReaction, runOnJS } from 'react-native-reanimated';
@@ -123,14 +123,40 @@ export function ChatShell({ children }: ChatShellProps) {
 
   // ─── Provider Store ─────────────────────────────────────────────────
 
+  const providers = useProviderStore((state) => state.providers);
   const models = useProviderStore((state) => state.models);
   const activeModel = models.find(
     (m) => m.providerId === activeProviderId && m.modelId === activeModelId,
   );
 
+  // If no active model but models exist, auto-select the first one
+  useEffect(() => {
+    if (!activeModel && providers.length > 0 && models.length > 0) {
+      // Try to restore from active session first
+      if (activeSessionId) {
+        const session = sessions.find((s) => s.id === activeSessionId);
+        if (session?.providerId && session?.modelId) {
+          const sessionModel = models.find(
+            (m) => m.providerId === session.providerId && m.modelId === session.modelId
+          );
+          if (sessionModel) {
+            switchModel(session.providerId, session.modelId);
+            return;
+          }
+        }
+      }
+      // Fall back to first available model
+      const firstProvider = providers[0];
+      const firstModel = models.find((m) => m.providerId === firstProvider.id);
+      if (firstModel) {
+        switchModel(firstProvider.id, firstModel.modelId);
+      }
+    }
+  }, [activeModel, activeSessionId, sessions, providers, models, switchModel]);
+
   // ─── Chat Hook ──────────────────────────────────────────────────────
 
-  const { sendMessage, stopGeneration, error, retry, clearError } = useChat();
+  const { sendMessage: rawSendMessage, stopGeneration, error, retry, clearError } = useChat();
   const { copyMessage, regenerate, editMessage } = useMessageActions();
 
   // ─── FlatList Ref ───────────────────────────────────────────────────
@@ -142,7 +168,17 @@ export function ChatShell({ children }: ChatShellProps) {
     onContentSizeChange,
     onLayout,
     scrollToBottom,
-  } = useScrollBehavior();
+    onMessageSent,
+  } = useScrollBehavior(messages.length);
+
+  /** Wraps sendMessage to trigger auto-scroll on send. */
+  const sendMessage = useCallback(
+    async (text: string, attachments?: any) => {
+      onMessageSent();
+      await rawSendMessage(text, attachments);
+    },
+    [rawSendMessage, onMessageSent]
+  );
 
   // ─── Sidebar Sync ──────────────────────────────────────────────────
 
@@ -183,7 +219,27 @@ export function ChatShell({ children }: ChatShellProps) {
       const session = sessions.find((s) => s.id === id);
       if (session) {
         if (session.providerId && session.modelId) {
-          switchModel(session.providerId, session.modelId);
+          // Verify the model still exists in the store
+          const modelExists = models.find(
+            (m) => m.providerId === session.providerId && m.modelId === session.modelId
+          );
+          if (modelExists) {
+            switchModel(session.providerId, session.modelId);
+          } else if (providers.length > 0 && models.length > 0) {
+            // Model was deleted — fall back to first available
+            const firstProvider = providers[0];
+            const firstModel = models.find((m) => m.providerId === firstProvider.id);
+            if (firstModel) {
+              switchModel(firstProvider.id, firstModel.modelId);
+            }
+          }
+        } else if (providers.length > 0 && models.length > 0) {
+          // Session has no model stored — use first available
+          const firstProvider = providers[0];
+          const firstModel = models.find((m) => m.providerId === firstProvider.id);
+          if (firstModel) {
+            switchModel(firstProvider.id, firstModel.modelId);
+          }
         }
         if (session.thinkingLevel) {
           setThinkingLevel(session.thinkingLevel as typeof thinkingLevel);
@@ -194,7 +250,7 @@ export function ChatShell({ children }: ChatShellProps) {
 
       closeSidebar();
     },
-    [setActiveSession, sessions, switchModel, setThinkingLevel, thinkingLevel, closeSidebar],
+    [setActiveSession, sessions, providers, models, switchModel, setThinkingLevel, thinkingLevel, closeSidebar],
   );
 
   const handleSessionDelete = useCallback(
@@ -211,12 +267,29 @@ export function ChatShell({ children }: ChatShellProps) {
     [openRename],
   );
 
-  const handleNewChat = useCallback(() => {
-    if (activeProviderId && activeModelId) {
-      createSession(activeProviderId, activeModelId);
+  const handleNewChat = useCallback(async () => {
+    let providerId = activeProviderId;
+    let modelId = activeModelId;
+
+    // If no model active, pick the first available
+    if (!providerId || !modelId) {
+      if (providers.length > 0 && models.length > 0) {
+        const firstProvider = providers[0];
+        const firstModel = models.find((m) => m.providerId === firstProvider.id);
+        if (firstModel) {
+          providerId = firstProvider.id;
+          modelId = firstModel.modelId;
+        }
+      }
+    }
+
+    if (providerId && modelId) {
+      const newSessionId = await createSession(providerId, modelId);
+      await setActiveSession(newSessionId);
+      switchModel(providerId, modelId);
     }
     closeSidebar();
-  }, [activeProviderId, activeModelId, createSession, closeSidebar]);
+  }, [activeProviderId, activeModelId, providers, models, createSession, setActiveSession, switchModel, closeSidebar]);
 
   // ─── Delete Message Handler ──────────────────────────────────────────
 
