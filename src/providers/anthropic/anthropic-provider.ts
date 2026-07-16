@@ -1,13 +1,25 @@
 /**
- * Anthropic provider adapter — implements IProvider for the Anthropic Messages API.
+ * Anthropic provider adapter — implements IProvider using the official @anthropic-ai/sdk.
  *
- * Key differences from OpenAI:
- * - API key sent via `x-api-key` header (not Bearer token)
- * - System message is a top-level parameter, not in the messages array
- * - Thinking/reasoning uses a `thinking` block with `budget_tokens`
- * - SSE format uses event types (content_block_delta, message_delta, message_stop)
- * - `anthropic-version` header required on all requests
+ * The SDK handles authentication, request construction, streaming iteration, and retries.
+ * This adapter maps between the app's IProvider interface and the SDK's typed API.
  */
+
+import Anthropic from '@anthropic-ai/sdk';
+import {
+  APIError,
+  APIConnectionError,
+  APIConnectionTimeoutError,
+  APIUserAbortError,
+  AuthenticationError,
+  PermissionDeniedError,
+  RateLimitError,
+} from '@anthropic-ai/sdk';
+import type {
+  MessageParam,
+  ContentBlockParam,
+  RawMessageStreamEvent,
+} from '@anthropic-ai/sdk/resources/messages/messages';
 
 import type {
   IProvider,
@@ -18,8 +30,8 @@ import type {
   StreamChunk,
   TokenUsage,
   ChatMessage,
-  ThinkingLevel,
 } from '../types';
+import { ProviderError } from '../errors';
 import { mapThinkingLevelAnthropic } from '../../domain/thinking-mapper';
 
 /** Anthropic API version header value. */
@@ -30,7 +42,7 @@ const DEFAULT_MAX_TOKENS = 4096;
 
 /**
  * Hardcoded list of known Anthropic models.
- * Anthropic does not provide a standard model listing endpoint.
+ * Used as fallback when the models endpoint is unavailable.
  */
 const KNOWN_ANTHROPIC_MODELS: string[] = [
   'claude-sonnet-4-20250514',
@@ -44,241 +56,192 @@ const KNOWN_ANTHROPIC_MODELS: string[] = [
 ];
 
 /**
- * Anthropic provider adapter implementing the IProvider interface.
+ * Anthropic provider adapter implementing the IProvider interface via the official SDK.
  */
 export class AnthropicProvider implements IProvider {
   readonly type: ProviderType = 'anthropic';
 
+  /** Cached SDK client instance. */
+  private client: Anthropic | null = null;
+  /** API key used to create the cached client. */
+  private clientKey: string = '';
+  /** Base URL used to create the cached client. */
+  private clientBaseUrl: string = '';
+
   /**
-   * Build the HTTP request for an Anthropic Messages API completion.
-   *
-   * - URL: `{baseUrl}/v1/messages`
-   * - Headers: x-api-key, content-type, anthropic-version
-   * - Body: system as top-level param, messages array without system messages,
-   *   thinking block if applicable
+   * Get or create an SDK client, reusing cached instance when (apiKey, baseUrl) match.
    */
-  buildRequest(
+  private getClient(apiKey: string, baseUrl: string): Anthropic {
+    if (this.client && this.clientKey === apiKey && this.clientBaseUrl === baseUrl) {
+      return this.client;
+    }
+    this.client = new Anthropic({
+      apiKey,
+      baseURL: baseUrl,
+      defaultHeaders: { 'anthropic-version': ANTHROPIC_VERSION },
+    });
+    this.clientKey = apiKey;
+    this.clientBaseUrl = baseUrl;
+    return this.client;
+  }
+
+  /**
+   * Execute a non-streaming completion request via the Anthropic SDK.
+   */
+  async complete(
     config: ProviderConfig,
     request: CompletionRequest,
-  ): { url: string; headers: Record<string, string>; body: string } {
-    const url = `${config.baseUrl}/v1/messages`;
-
-    const headers: Record<string, string> = {
-      'content-type': 'application/json',
-      'anthropic-version': ANTHROPIC_VERSION,
-    };
-
-    // Extract system message from messages array
+    apiKey: string,
+  ): Promise<CompletionResponse> {
+    const client = this.getClient(apiKey, config.baseUrl);
     const systemMessage = extractSystemMessage(request.messages);
-    const nonSystemMessages = request.messages
-      .filter((m) => m.role !== 'system')
-      .map(formatMessage);
-
-    // Build body
-    const body: Record<string, unknown> = {
-      model: request.model,
-      messages: nonSystemMessages,
-      max_tokens: request.maxTokens ?? DEFAULT_MAX_TOKENS,
-      stream: request.stream,
-    };
-
-    // Add system message as top-level param if present
-    if (systemMessage) {
-      body.system = systemMessage;
-    }
-
-    // Add thinking configuration based on thinking level
-    const thinkingParams = this.mapThinkingLevel(request.thinkingLevel);
-    if (thinkingParams.thinking) {
-      body.thinking = thinkingParams.thinking;
-    }
-
-    return { url, headers, body: JSON.stringify(body) };
-  }
-
-  /**
-   * Parse a non-streaming Anthropic Messages API response.
-   *
-   * Response shape:
-   * {
-   *   content: [{ type: 'text', text: '...' }, { type: 'thinking', thinking: '...' }],
-   *   usage: { input_tokens, output_tokens },
-   *   stop_reason: 'end_turn' | 'max_tokens' | ...
-   * }
-   */
-  parseResponse(raw: unknown): CompletionResponse {
-    const response = raw as AnthropicResponse;
-
-    let content = '';
-    let thinkingContent: string | undefined;
-
-    if (response.content && Array.isArray(response.content)) {
-      for (const block of response.content) {
-        if (block.type === 'text') {
-          content += block.text;
-        } else if (block.type === 'thinking') {
-          thinkingContent = block.thinking;
-        }
-      }
-    }
-
-    const usage: TokenUsage = {
-      promptTokens: response.usage?.input_tokens ?? 0,
-      completionTokens: response.usage?.output_tokens ?? 0,
-      totalTokens:
-        (response.usage?.input_tokens ?? 0) +
-        (response.usage?.output_tokens ?? 0),
-      cachedTokens: response.usage?.cache_read_input_tokens,
-    };
-
-    return {
-      content,
-      thinkingContent,
-      usage,
-      finishReason: response.stop_reason ?? 'unknown',
-    };
-  }
-
-  /**
-   * Parse a single SSE line from an Anthropic stream.
-   *
-   * Anthropic SSE format:
-   * - `event: content_block_delta` with `delta.type === 'text_delta'` → text chunk
-   * - `event: content_block_delta` with `delta.type === 'thinking_delta'` → thinking chunk
-   * - `event: message_delta` → may contain usage/stop_reason
-   * - `event: message_stop` → done
-   *
-   * Lines come as: `event: {type}\ndata: {...}`
-   * This parser handles `data:` lines.
-   */
-  parseStreamChunk(line: string): StreamChunk | null {
-    // Skip empty lines, comments, and event lines
-    if (!line || line.startsWith(':') || line.startsWith('event:')) {
-      return null;
-    }
-
-    // Handle data lines
-    if (!line.startsWith('data:')) {
-      return null;
-    }
-
-    const jsonStr = line.slice(5).trim();
-    if (!jsonStr || jsonStr === '[DONE]') {
-      return { type: 'done', content: '' };
-    }
+    const messages = formatMessages(request.messages);
+    const thinkingParams = mapThinkingLevelAnthropic(request.thinkingLevel);
 
     try {
-      const data = JSON.parse(jsonStr) as AnthropicStreamEvent;
+      const response = await client.messages.create({
+        model: request.model,
+        messages,
+        max_tokens: request.maxTokens ?? DEFAULT_MAX_TOKENS,
+        stream: false,
+        ...(systemMessage ? { system: systemMessage } : {}),
+        ...(thinkingParams.thinking ? { thinking: thinkingParams.thinking as any } : {}),
+      });
 
-      // content_block_delta events
-      if (data.type === 'content_block_delta') {
-        if (data.delta?.type === 'text_delta') {
-          return { type: 'text', content: data.delta.text ?? '' };
-        }
-        if (data.delta?.type === 'thinking_delta') {
-          return { type: 'thinking', content: data.delta.thinking ?? '' };
-        }
-        return null;
-      }
-
-      // message_delta — may contain usage info
-      if (data.type === 'message_delta') {
-        const usage: TokenUsage | undefined = data.usage
-          ? {
-              promptTokens: data.usage.input_tokens ?? 0,
-              completionTokens: data.usage.output_tokens ?? 0,
-              totalTokens:
-                (data.usage.input_tokens ?? 0) +
-                (data.usage.output_tokens ?? 0),
-            }
-          : undefined;
-
-        return { type: 'done', content: '', usage };
-      }
-
-      // message_stop — stream complete
-      if (data.type === 'message_stop') {
-        return { type: 'done', content: '' };
-      }
-
-      // message_start — contains initial usage info
-      if (data.type === 'message_start') {
-        const msg = data.message;
-        if (msg?.usage) {
-          const usage: TokenUsage = {
-            promptTokens: msg.usage.input_tokens ?? 0,
-            completionTokens: msg.usage.output_tokens ?? 0,
-            totalTokens:
-              (msg.usage.input_tokens ?? 0) +
-              (msg.usage.output_tokens ?? 0),
-          };
-          return { type: 'done', content: '', usage };
-        }
-        return null;
-      }
-
-      // content_block_start, ping, etc. — skip
-      return null;
-    } catch {
-      return { type: 'error', content: `Failed to parse stream data: ${jsonStr}` };
+      return mapResponse(response);
+    } catch (error) {
+      throw classifyError(error);
     }
   }
 
   /**
-   * Map abstract ThinkingLevel to Anthropic-specific parameters.
-   * Delegates to the thinking-mapper domain function.
+   * Execute a streaming completion request via the Anthropic SDK.
+   * Returns an AsyncIterable of StreamChunks mapped from SDK stream events.
    */
-  mapThinkingLevel(level: ThinkingLevel): Record<string, unknown> {
-    return mapThinkingLevelAnthropic(level);
+  async *streamCompletion(
+    config: ProviderConfig,
+    request: CompletionRequest,
+    apiKey: string,
+    signal: AbortSignal,
+  ): AsyncIterable<StreamChunk> {
+    const client = this.getClient(apiKey, config.baseUrl);
+    const systemMessage = extractSystemMessage(request.messages);
+    const messages = formatMessages(request.messages);
+    const thinkingParams = mapThinkingLevelAnthropic(request.thinkingLevel);
+
+    let inputTokens = 0;
+    let outputTokens = 0;
+
+    try {
+      const stream = client.messages.stream(
+        {
+          model: request.model,
+          messages,
+          max_tokens: request.maxTokens ?? DEFAULT_MAX_TOKENS,
+          ...(systemMessage ? { system: systemMessage } : {}),
+          ...(thinkingParams.thinking ? { thinking: thinkingParams.thinking as any } : {}),
+        },
+        { signal },
+      );
+
+      for await (const event of stream) {
+        if (signal.aborted) break;
+
+        const chunk = mapStreamEvent(event);
+        if (chunk) {
+          yield chunk;
+        }
+
+        // Accumulate usage from message events
+        if (event.type === 'message_start') {
+          inputTokens = event.message.usage?.input_tokens ?? 0;
+          outputTokens = event.message.usage?.output_tokens ?? 0;
+        }
+        if (event.type === 'message_delta') {
+          outputTokens = event.usage?.output_tokens ?? outputTokens;
+        }
+      }
+
+      // Final done chunk with accumulated usage
+      yield {
+        type: 'done',
+        content: '',
+        usage: {
+          promptTokens: inputTokens,
+          completionTokens: outputTokens,
+          totalTokens: inputTokens + outputTokens,
+        },
+      };
+    } catch (error) {
+      if (signal.aborted || error instanceof APIUserAbortError) {
+        yield { type: 'done', content: '' };
+        return;
+      }
+      const classified = classifyError(error);
+      const retryInfo = classified.retryAfterSeconds != null
+        ? ` (retry after ${classified.retryAfterSeconds}s)`
+        : classified.category === 'rate_limit'
+          ? ' (retry after unknown)'
+          : '';
+      yield { type: 'error', content: `${classified.category}: ${classified.message}${retryInfo}` };
+      yield { type: 'done', content: '' };
+    }
   }
 
   /**
    * List available models from Anthropic.
-   * Anthropic doesn't expose a standard model listing endpoint,
-   * so we return a hardcoded list of known models.
+   * Attempts the SDK models endpoint, falls back to curated list on non-auth failures.
    */
   async listModels(
-    _config: ProviderConfig,
-    _apiKey: string,
+    config: ProviderConfig,
+    apiKey: string,
   ): Promise<string[]> {
-    return KNOWN_ANTHROPIC_MODELS;
+    const client = this.getClient(apiKey, config.baseUrl);
+
+    try {
+      const page = await client.models.list({ limit: 100 });
+      const modelIds = page.data.map((m) => m.id);
+      if (modelIds.length > 0) {
+        return modelIds;
+      }
+      return KNOWN_ANTHROPIC_MODELS;
+    } catch (error) {
+      // Auth errors should propagate — don't fall back to curated list
+      if (error instanceof AuthenticationError || error instanceof PermissionDeniedError) {
+        throw classifyError(error);
+      }
+      // All other failures: fall back to curated list
+      return KNOWN_ANTHROPIC_MODELS;
+    }
   }
 
   /**
-   * Validate an API key by sending a minimal request to the Anthropic Messages API.
-   * Sends a tiny request with max_tokens: 10 and checks for a non-auth-error response.
+   * Validate an API key by sending a minimal request via the SDK.
+   * Returns false on auth errors, true on any other response.
    */
   async validateApiKey(
     config: ProviderConfig,
     apiKey: string,
   ): Promise<boolean> {
-    const url = `${config.baseUrl}/v1/messages`;
+    const client = this.getClient(apiKey, config.baseUrl);
 
     try {
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'content-type': 'application/json',
-          'x-api-key': apiKey,
-          'anthropic-version': ANTHROPIC_VERSION,
-        },
-        body: JSON.stringify({
-          model: 'claude-3-haiku-20240307',
-          messages: [{ role: 'user', content: 'Hi' }],
-          max_tokens: 10,
-        }),
+      await client.messages.create({
+        model: 'claude-3-haiku-20240307',
+        messages: [{ role: 'user', content: 'Hi' }],
+        max_tokens: 10,
+        stream: false,
       });
-
-      // 401/403 means invalid key
-      if (response.status === 401 || response.status === 403) {
+      return true;
+    } catch (error) {
+      if (error instanceof AuthenticationError || error instanceof PermissionDeniedError) {
         return false;
       }
-
-      // 200 or other non-auth errors (429, 500, etc.) mean the key is valid
+      if (error instanceof APIConnectionError) {
+        return false;
+      }
+      // Other errors (429, 500, etc.) mean the key is valid
       return true;
-    } catch {
-      // Network error — can't validate, assume invalid
-      return false;
     }
   }
 }
@@ -299,18 +262,25 @@ function extractSystemMessage(messages: ChatMessage[]): string | undefined {
 }
 
 /**
- * Format a ChatMessage into Anthropic's message format.
- * Handles both string content and multimodal content parts.
+ * Format app ChatMessages into Anthropic SDK MessageParam format.
+ * Excludes system messages (they go into the top-level `system` param).
  */
-function formatMessage(
-  msg: ChatMessage,
-): { role: string; content: string | AnthropicContentPart[] } {
+function formatMessages(messages: ChatMessage[]): MessageParam[] {
+  return messages
+    .filter((m) => m.role !== 'system')
+    .map(formatMessage);
+}
+
+/**
+ * Format a single ChatMessage into Anthropic SDK MessageParam.
+ */
+function formatMessage(msg: ChatMessage): MessageParam {
   if (typeof msg.content === 'string') {
-    return { role: msg.role, content: msg.content };
+    return { role: msg.role as 'user' | 'assistant', content: msg.content };
   }
 
   // Convert multimodal content parts to Anthropic format
-  const parts: AnthropicContentPart[] = msg.content.map((part) => {
+  const parts: ContentBlockParam[] = msg.content.map((part) => {
     if (part.type === 'text') {
       return { type: 'text' as const, text: part.text };
     }
@@ -318,55 +288,130 @@ function formatMessage(
     return {
       type: 'image' as const,
       source: {
-        type: 'url',
+        type: 'url' as const,
         url: part.image_url.url,
       },
     };
   });
 
-  return { role: msg.role, content: parts };
+  return { role: msg.role as 'user' | 'assistant', content: parts };
 }
 
-// ─── Internal Types ──────────────────────────────────────────────────────────
+/**
+ * Map a non-streaming Anthropic SDK Message response to CompletionResponse.
+ */
+function mapResponse(response: Anthropic.Message): CompletionResponse {
+  let content = '';
+  let thinkingContent: string | undefined;
 
-/** Anthropic content part in request/response. */
-interface AnthropicContentPart {
-  type: string;
-  text?: string;
-  source?: { type: string; url: string };
+  for (const block of response.content) {
+    if (block.type === 'text') {
+      content += block.text;
+    } else if (block.type === 'thinking') {
+      thinkingContent = block.thinking;
+    }
+  }
+
+  const usage: TokenUsage = {
+    promptTokens: response.usage.input_tokens,
+    completionTokens: response.usage.output_tokens,
+    totalTokens: response.usage.input_tokens + response.usage.output_tokens,
+    cachedTokens: response.usage.cache_read_input_tokens ?? undefined,
+  };
+
+  return {
+    content,
+    thinkingContent,
+    usage,
+    finishReason: response.stop_reason ?? 'unknown',
+  };
 }
 
-/** Anthropic Messages API response structure. */
-interface AnthropicResponse {
-  content?: Array<{
-    type: string;
-    text?: string;
-    thinking?: string;
-  }>;
-  usage?: {
-    input_tokens?: number;
-    output_tokens?: number;
-    cache_read_input_tokens?: number;
-  };
-  stop_reason?: string;
+/**
+ * Map a single Anthropic stream event to a StreamChunk, or null if skipped.
+ */
+function mapStreamEvent(event: RawMessageStreamEvent): StreamChunk | null {
+  if (event.type === 'content_block_delta') {
+    if (event.delta.type === 'text_delta') {
+      return { type: 'text', content: event.delta.text ?? '' };
+    }
+    if (event.delta.type === 'thinking_delta') {
+      return { type: 'thinking', content: event.delta.thinking ?? '' };
+    }
+    // Unrecognized delta type (input_json_delta, citations_delta, signature_delta, etc.)
+    return null;
+  }
+
+  // Skip other event types — usage is accumulated separately, done is emitted at end
+  return null;
 }
 
-/** Anthropic SSE stream event structure. */
-interface AnthropicStreamEvent {
-  type: string;
-  delta?: {
-    type: string;
-    text?: string;
-    thinking?: string;
-  };
-  usage?: {
-    input_tokens?: number;
-    output_tokens?: number;
-  };
-  message?: {
-    usage?: {
-      input_tokens?: number;
-      output_tokens?: number;
-    };
-  };
+/**
+ * Classify an SDK error into a ProviderError with the correct category.
+ */
+function classifyError(error: unknown): ProviderError {
+  if (error instanceof AuthenticationError || error instanceof PermissionDeniedError) {
+    return new ProviderError(
+      'Authentication failed. Please check your API key.',
+      'authentication',
+    );
+  }
+
+  if (error instanceof RateLimitError) {
+    const retryAfter = extractRetryAfter(error.headers);
+    return new ProviderError(
+      'Rate limit exceeded.',
+      'rate_limit',
+      retryAfter,
+    );
+  }
+
+  if (error instanceof APIError) {
+    const status = error.status;
+    if (status === 529) {
+      return new ProviderError(
+        'Anthropic API is overloaded. Please try again later.',
+        'overloaded',
+      );
+    }
+    if (status != null && status >= 500 && status < 600) {
+      return new ProviderError(
+        'Anthropic server error. Please try again later.',
+        'server',
+      );
+    }
+  }
+
+  if (error instanceof APIConnectionTimeoutError) {
+    return new ProviderError(
+      'Request timed out.',
+      'network',
+    );
+  }
+
+  if (error instanceof APIConnectionError) {
+    return new ProviderError(
+      'Network error. Please check your connection.',
+      'network',
+    );
+  }
+
+  // Fallback for unknown errors
+  return new ProviderError(
+    'An unexpected error occurred.',
+    'server',
+  );
+}
+
+/**
+ * Extract Retry-After value in seconds from response headers.
+ */
+function extractRetryAfter(headers: Headers | undefined | null): number | null {
+  if (!headers) return null;
+  const retryAfter = headers.get('retry-after');
+  if (!retryAfter) return null;
+
+  const seconds = parseInt(retryAfter, 10);
+  if (isNaN(seconds)) return null;
+  return seconds;
 }
