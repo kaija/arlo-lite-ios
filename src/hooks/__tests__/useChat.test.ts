@@ -17,16 +17,9 @@ jest.mock('@/stores/provider-store', () => ({
   useProviderStore: jest.fn(),
 }));
 
-jest.mock('@/providers/registry', () => ({
-  getProvider: jest.fn(),
-}));
-
-jest.mock('@/providers/sse/sse-manager', () => ({
-  createSSEStream: jest.fn(),
-}));
-
-jest.mock('@/database/secure-store', () => ({
-  getApiKey: jest.fn(),
+jest.mock('@/services/completion-service', () => ({
+  streamCompletion: jest.fn(),
+  complete: jest.fn(),
 }));
 
 jest.mock('@/domain/cost-calculator', () => ({

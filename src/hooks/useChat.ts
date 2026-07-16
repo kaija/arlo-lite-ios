@@ -3,11 +3,10 @@
  *
  * Handles:
  * - Adding user message to session store
- * - Building and sending requests to the active provider
- * - Streaming: updates UI incrementally via chat store
- * - Non-streaming: awaits full response then adds assistant message
- * - Error handling with classification (auth, rate-limit, server, network, stream)
- * - Stop/abort support for in-flight streaming requests
+ * - Streaming via CompletionService.streamCompletion (AsyncIterable)
+ * - Non-streaming via CompletionService.complete
+ * - Error handling with ProviderError → ChatError mapping
+ * - Stop/abort support via AbortController
  */
 
 import { useCallback, useRef } from 'react';
@@ -15,17 +14,11 @@ import { useCallback, useRef } from 'react';
 import { useSessionStore } from '@/stores/session-store';
 import { useChatStore } from '@/stores/chat-store';
 import { useProviderStore } from '@/stores/provider-store';
-import { getProvider } from '@/providers/registry';
-import { createSSEStream, SSEConnection } from '@/providers/sse/sse-manager';
-import { getApiKey } from '@/database/secure-store';
+import { streamCompletion, complete } from '@/services/completion-service';
+import type { CompletionServiceOptions } from '@/services/completion-service';
+import { ProviderError } from '@/providers/errors';
 import { calculateMessageCost } from '@/domain/cost-calculator';
-import {
-  classifyHttpError,
-  classifyNetworkError,
-  classifyStreamError,
-  type ClassifiedError,
-} from '@/domain/error-classifier';
-import type { ChatMessage, ContentPart, CompletionRequest, ProviderConfig, StreamChunk, TokenUsage } from '@/providers/types';
+import type { ChatMessage, ContentPart, ProviderConfig, TokenUsage } from '@/providers/types';
 import type { Message } from '@/database/repositories/message-repo';
 
 /** Stable empty array to avoid infinite re-render loops in selectors */
@@ -62,14 +55,32 @@ export interface UseChatResult {
 }
 
 /**
+ * Map a ProviderError into a ChatError for the ErrorBanner UI.
+ */
+function providerErrorToChatError(err: ProviderError): ChatError {
+  let detail: string | undefined;
+  if (err.category === 'rate_limit' && err.retryAfterSeconds != null) {
+    detail = `Rate limited. Retry after ${err.retryAfterSeconds} seconds.`;
+  } else if (err.category === 'authentication') {
+    detail = 'Check your API key in provider settings.';
+  }
+
+  return {
+    message: err.message,
+    detail,
+    isRetryable: err.isRetryable,
+  };
+}
+
+/**
  * Hook providing the complete send message flow for the chat screen.
  *
- * Reads the active provider/model from the chat store, builds the request
- * through the provider adapter, and handles both streaming and non-streaming
- * responses. Errors are classified and surfaced for the ErrorBanner.
+ * Reads the active provider/model from the chat store, delegates to
+ * CompletionService for streaming and non-streaming completions.
+ * Errors are classified and surfaced for the ErrorBanner.
  */
 export function useChat(): UseChatResult {
-  const sseConnectionRef = useRef<SSEConnection | null>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
   const lastMessageRef = useRef<string>('');
 
   // Store selectors
@@ -102,17 +113,6 @@ export function useChat(): UseChatResult {
   }, []);
 
   /**
-   * Convert a ClassifiedError into a ChatError for the UI.
-   */
-  function toChatError(classified: ClassifiedError): ChatError {
-    return {
-      message: classified.message,
-      detail: classified.detail,
-      isRetryable: classified.isRetryable,
-    };
-  }
-
-  /**
    * Build ChatMessage array from session messages for the provider request.
    */
   function buildChatMessages(sessionMessages: Message[]): ChatMessage[] {
@@ -121,6 +121,142 @@ export function useChat(): UseChatResult {
       content: msg.content,
       ...(msg.thinkingContent ? { thinkingContent: msg.thinkingContent } : {}),
     }));
+  }
+
+  /**
+   * Execute a streaming completion via CompletionService.
+   */
+  async function handleStreaming(
+    chatMessages: ChatMessage[],
+    options: CompletionServiceOptions,
+    sessionId: string,
+    modelConfig: { inputPrice: number | null; outputPrice: number | null }
+  ) {
+    clearStream();
+    setStreaming(true);
+
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+
+    let accumulatedContent = '';
+    let accumulatedThinking = '';
+    let finalUsage: TokenUsage | undefined;
+
+    try {
+      for await (const chunk of streamCompletion(chatMessages, options, controller.signal)) {
+        switch (chunk.type) {
+          case 'text':
+            accumulatedContent += chunk.content;
+            appendStreamContent(chunk.content);
+            break;
+          case 'thinking':
+            accumulatedThinking += chunk.content;
+            appendThinkingContent(chunk.content);
+            break;
+          case 'done':
+            finalUsage = chunk.usage;
+            break;
+          case 'error':
+            errorRef.current = {
+              message: chunk.content,
+              isRetryable: true,
+            };
+            break;
+        }
+      }
+
+      // If we got content, persist the assistant message
+      if (accumulatedContent.length > 0 || accumulatedThinking.length > 0) {
+        const cost =
+          finalUsage && modelConfig.inputPrice !== null && modelConfig.outputPrice !== null
+            ? calculateMessageCost(
+                finalUsage.promptTokens,
+                finalUsage.completionTokens,
+                modelConfig.inputPrice,
+                modelConfig.outputPrice
+              )
+            : null;
+
+        await addMessage(sessionId, {
+          sessionId,
+          role: 'assistant',
+          content: accumulatedContent,
+          thinkingContent: accumulatedThinking || undefined,
+          providerId: options.providerId,
+          modelId: options.modelId,
+          promptTokens: finalUsage?.promptTokens ?? null,
+          completionTokens: finalUsage?.completionTokens ?? null,
+          totalTokens: finalUsage?.totalTokens ?? null,
+          cachedTokens: finalUsage?.cachedTokens ?? null,
+          cost,
+        });
+      }
+    } catch (err: unknown) {
+      if (err instanceof ProviderError) {
+        errorRef.current = providerErrorToChatError(err);
+      } else {
+        const error = err instanceof Error ? err : new Error(String(err));
+        errorRef.current = {
+          message: error.message || 'Streaming failed',
+          isRetryable: true,
+        };
+      }
+    } finally {
+      abortControllerRef.current = null;
+      setStreaming(false);
+      clearStream();
+    }
+  }
+
+  /**
+   * Execute a non-streaming completion via CompletionService.
+   */
+  async function handleNonStreaming(
+    chatMessages: ChatMessage[],
+    options: CompletionServiceOptions,
+    sessionId: string,
+    modelConfig: { inputPrice: number | null; outputPrice: number | null }
+  ) {
+    setStreaming(true);
+
+    try {
+      const response = await complete(chatMessages, options);
+
+      // Calculate cost
+      const cost = calculateMessageCost(
+        response.usage.promptTokens,
+        response.usage.completionTokens,
+        modelConfig.inputPrice,
+        modelConfig.outputPrice
+      );
+
+      // Add assistant message
+      await addMessage(sessionId, {
+        sessionId,
+        role: 'assistant',
+        content: response.content,
+        thinkingContent: response.thinkingContent ?? undefined,
+        providerId: options.providerId,
+        modelId: options.modelId,
+        promptTokens: response.usage.promptTokens,
+        completionTokens: response.usage.completionTokens,
+        totalTokens: response.usage.totalTokens,
+        cachedTokens: response.usage.cachedTokens ?? null,
+        cost,
+      });
+    } catch (err: unknown) {
+      if (err instanceof ProviderError) {
+        errorRef.current = providerErrorToChatError(err);
+      } else {
+        const error = err instanceof Error ? err : new Error(String(err));
+        errorRef.current = {
+          message: error.message || 'Request failed',
+          isRetryable: true,
+        };
+      }
+    } finally {
+      setStreaming(false);
+    }
   }
 
   /**
@@ -150,26 +286,8 @@ export function useChat(): UseChatResult {
         return;
       }
 
-      // Get API key from secure storage
-      const apiKey = await getApiKey(activeProviderId);
-      if (!apiKey) {
-        errorRef.current = {
-          message: 'API key not found',
-          detail: 'Please add an API key for this provider in settings.',
-          isRetryable: false,
-        };
-        return;
-      }
-
-      // Build the content for the user message — plain text or multimodal ContentPart[]
-      let messageContent: string;
-      if (attachments && attachments.length > 0) {
-        // Content stored as text in DB; attachments encoded inline in the message content
-        // for the API request we build proper ContentPart[] in buildChatMessages
-        messageContent = text.trim();
-      } else {
-        messageContent = text.trim();
-      }
+      // Build the content for the user message
+      const messageContent = text.trim();
 
       // Add user message to session
       const userMessage = await addMessage(activeSessionId, {
@@ -181,10 +299,7 @@ export function useChat(): UseChatResult {
       });
 
       // Build conversation context from all session messages (including the one just added)
-      const currentMessages = [
-        ...messages,
-        userMessage,
-      ];
+      const currentMessages = [...messages, userMessage];
       const chatMessages = buildChatMessages(currentMessages);
 
       // If there are attachments, modify the last user message to include multimodal content
@@ -200,32 +315,23 @@ export function useChat(): UseChatResult {
         }
       }
 
-      // Get the provider adapter
-      const provider = getProvider(providerConfig.type);
-
-      // Build the completion request
-      const completionRequest: CompletionRequest = {
-        messages: chatMessages,
-        model: activeModelId,
-        thinkingLevel,
-        stream: providerConfig.streamingEnabled,
-      };
-
-      // Build HTTP request via provider adapter
-      const config = {
+      // Build CompletionService options — map store Provider to ProviderConfig
+      const providerConfigForService: ProviderConfig = {
         ...providerConfig,
         apiMode: providerConfig.apiMode ?? undefined,
       };
-      const { url, headers, body } = provider.buildRequest(config, completionRequest);
 
-      // Inject API key into headers based on provider type
-      const authHeaders = getAuthHeaders(providerConfig.type, apiKey);
-      const mergedHeaders = { ...headers, ...authHeaders };
+      const options: CompletionServiceOptions = {
+        providerId: activeProviderId,
+        providerConfig: providerConfigForService,
+        modelId: activeModelId,
+        thinkingLevel,
+      };
 
       if (providerConfig.streamingEnabled) {
-        await handleStreaming(url, mergedHeaders, body, provider, activeSessionId, modelConfig);
+        await handleStreaming(chatMessages, options, activeSessionId, modelConfig);
       } else {
-        await handleNonStreaming(url, mergedHeaders, body, provider, activeSessionId, modelConfig);
+        await handleNonStreaming(chatMessages, options, activeSessionId, modelConfig);
       }
     },
     [
@@ -275,44 +381,26 @@ export function useChat(): UseChatResult {
         return;
       }
 
-      // Get API key from secure storage
-      const apiKey = await getApiKey(activeProviderId);
-      if (!apiKey) {
-        errorRef.current = {
-          message: 'API key not found',
-          detail: 'Please add an API key for this provider in settings.',
-          isRetryable: false,
-        };
-        return;
-      }
-
       // Use existing messages as context (no new user message added)
       const chatMessages = buildChatMessages(currentMessages);
 
-      // Get the provider adapter
-      const provider = getProvider(providerConfig.type);
-
-      // Build the completion request
-      const completionRequest: CompletionRequest = {
-        messages: chatMessages,
-        model: activeModelId,
-        thinkingLevel,
-        stream: providerConfig.streamingEnabled,
-      };
-
-      const config = {
+      // Build CompletionService options — map store Provider to ProviderConfig
+      const providerConfigForService: ProviderConfig = {
         ...providerConfig,
         apiMode: providerConfig.apiMode ?? undefined,
       };
-      const { url, headers, body } = provider.buildRequest(config, completionRequest);
 
-      const authHeaders = getAuthHeaders(providerConfig.type, apiKey);
-      const mergedHeaders = { ...headers, ...authHeaders };
+      const options: CompletionServiceOptions = {
+        providerId: activeProviderId,
+        providerConfig: providerConfigForService,
+        modelId: activeModelId,
+        thinkingLevel,
+      };
 
       if (providerConfig.streamingEnabled) {
-        await handleStreaming(url, mergedHeaders, body, provider, activeSessionId, modelConfig);
+        await handleStreaming(chatMessages, options, activeSessionId, modelConfig);
       } else {
-        await handleNonStreaming(url, mergedHeaders, body, provider, activeSessionId, modelConfig);
+        await handleNonStreaming(chatMessages, options, activeSessionId, modelConfig);
       }
     },
     [
@@ -332,160 +420,12 @@ export function useChat(): UseChatResult {
   );
 
   /**
-   * Handle streaming response via SSE.
-   */
-  async function handleStreaming(
-    url: string,
-    headers: Record<string, string>,
-    body: string,
-    provider: ReturnType<typeof getProvider>,
-    sessionId: string,
-    modelConfig: { inputPrice: number | null; outputPrice: number | null }
-  ) {
-    clearStream();
-    setStreaming(true);
-
-    return new Promise<void>((resolve) => {
-      let accumulatedContent = '';
-      let accumulatedThinking = '';
-
-      const connection = createSSEStream(url, headers, body, provider, {
-        onChunk: (chunk: StreamChunk) => {
-          if (chunk.type === 'text') {
-            accumulatedContent += chunk.content;
-            appendStreamContent(chunk.content);
-          } else if (chunk.type === 'thinking') {
-            accumulatedThinking += chunk.content;
-            appendThinkingContent(chunk.content);
-          }
-        },
-
-        onComplete: async (usage?: TokenUsage) => {
-          sseConnectionRef.current = null;
-          setStreaming(false);
-
-          // Calculate cost if we have usage data and pricing
-          const cost =
-            usage && modelConfig.inputPrice !== null && modelConfig.outputPrice !== null
-              ? calculateMessageCost(
-                  usage.promptTokens,
-                  usage.completionTokens,
-                  modelConfig.inputPrice,
-                  modelConfig.outputPrice
-                )
-              : null;
-
-          // Add assistant message to session store
-          await addMessage(sessionId, {
-            sessionId,
-            role: 'assistant',
-            content: accumulatedContent,
-            thinkingContent: accumulatedThinking || undefined,
-            providerId: activeProviderId!,
-            modelId: activeModelId!,
-            promptTokens: usage?.promptTokens ?? null,
-            completionTokens: usage?.completionTokens ?? null,
-            totalTokens: usage?.totalTokens ?? null,
-            cachedTokens: usage?.cachedTokens ?? null,
-            cost,
-          });
-
-          clearStream();
-          resolve();
-        },
-
-        onError: (error: Error) => {
-          sseConnectionRef.current = null;
-          setStreaming(false);
-          clearStream();
-
-          // Classify the streaming error for appropriate UI display
-          const classified = classifyStreamError(error);
-          errorRef.current = toChatError(classified);
-          resolve();
-        },
-      });
-
-      sseConnectionRef.current = connection;
-    });
-  }
-
-  /**
-   * Handle non-streaming response (regular fetch).
-   */
-  async function handleNonStreaming(
-    url: string,
-    headers: Record<string, string>,
-    body: string,
-    provider: ReturnType<typeof getProvider>,
-    sessionId: string,
-    modelConfig: { inputPrice: number | null; outputPrice: number | null }
-  ) {
-    setStreaming(true);
-
-    try {
-      const response = await fetch(url, {
-        method: 'POST',
-        headers,
-        body,
-      });
-
-      if (!response.ok) {
-        let errorBody = '';
-        try {
-          errorBody = await response.text();
-        } catch {
-          // ignore
-        }
-        // Classify the HTTP error for appropriate UI display
-        const classified = classifyHttpError(response.status, errorBody, response.statusText);
-        errorRef.current = toChatError(classified);
-        setStreaming(false);
-        return;
-      }
-
-      const raw = await response.json();
-      const parsed = provider.parseResponse(raw);
-
-      // Calculate cost
-      const cost = calculateMessageCost(
-        parsed.usage.promptTokens,
-        parsed.usage.completionTokens,
-        modelConfig.inputPrice,
-        modelConfig.outputPrice
-      );
-
-      // Add assistant message
-      await addMessage(sessionId, {
-        sessionId,
-        role: 'assistant',
-        content: parsed.content,
-        thinkingContent: parsed.thinkingContent ?? undefined,
-        providerId: activeProviderId!,
-        modelId: activeModelId!,
-        promptTokens: parsed.usage.promptTokens,
-        completionTokens: parsed.usage.completionTokens,
-        totalTokens: parsed.usage.totalTokens,
-        cachedTokens: parsed.usage.cachedTokens ?? null,
-        cost,
-      });
-    } catch (err: unknown) {
-      // Classify the network/fetch error
-      const error = err instanceof Error ? err : new Error(String(err));
-      const classified = classifyNetworkError(error);
-      errorRef.current = toChatError(classified);
-    } finally {
-      setStreaming(false);
-    }
-  }
-
-  /**
    * Abort the current streaming response and discard partial content.
    */
   const stopGeneration = useCallback(() => {
-    if (sseConnectionRef.current) {
-      sseConnectionRef.current.abort();
-      sseConnectionRef.current = null;
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
     }
     setStreaming(false);
     clearStream();
@@ -511,22 +451,4 @@ export function useChat(): UseChatResult {
     retry,
     clearError,
   };
-}
-
-/**
- * Get authentication headers based on provider type.
- * Provider buildRequest may already include these, but this ensures the key is injected.
- */
-function getAuthHeaders(
-  providerType: string,
-  apiKey: string
-): Record<string, string> {
-  switch (providerType) {
-    case 'anthropic':
-      return { 'x-api-key': apiKey };
-    case 'openai':
-    case 'custom':
-    default:
-      return { Authorization: `Bearer ${apiKey}` };
-  }
 }
