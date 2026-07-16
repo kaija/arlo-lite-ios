@@ -48,6 +48,24 @@ export default function RootLayout() {
           useSessionStore.getState().loadSessions(),
           useSettingsStore.getState().loadSystemPrompts(db),
         ]);
+
+        // Auto-create a session if none exist and a provider+model are configured
+        const sessions = useSessionStore.getState().sessions;
+        const providers = useProviderStore.getState().providers;
+        const models = useProviderStore.getState().models;
+
+        if (sessions.length === 0 && providers.length > 0 && models.length > 0) {
+          const defaultProvider = providers[0];
+          const defaultModel = models.find(
+            (m) => m.providerId === defaultProvider.id
+          );
+          if (defaultModel) {
+            const sessionId = await useSessionStore
+              .getState()
+              .createSession(defaultProvider.id, defaultModel.id);
+            await useSessionStore.getState().setActiveSession(sessionId);
+          }
+        }
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
         console.error('[RootLayout] Bootstrap error:', message);

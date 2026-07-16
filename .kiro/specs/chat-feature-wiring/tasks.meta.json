@@ -1,0 +1,281 @@
+{
+  "pbtResults": {
+    "2.2 Write property test for `isNearBottom` pure function": {
+      "status": "passed",
+      "lastRunTimestamp": 1784185553850
+    },
+    "2.3 Write unit test for `deleteMessage` store action": {
+      "status": "passed",
+      "lastRunTimestamp": 1784185598488
+    },
+    "4.3 Write property test for auto-create session on send": {
+      "status": "passed",
+      "lastRunTimestamp": 1784185862582
+    }
+  },
+  "executionHistory": {
+    "1.1 Create `src/hooks/useScrollBehavior.ts`": [
+      {
+        "executionId": "43e1b915-07bf-4c71-989f-9bed82e44716",
+        "chatSessionId": "sess_785f1ee2-1366-45c8-9fb0-b2d0647001d3",
+        "timestamp": 1784185226158
+      },
+      {
+        "executionId": "43e1b915-07bf-4c71-989f-9bed82e44716",
+        "chatSessionId": "sess_785f1ee2-1366-45c8-9fb0-b2d0647001d3",
+        "timestamp": 1784185245226
+      },
+      {
+        "executionId": "43e1b915-07bf-4c71-989f-9bed82e44716",
+        "chatSessionId": "sess_785f1ee2-1366-45c8-9fb0-b2d0647001d3",
+        "timestamp": 1784185429867
+      }
+    ],
+    "1.2 Create `src/components/chat/ScrollFAB.tsx`": [
+      {
+        "executionId": "43e1b915-07bf-4c71-989f-9bed82e44716",
+        "chatSessionId": "sess_785f1ee2-1366-45c8-9fb0-b2d0647001d3",
+        "timestamp": 1784185226182
+      },
+      {
+        "executionId": "43e1b915-07bf-4c71-989f-9bed82e44716",
+        "chatSessionId": "sess_785f1ee2-1366-45c8-9fb0-b2d0647001d3",
+        "timestamp": 1784185245633
+      },
+      {
+        "executionId": "43e1b915-07bf-4c71-989f-9bed82e44716",
+        "chatSessionId": "sess_785f1ee2-1366-45c8-9fb0-b2d0647001d3",
+        "timestamp": 1784185430775
+      }
+    ],
+    "2.1 Add `deleteMessage` action to `src/stores/session-store.ts`": [
+      {
+        "executionId": "43e1b915-07bf-4c71-989f-9bed82e44716",
+        "chatSessionId": "sess_785f1ee2-1366-45c8-9fb0-b2d0647001d3",
+        "timestamp": 1784185226209
+      },
+      {
+        "executionId": "43e1b915-07bf-4c71-989f-9bed82e44716",
+        "chatSessionId": "sess_785f1ee2-1366-45c8-9fb0-b2d0647001d3",
+        "timestamp": 1784185247467
+      },
+      {
+        "executionId": "43e1b915-07bf-4c71-989f-9bed82e44716",
+        "chatSessionId": "sess_785f1ee2-1366-45c8-9fb0-b2d0647001d3",
+        "timestamp": 1784185432177
+      }
+    ],
+    "2.2 Write property test for `isNearBottom` pure function": [
+      {
+        "executionId": "43e1b915-07bf-4c71-989f-9bed82e44716",
+        "chatSessionId": "sess_785f1ee2-1366-45c8-9fb0-b2d0647001d3",
+        "timestamp": 1784185226235
+      },
+      {
+        "executionId": "43e1b915-07bf-4c71-989f-9bed82e44716",
+        "chatSessionId": "sess_785f1ee2-1366-45c8-9fb0-b2d0647001d3",
+        "timestamp": 1784185443481
+      },
+      {
+        "executionId": "43e1b915-07bf-4c71-989f-9bed82e44716",
+        "chatSessionId": "sess_785f1ee2-1366-45c8-9fb0-b2d0647001d3",
+        "timestamp": 1784185616783
+      }
+    ],
+    "2.3 Write unit test for `deleteMessage` store action": [
+      {
+        "executionId": "43e1b915-07bf-4c71-989f-9bed82e44716",
+        "chatSessionId": "sess_785f1ee2-1366-45c8-9fb0-b2d0647001d3",
+        "timestamp": 1784185226258
+      },
+      {
+        "executionId": "43e1b915-07bf-4c71-989f-9bed82e44716",
+        "chatSessionId": "sess_785f1ee2-1366-45c8-9fb0-b2d0647001d3",
+        "timestamp": 1784185444411
+      },
+      {
+        "executionId": "43e1b915-07bf-4c71-989f-9bed82e44716",
+        "chatSessionId": "sess_785f1ee2-1366-45c8-9fb0-b2d0647001d3",
+        "timestamp": 1784185617698
+      }
+    ],
+    "3. Checkpoint — hooks and store action ready": [
+      {
+        "executionId": "43e1b915-07bf-4c71-989f-9bed82e44716",
+        "chatSessionId": "sess_785f1ee2-1366-45c8-9fb0-b2d0647001d3",
+        "timestamp": 1784185226276
+      },
+      {
+        "executionId": "43e1b915-07bf-4c71-989f-9bed82e44716",
+        "chatSessionId": "sess_785f1ee2-1366-45c8-9fb0-b2d0647001d3",
+        "timestamp": 1784185626950
+      }
+    ],
+    "4.1 Add bootstrap auto-create in `src/app/_layout.tsx`": [
+      {
+        "executionId": "43e1b915-07bf-4c71-989f-9bed82e44716",
+        "chatSessionId": "sess_785f1ee2-1366-45c8-9fb0-b2d0647001d3",
+        "timestamp": 1784185226299
+      },
+      {
+        "executionId": "43e1b915-07bf-4c71-989f-9bed82e44716",
+        "chatSessionId": "sess_785f1ee2-1366-45c8-9fb0-b2d0647001d3",
+        "timestamp": 1784185445291
+      },
+      {
+        "executionId": "43e1b915-07bf-4c71-989f-9bed82e44716",
+        "chatSessionId": "sess_785f1ee2-1366-45c8-9fb0-b2d0647001d3",
+        "timestamp": 1784185618566
+      }
+    ],
+    "4.2 Add first-send auto-create in `src/hooks/useChat.ts`": [
+      {
+        "executionId": "43e1b915-07bf-4c71-989f-9bed82e44716",
+        "chatSessionId": "sess_785f1ee2-1366-45c8-9fb0-b2d0647001d3",
+        "timestamp": 1784185226338
+      },
+      {
+        "executionId": "43e1b915-07bf-4c71-989f-9bed82e44716",
+        "chatSessionId": "sess_785f1ee2-1366-45c8-9fb0-b2d0647001d3",
+        "timestamp": 1784185446662
+      },
+      {
+        "executionId": "43e1b915-07bf-4c71-989f-9bed82e44716",
+        "chatSessionId": "sess_785f1ee2-1366-45c8-9fb0-b2d0647001d3",
+        "timestamp": 1784185620142
+      }
+    ],
+    "4.3 Write property test for auto-create session on send": [
+      {
+        "executionId": "43e1b915-07bf-4c71-989f-9bed82e44716",
+        "chatSessionId": "sess_785f1ee2-1366-45c8-9fb0-b2d0647001d3",
+        "timestamp": 1784185226364
+      },
+      {
+        "executionId": "43e1b915-07bf-4c71-989f-9bed82e44716",
+        "chatSessionId": "sess_785f1ee2-1366-45c8-9fb0-b2d0647001d3",
+        "timestamp": 1784185633493
+      },
+      {
+        "executionId": "43e1b915-07bf-4c71-989f-9bed82e44716",
+        "chatSessionId": "sess_785f1ee2-1366-45c8-9fb0-b2d0647001d3",
+        "timestamp": 1784185970628
+      }
+    ],
+    "5.1 Add delete handler to `src/screens/ChatShell.tsx`": [
+      {
+        "executionId": "43e1b915-07bf-4c71-989f-9bed82e44716",
+        "chatSessionId": "sess_785f1ee2-1366-45c8-9fb0-b2d0647001d3",
+        "timestamp": 1784185226384
+      },
+      {
+        "executionId": "43e1b915-07bf-4c71-989f-9bed82e44716",
+        "chatSessionId": "sess_785f1ee2-1366-45c8-9fb0-b2d0647001d3",
+        "timestamp": 1784185634441
+      },
+      {
+        "executionId": "43e1b915-07bf-4c71-989f-9bed82e44716",
+        "chatSessionId": "sess_785f1ee2-1366-45c8-9fb0-b2d0647001d3",
+        "timestamp": 1784185971734
+      }
+    ],
+    "5.2 Integrate `useScrollBehavior` into ChatShell FlatList": [
+      {
+        "executionId": "43e1b915-07bf-4c71-989f-9bed82e44716",
+        "chatSessionId": "sess_785f1ee2-1366-45c8-9fb0-b2d0647001d3",
+        "timestamp": 1784185226402
+      },
+      {
+        "executionId": "43e1b915-07bf-4c71-989f-9bed82e44716",
+        "chatSessionId": "sess_785f1ee2-1366-45c8-9fb0-b2d0647001d3",
+        "timestamp": 1784185635274
+      },
+      {
+        "executionId": "43e1b915-07bf-4c71-989f-9bed82e44716",
+        "chatSessionId": "sess_785f1ee2-1366-45c8-9fb0-b2d0647001d3",
+        "timestamp": 1784185972500
+      }
+    ],
+    "5.3 Write unit tests for delete confirmation flow": [
+      {
+        "executionId": "43e1b915-07bf-4c71-989f-9bed82e44716",
+        "chatSessionId": "sess_785f1ee2-1366-45c8-9fb0-b2d0647001d3",
+        "timestamp": 1784185226433
+      },
+      {
+        "executionId": "43e1b915-07bf-4c71-989f-9bed82e44716",
+        "chatSessionId": "sess_785f1ee2-1366-45c8-9fb0-b2d0647001d3",
+        "timestamp": 1784185986189
+      },
+      {
+        "executionId": "43e1b915-07bf-4c71-989f-9bed82e44716",
+        "chatSessionId": "sess_785f1ee2-1366-45c8-9fb0-b2d0647001d3",
+        "timestamp": 1784186372757
+      }
+    ],
+    "6.1 Add new i18n keys to English translation file": [
+      {
+        "executionId": "43e1b915-07bf-4c71-989f-9bed82e44716",
+        "chatSessionId": "sess_785f1ee2-1366-45c8-9fb0-b2d0647001d3",
+        "timestamp": 1784185226455
+      },
+      {
+        "executionId": "43e1b915-07bf-4c71-989f-9bed82e44716",
+        "chatSessionId": "sess_785f1ee2-1366-45c8-9fb0-b2d0647001d3",
+        "timestamp": 1784185636650
+      },
+      {
+        "executionId": "43e1b915-07bf-4c71-989f-9bed82e44716",
+        "chatSessionId": "sess_785f1ee2-1366-45c8-9fb0-b2d0647001d3",
+        "timestamp": 1784185973876
+      }
+    ],
+    "7. Final checkpoint — all three features wired": [
+      {
+        "executionId": "43e1b915-07bf-4c71-989f-9bed82e44716",
+        "chatSessionId": "sess_785f1ee2-1366-45c8-9fb0-b2d0647001d3",
+        "timestamp": 1784185226474
+      },
+      {
+        "executionId": "43e1b915-07bf-4c71-989f-9bed82e44716",
+        "chatSessionId": "sess_785f1ee2-1366-45c8-9fb0-b2d0647001d3",
+        "timestamp": 1784186378942
+      }
+    ],
+    "1. Create scroll behavior hook and ScrollFAB component": [
+      {
+        "executionId": "43e1b915-07bf-4c71-989f-9bed82e44716",
+        "chatSessionId": "sess_785f1ee2-1366-45c8-9fb0-b2d0647001d3",
+        "timestamp": 1784185430799
+      }
+    ],
+    "2. Add deleteMessage action to session store": [
+      {
+        "executionId": "43e1b915-07bf-4c71-989f-9bed82e44716",
+        "chatSessionId": "sess_785f1ee2-1366-45c8-9fb0-b2d0647001d3",
+        "timestamp": 1784185617722
+      }
+    ],
+    "4. Wire auto-create session logic": [
+      {
+        "executionId": "43e1b915-07bf-4c71-989f-9bed82e44716",
+        "chatSessionId": "sess_785f1ee2-1366-45c8-9fb0-b2d0647001d3",
+        "timestamp": 1784185970652
+      }
+    ],
+    "6. Add i18n translation keys": [
+      {
+        "executionId": "43e1b915-07bf-4c71-989f-9bed82e44716",
+        "chatSessionId": "sess_785f1ee2-1366-45c8-9fb0-b2d0647001d3",
+        "timestamp": 1784185973899
+      }
+    ],
+    "5. Wire delete and scroll into ChatShell": [
+      {
+        "executionId": "43e1b915-07bf-4c71-989f-9bed82e44716",
+        "chatSessionId": "sess_785f1ee2-1366-45c8-9fb0-b2d0647001d3",
+        "timestamp": 1784186372812
+      }
+    ]
+  }
+}

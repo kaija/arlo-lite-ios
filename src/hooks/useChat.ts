@@ -280,11 +280,31 @@ export function useChat(): UseChatResult {
   const sendMessage = useCallback(
     async (text: string, attachments?: ContentPart[]) => {
       if (!text.trim() && (!attachments || attachments.length === 0)) return;
-      if (!activeSessionId || !activeProviderId || !activeModelId) return;
 
       // Clear previous error
       errorRef.current = null;
       lastMessageRef.current = text;
+
+      // Auto-create session if no active session exists
+      let sessionId = activeSessionId;
+
+      if (!sessionId) {
+        if (!activeProviderId || !activeModelId) {
+          errorRef.current = {
+            message: 'No provider configured',
+            detail: 'Please configure a provider and model in settings.',
+            isRetryable: false,
+          };
+          return;
+        }
+        sessionId = await useSessionStore.getState().createSession(
+          activeProviderId,
+          activeModelId
+        );
+        await useSessionStore.getState().setActiveSession(sessionId);
+      }
+
+      if (!activeProviderId || !activeModelId) return;
 
       // Find provider config and model config
       const providerConfig = providers.find((p) => p.id === activeProviderId);
@@ -305,8 +325,8 @@ export function useChat(): UseChatResult {
       const messageContent = text.trim();
 
       // Add user message to session
-      const userMessage = await addMessage(activeSessionId, {
-        sessionId: activeSessionId,
+      const userMessage = await addMessage(sessionId, {
+        sessionId,
         role: 'user',
         content: messageContent,
         providerId: activeProviderId,
@@ -314,7 +334,8 @@ export function useChat(): UseChatResult {
       });
 
       // Build conversation context from all session messages (including the one just added)
-      const currentMessages = [...messages, userMessage];
+      const sessionMessages = useSessionStore.getState().messages[sessionId] ?? [];
+      const currentMessages = [...sessionMessages.filter((m) => m.id !== userMessage.id), userMessage];
       const chatMessages = buildChatMessages(currentMessages);
 
       // If there are attachments, modify the last user message to include multimodal content
@@ -346,9 +367,9 @@ export function useChat(): UseChatResult {
       };
 
       if (providerConfig.streamingEnabled) {
-        await handleStreaming(prependSystemPrompt(chatMessages), options, activeSessionId, modelConfig);
+        await handleStreaming(prependSystemPrompt(chatMessages), options, sessionId, modelConfig);
       } else {
-        await handleNonStreaming(prependSystemPrompt(chatMessages), options, activeSessionId, modelConfig);
+        await handleNonStreaming(prependSystemPrompt(chatMessages), options, sessionId, modelConfig);
       }
     },
     [

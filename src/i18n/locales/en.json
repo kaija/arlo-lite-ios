@@ -33,7 +33,9 @@
     "copy": "Copy",
     "copyCode": "Copy code",
     "copied": "Copied to clipboard",
-    "retryMessage": "Retry"
+    "retryMessage": "Retry",
+    "deleteMessage": "Delete Message",
+    "deleteMessageConfirm": "Are you sure you want to delete this message?"
   },
 
   "sessions": {

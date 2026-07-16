@@ -157,7 +157,7 @@ Wire together existing stores, services, and UI components into a fully function
     - Include in the fetch request body when defined
     - _Requirements: 2.4_
 
-- [-] 13. Checkpoint - Full integration verification
+- [x] 13. Checkpoint - Full integration verification
   - Ensure all tests pass and the app builds without errors.
 
 - [x] 14. Property tests
@@ -208,7 +208,7 @@ Wire together existing stores, services, and UI components into a fully function
     - **Validates: Requirements 11.1, 11.2, 11.3, 11.4, 11.5**
     - Verify percentage calculation and color thresholds
 
-- [~] 15. Final checkpoint
+- [x] 15. Final checkpoint
   - Ensure all tests pass, TypeScript compiles cleanly, and the app runs correctly.
 
 ## Notes

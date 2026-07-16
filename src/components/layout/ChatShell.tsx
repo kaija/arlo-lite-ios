@@ -14,8 +14,8 @@
  * Requirements: 7.1, 7.2, 7.3, 7.4, 7.5, 14.1, 14.4
  */
 
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import React, { useCallback, useState } from 'react';
+import { Alert, FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
 import Animated, { useAnimatedStyle, interpolate, useAnimatedReaction, runOnJS } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -29,6 +29,7 @@ import { useChatStore } from '@/stores/chat-store';
 import { useProviderStore } from '@/stores/provider-store';
 import { useChat } from '@/hooks/useChat';
 import { useMessageActions } from '@/hooks/useMessageActions';
+import { useScrollBehavior } from '@/hooks/useScrollBehavior';
 
 import { NavigationChrome } from '@/components/layout/NavigationChrome';
 import { InputChrome } from '@/components/layout/InputChrome';
@@ -40,6 +41,7 @@ import { ModelPicker } from '@/components/overlays/ModelPicker';
 import { RenameDialog } from '@/components/overlays/RenameDialog';
 import { SettingsScreen } from '@/components/overlays/SettingsScreen';
 import { ProviderDetailScreen } from '@/components/overlays/ProviderDetailScreen';
+import { ScrollFAB } from '@/components/chat/ScrollFAB';
 
 import type { Message } from '@/database/repositories/message-repo';
 
@@ -100,6 +102,7 @@ export function ChatShell({ children }: ChatShellProps) {
   const messagesMap = useSessionStore((state) => state.messages);
   const messages = (activeSessionId ? messagesMap[activeSessionId] : undefined) ?? EMPTY_MESSAGES;
   const deleteSession = useSessionStore((state) => state.deleteSession);
+  const deleteMessage = useSessionStore((state) => state.deleteMessage);
   const renameSession = useSessionStore((state) => state.renameSession);
   const createSession = useSessionStore((state) => state.createSession);
   const setActiveSession = useSessionStore((state) => state.setActiveSession);
@@ -132,17 +135,14 @@ export function ChatShell({ children }: ChatShellProps) {
 
   // ─── FlatList Ref ───────────────────────────────────────────────────
 
-  const flatListRef = useRef<FlatList<Message>>(null);
-
-  // Auto-scroll to bottom on new messages or stream content updates
-  useEffect(() => {
-    if ((messages.length > 0 || streamContent) && flatListRef.current) {
-      const timer = setTimeout(() => {
-        flatListRef.current?.scrollToEnd({ animated: true });
-      }, 100);
-      return () => clearTimeout(timer);
-    }
-  }, [messages.length, streamContent]);
+  const {
+    flatListRef,
+    showFAB,
+    onScroll,
+    onContentSizeChange,
+    onLayout,
+    scrollToBottom,
+  } = useScrollBehavior();
 
   // ─── Sidebar Sync ──────────────────────────────────────────────────
 
@@ -217,6 +217,30 @@ export function ChatShell({ children }: ChatShellProps) {
     }
     closeSidebar();
   }, [activeProviderId, activeModelId, createSession, closeSidebar]);
+
+  // ─── Delete Message Handler ──────────────────────────────────────────
+
+  const handleDeleteMessage = useCallback(
+    (messageId: string) => {
+      Alert.alert(
+        t('chat.deleteMessage', 'Delete Message'),
+        t('chat.deleteMessageConfirm', 'Are you sure you want to delete this message?'),
+        [
+          { text: t('common.cancel', 'Cancel'), style: 'cancel' },
+          {
+            text: t('common.delete', 'Delete'),
+            style: 'destructive',
+            onPress: () => {
+              if (activeSessionId) {
+                deleteMessage(activeSessionId, messageId);
+              }
+            },
+          },
+        ],
+      );
+    },
+    [activeSessionId, deleteMessage, t],
+  );
 
   // ─── Rename Handlers ────────────────────────────────────────────────
 
@@ -300,12 +324,10 @@ export function ChatShell({ children }: ChatShellProps) {
         onCopy={() => copyMessage(item)}
         onRegenerate={() => regenerate()}
         onEdit={() => editMessage(item)}
-        onDelete={() => {
-          // Delete handled via session store
-        }}
+        onDelete={() => handleDeleteMessage(item.id)}
       />
     ),
-    [activeModel, copyMessage, regenerate, editMessage],
+    [activeModel, copyMessage, regenerate, editMessage, handleDeleteMessage],
   );
 
   // ─── Render Footer (Streaming) ─────────────────────────────────────
@@ -423,10 +445,17 @@ export function ChatShell({ children }: ChatShellProps) {
                 styles.listContent,
                 { paddingTop: insets.top + 44 + 8 }, // below nav chrome
               ]}
+              onScroll={onScroll}
+              onContentSizeChange={onContentSizeChange}
+              onLayout={onLayout}
+              scrollEventThrottle={16}
               showsVerticalScrollIndicator={false}
               keyboardDismissMode="interactive"
               keyboardShouldPersistTaps="handled"
             />
+
+            {/* Scroll to Bottom FAB */}
+            <ScrollFAB visible={showFAB} onPress={scrollToBottom} />
 
             {/* Input Chrome */}
             <InputChrome

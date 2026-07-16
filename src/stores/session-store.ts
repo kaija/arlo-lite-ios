@@ -10,6 +10,7 @@ import type { Session } from '@/database/repositories/session-repo';
 import {
   createMessage as createMessageInDb,
   getMessagesBySession,
+  deleteMessage as deleteMessageFromDb,
   deleteMessagesAfter,
 } from '@/database/repositories/message-repo';
 import type { Message, CreateMessageData } from '@/database/repositories/message-repo';
@@ -59,6 +60,9 @@ export interface SessionStore {
 
   /** Add a message to a session */
   addMessage: (sessionId: string, data: CreateMessageData) => Promise<Message>;
+
+  /** Delete a single message from a session */
+  deleteMessage: (sessionId: string, messageId: string) => Promise<void>;
 
   /** Edit a message at a given ID and discard all subsequent messages */
   editMessage: (sessionId: string, messageId: string, newContent: string) => Promise<void>;
@@ -185,6 +189,24 @@ export const useSessionStore = create<SessionStore>((set, get) => ({
     }
 
     return message;
+  },
+
+  deleteMessage: async (sessionId: string, messageId: string) => {
+    const { db } = get();
+    if (!db) {
+      throw new Error('Database not initialized. Call setDatabase first.');
+    }
+
+    await deleteMessageFromDb(db, messageId);
+
+    set((state) => ({
+      messages: {
+        ...state.messages,
+        [sessionId]: (state.messages[sessionId] ?? []).filter(
+          (m) => m.id !== messageId
+        ),
+      },
+    }));
   },
 
   editMessage: async (sessionId: string, messageId: string, newContent: string) => {

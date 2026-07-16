@@ -30,7 +30,8 @@
       "expo-localization",
       "expo-speech-recognition",
       "expo-asset",
-      "expo-router"
+      "expo-router",
+      "expo-font"
     ]
   }
 }
