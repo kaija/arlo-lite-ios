@@ -341,19 +341,6 @@ exports[`MessageFlow Snapshots renders a user message with token metadata and ma
     >
       You
     </Text>
-    <Text
-      style={
-        {
-          "color": "#8E8E93",
-          "fontFamily": "Menlo",
-          "fontSize": 11,
-          "fontWeight": "400",
-          "marginLeft": "auto",
-        }
-      }
-    >
-      2.4k in / 0 out
-    </Text>
   </View>
   <View
     style={{}}

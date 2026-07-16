@@ -147,8 +147,8 @@ describe('MessageFlow', () => {
     expect(getByText('Hi there')).toBeTruthy();
   });
 
-  it('displays token metadata when tokens are available', () => {
-    const { getByText } = renderMessageFlow({
+  it('does not display token metadata when cost is null', () => {
+    const { queryByText } = renderMessageFlow({
       message: createMessage({
         role: 'assistant',
         promptTokens: 1500,
@@ -156,7 +156,7 @@ describe('MessageFlow', () => {
         cost: null,
       }),
     });
-    expect(getByText('1.5k in / 3.2k out')).toBeTruthy();
+    expect(queryByText('1.5k in / 3.2k out')).toBeNull();
   });
 
   it('displays token metadata with cost when cost is available', () => {

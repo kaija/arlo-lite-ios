@@ -81,27 +81,12 @@ export function MessageFlow({
     ? t('chat.roleUser', 'You')
     : modelName;
 
-  // Format token metadata if tokens are available
-  const tokenMetadata =
-    message.promptTokens != null && message.completionTokens != null
-      ? formatTokenMetadata(
-          message.promptTokens,
-          message.completionTokens,
-          message.cost != null && message.promptTokens > 0
-            ? message.cost / (message.promptTokens + message.completionTokens) // approximate per-token
-            : undefined,
-          message.cost != null && message.completionTokens > 0
-            ? message.cost / (message.promptTokens + message.completionTokens)
-            : undefined
-        )
-      : null;
-
-  // Use cost directly if available — better than deriving from per-token
+  // Cost metadata line: only render when all three fields are non-null
   const formattedMetadata =
-    message.promptTokens != null && message.completionTokens != null
-      ? message.cost != null && message.cost > 0
-        ? `${formatTokenMetadata(message.promptTokens, message.completionTokens)} · $${message.cost.toFixed(3)}`
-        : formatTokenMetadata(message.promptTokens, message.completionTokens)
+    message.promptTokens != null &&
+    message.completionTokens != null &&
+    message.cost != null
+      ? `${formatTokenMetadata(message.promptTokens, message.completionTokens)} · $${message.cost.toFixed(3)}`
       : null;
 
   const showActions = !isStreaming;
