@@ -19,13 +19,18 @@
  * Requirements: 9.1, 9.2, 9.3, 9.4, 9.5, 9.6, 9.7, 9.8, 9.9, 9.10
  */
 
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
+  Alert,
   Dimensions,
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   View,
 } from 'react-native';
 import Animated, {
@@ -40,8 +45,12 @@ import { BlurView } from 'expo-blur';
 import { useTheme } from '@/theme';
 import { SETTINGS_SLIDE_DURATION } from '@/theme/animations';
 import { useProviderStore } from '@/stores/provider-store';
-import type { Provider } from '@/database/repositories/provider-repo';
-import type { ModelConfig } from '@/stores/provider-store';
+import { useSettingsStore } from '@/stores/settings-store';
+import { useChatStore } from '@/stores/chat-store';
+import { useUIStore } from '@/stores/ui-store';
+import { useMaskedKey } from '@/hooks/useMaskedKey';
+import type { Provider, GenerationParams } from '@/database/repositories/provider-repo';
+import type { ModelConfig, ConnectionStatus } from '@/stores/provider-store';
 
 // ─── Interface ────────────────────────────────────────────────────────────────
 
@@ -54,12 +63,7 @@ export interface SettingsScreenProps {
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-interface SystemPrompt {
-  id: string;
-  name: string;
-  content: string;
-  isDefault: boolean;
-}
+// SystemPrompt type comes from SettingsStore / system-prompt-repo
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -102,17 +106,6 @@ function formatApiType(provider: Provider): string {
 }
 
 /**
- * Masks an API key showing only the last 4 characters.
- * Returns "•••• XXXX" format.
- */
-function maskApiKey(key: string | null): string {
-  if (!key || key.length < 4) {
-    return '••••';
-  }
-  return `•••• ${key.slice(-4)}`;
-}
-
-/**
  * Truncates text to a max length with ellipsis.
  */
 function truncateText(text: string, maxLength: number): string {
@@ -128,6 +121,32 @@ export function SettingsScreen({ visible, onClose }: SettingsScreenProps) {
   // Provider store data
   const providers = useProviderStore((state) => state.providers);
   const models = useProviderStore((state) => state.models);
+  const updateProvider = useProviderStore((state) => state.updateProvider);
+
+  // Chat store — active provider selection
+  const activeProviderId = useChatStore((state) => state.activeProviderId);
+
+  // Determine the active provider: use ChatStore's activeProviderId, fallback to first provider
+  const activeProvider = useMemo(() => {
+    if (activeProviderId) {
+      const found = providers.find((p) => p.id === activeProviderId);
+      if (found) return found;
+    }
+    return providers.length > 0 ? providers[0] : null;
+  }, [providers, activeProviderId]);
+
+  // Generation params from the active provider
+  const generationParams: GenerationParams = useMemo(() => {
+    if (activeProvider) {
+      return activeProvider.generationParams;
+    }
+    return { temperature: 0.7, maxTokens: 4096 };
+  }, [activeProvider]);
+
+  // Edit modal state for generation params
+  const [editParamModalVisible, setEditParamModalVisible] = useState(false);
+  const [editingParam, setEditingParam] = useState<'temperature' | 'maxTokens' | null>(null);
+  const [editParamValue, setEditParamValue] = useState('');
 
   // Animation
   const translateX = useSharedValue(SCREEN_WIDTH);
@@ -167,23 +186,126 @@ export function SettingsScreen({ visible, onClose }: SettingsScreenProps) {
     return counts;
   }, [models]);
 
-  // Placeholder system prompts (will integrate with actual store when available)
-  const systemPrompts: SystemPrompt[] = useMemo(() => [], []);
+  // Database reference from provider store
+  const db = useProviderStore((state) => state.db);
+
+  // Settings store — system prompts
+  const storeSystemPrompts = useSettingsStore((s) => s.systemPrompts);
+  const defaultSystemPromptId = useSettingsStore((s) => s.defaultSystemPromptId);
+  const setDefaultSystemPromptId = useSettingsStore((s) => s.setDefaultSystemPromptId);
+  const addSystemPromptAction = useSettingsStore((s) => s.addSystemPrompt);
+
+  // Map store prompts to display format with isDefault flag
+  const systemPrompts = useMemo(() => {
+    return storeSystemPrompts.map((prompt) => ({
+      ...prompt,
+      isDefault: prompt.id === defaultSystemPromptId,
+    }));
+  }, [storeSystemPrompts, defaultSystemPromptId]);
+
+  // Add prompt modal state
+  const [addPromptModalVisible, setAddPromptModalVisible] = useState(false);
+  const [newPromptName, setNewPromptName] = useState('');
+  const [newPromptContent, setNewPromptContent] = useState('');
+  const [isSavingPrompt, setIsSavingPrompt] = useState(false);
 
   const handleBack = useCallback(() => {
     onClose();
   }, [onClose]);
 
-  const handleProviderPress = useCallback((_providerId: string) => {
-    // Will wire to openProviderDetail via UI store
+  const handleProviderPress = useCallback((providerId: string) => {
+    useUIStore.getState().openProviderDetail(providerId);
   }, []);
 
   const handleAddPrompt = useCallback(() => {
-    // Navigate to prompt creation
+    setNewPromptName('');
+    setNewPromptContent('');
+    setAddPromptModalVisible(true);
   }, []);
 
+  /** Save the new system prompt via the settings store. */
+  const handleSavePrompt = useCallback(async () => {
+    if (!db || isSavingPrompt) return;
+    const trimmedName = newPromptName.trim();
+    const trimmedContent = newPromptContent.trim();
+    if (!trimmedName || !trimmedContent) return;
+
+    setIsSavingPrompt(true);
+    try {
+      await addSystemPromptAction(db, { name: trimmedName, content: trimmedContent });
+      setAddPromptModalVisible(false);
+    } catch (error) {
+      Alert.alert(
+        'Error',
+        error instanceof Error ? error.message : 'Failed to add system prompt.',
+      );
+    } finally {
+      setIsSavingPrompt(false);
+    }
+  }, [db, isSavingPrompt, newPromptName, newPromptContent, addSystemPromptAction]);
+
+  /** Cancel the add prompt modal. */
+  const handleCancelAddPrompt = useCallback(() => {
+    setAddPromptModalVisible(false);
+  }, []);
+
+  /** Set a prompt as the default. */
+  const handleToggleDefault = useCallback((promptId: string) => {
+    if (defaultSystemPromptId === promptId) {
+      // Tapping the already-default prompt clears the default
+      setDefaultSystemPromptId(null);
+    } else {
+      setDefaultSystemPromptId(promptId);
+    }
+  }, [defaultSystemPromptId, setDefaultSystemPromptId]);
+
   const handleAddProvider = useCallback(() => {
-    // Navigate to provider creation flow
+    useUIStore.getState().openProviderDetail('');
+  }, []);
+
+  /** Open the edit modal for a generation parameter. */
+  const handleParamPress = useCallback((param: 'temperature' | 'maxTokens') => {
+    setEditingParam(param);
+    setEditParamValue(
+      param === 'temperature'
+        ? String(generationParams.temperature)
+        : String(generationParams.maxTokens)
+    );
+    setEditParamModalVisible(true);
+  }, [generationParams]);
+
+  /** Save the edited generation parameter value. */
+  const handleParamSave = useCallback(() => {
+    if (!activeProvider || !editingParam) return;
+
+    if (editingParam === 'temperature') {
+      const parsed = parseFloat(editParamValue);
+      if (isNaN(parsed) || parsed < 0 || parsed > 2) {
+        Alert.alert('Invalid Value', 'Temperature must be between 0.0 and 2.0.');
+        return;
+      }
+      updateProvider(activeProvider.id, {
+        generationParams: { ...generationParams, temperature: parsed },
+      });
+    } else {
+      const parsed = parseInt(editParamValue, 10);
+      if (isNaN(parsed) || parsed <= 0) {
+        Alert.alert('Invalid Value', 'Max Tokens must be a positive integer.');
+        return;
+      }
+      updateProvider(activeProvider.id, {
+        generationParams: { ...generationParams, maxTokens: parsed },
+      });
+    }
+
+    setEditParamModalVisible(false);
+    setEditingParam(null);
+  }, [activeProvider, editingParam, editParamValue, generationParams, updateProvider]);
+
+  /** Cancel the edit modal. */
+  const handleParamCancel = useCallback(() => {
+    setEditParamModalVisible(false);
+    setEditingParam(null);
   }, []);
 
   if (!shouldRender) return null;
@@ -319,6 +441,7 @@ export function SettingsScreen({ visible, onClose }: SettingsScreenProps) {
                     <SystemPromptRow
                       key={prompt.id}
                       prompt={prompt}
+                      onToggleDefault={() => handleToggleDefault(prompt.id)}
                       isLast={index === systemPrompts.length - 1}
                     />
                   ))
@@ -354,12 +477,14 @@ export function SettingsScreen({ visible, onClose }: SettingsScreenProps) {
               >
                 <GenerationParamRow
                   label="Temperature"
-                  value="0.7"
+                  value={String(generationParams.temperature)}
+                  onPress={() => handleParamPress('temperature')}
                   isLast={false}
                 />
                 <GenerationParamRow
                   label="Max Tokens"
-                  value="4096"
+                  value={String(generationParams.maxTokens)}
+                  onPress={() => handleParamPress('maxTokens')}
                   isLast
                 />
               </View>
@@ -367,6 +492,163 @@ export function SettingsScreen({ visible, onClose }: SettingsScreenProps) {
           </>
         )}
       </ScrollView>
+
+      {/* Edit Generation Parameter Modal */}
+      <Modal
+        visible={editParamModalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={handleParamCancel}
+      >
+        <Pressable
+          style={styles.modalOverlay}
+          onPress={handleParamCancel}
+        >
+          <Pressable
+            style={[styles.modalContent, { backgroundColor: colors.surface }]}
+            onPress={() => {}}
+          >
+            <Text style={[styles.modalTitle, { color: colors.text }]}>
+              {editingParam === 'temperature' ? 'Temperature' : 'Max Tokens'}
+            </Text>
+            <Text style={[styles.modalDescription, { color: colors.textSecondary }]}>
+              {editingParam === 'temperature'
+                ? 'Sampling temperature (0.0–2.0). Higher values produce more varied output.'
+                : 'Maximum number of tokens to generate in the response.'}
+            </Text>
+            <TextInput
+              style={[
+                styles.modalInput,
+                {
+                  color: colors.text,
+                  backgroundColor: colors.surfaceSecondary,
+                  borderColor: colors.border,
+                },
+              ]}
+              value={editParamValue}
+              onChangeText={setEditParamValue}
+              keyboardType={editingParam === 'temperature' ? 'decimal-pad' : 'number-pad'}
+              autoFocus
+              selectTextOnFocus
+              accessibilityLabel={editingParam === 'temperature' ? 'Temperature value' : 'Max Tokens value'}
+            />
+            <View style={styles.modalButtons}>
+              <Pressable
+                style={[styles.modalButton, styles.modalCancelButton]}
+                onPress={handleParamCancel}
+                accessibilityRole="button"
+                accessibilityLabel="Cancel"
+              >
+                <Text style={[styles.modalButtonText, { color: colors.textSecondary }]}>
+                  Cancel
+                </Text>
+              </Pressable>
+              <Pressable
+                style={[styles.modalButton, styles.modalSaveButton, { backgroundColor: colors.accent }]}
+                onPress={handleParamSave}
+                accessibilityRole="button"
+                accessibilityLabel="Save"
+              >
+                <Text style={[styles.modalButtonText, { color: colors.accentText }]}>
+                  Save
+                </Text>
+              </Pressable>
+            </View>
+          </Pressable>
+        </Pressable>
+      </Modal>
+
+      {/* Add System Prompt Modal */}
+      <Modal
+        visible={addPromptModalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={handleCancelAddPrompt}
+      >
+        <Pressable
+          style={styles.modalOverlay}
+          onPress={handleCancelAddPrompt}
+        >
+          <KeyboardAvoidingView
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            style={styles.addPromptModalWrapper}
+          >
+            <Pressable
+              style={[styles.modalContent, { backgroundColor: colors.surface }]}
+              onPress={() => {}}
+            >
+              <Text style={[styles.modalTitle, { color: colors.text }]}>
+                Add System Prompt
+              </Text>
+              <Text style={[styles.modalDescription, { color: colors.textSecondary }]}>
+                Give your prompt a name and provide the system instructions.
+              </Text>
+              <TextInput
+                style={[
+                  styles.modalInput,
+                  {
+                    color: colors.text,
+                    backgroundColor: colors.surfaceSecondary,
+                    borderColor: colors.border,
+                  },
+                ]}
+                value={newPromptName}
+                onChangeText={setNewPromptName}
+                placeholder="Prompt name"
+                placeholderTextColor={colors.textTertiary}
+                autoFocus
+                accessibilityLabel="Prompt name"
+              />
+              <TextInput
+                style={[
+                  styles.modalInput,
+                  styles.modalTextArea,
+                  {
+                    color: colors.text,
+                    backgroundColor: colors.surfaceSecondary,
+                    borderColor: colors.border,
+                  },
+                ]}
+                value={newPromptContent}
+                onChangeText={setNewPromptContent}
+                placeholder="System prompt content…"
+                placeholderTextColor={colors.textTertiary}
+                multiline
+                textAlignVertical="top"
+                accessibilityLabel="Prompt content"
+              />
+              <View style={styles.modalButtons}>
+                <Pressable
+                  style={[styles.modalButton, styles.modalCancelButton]}
+                  onPress={handleCancelAddPrompt}
+                  accessibilityRole="button"
+                  accessibilityLabel="Cancel"
+                >
+                  <Text style={[styles.modalButtonText, { color: colors.textSecondary }]}>
+                    Cancel
+                  </Text>
+                </Pressable>
+                <Pressable
+                  style={[
+                    styles.modalButton,
+                    styles.modalSaveButton,
+                    { backgroundColor: colors.accent },
+                    (!newPromptName.trim() || !newPromptContent.trim()) && { opacity: 0.5 },
+                  ]}
+                  onPress={handleSavePrompt}
+                  disabled={!newPromptName.trim() || !newPromptContent.trim() || isSavingPrompt}
+                  accessibilityRole="button"
+                  accessibilityLabel="Save"
+                >
+                  <Text style={[styles.modalButtonText, { color: colors.accentText }]}>
+                    Save
+                  </Text>
+                </Pressable>
+              </View>
+            </Pressable>
+          </KeyboardAvoidingView>
+        </Pressable>
+      </Modal>
     </Animated.View>
   );
 }
@@ -380,8 +662,24 @@ interface ProviderCardProps {
   isLast: boolean;
 }
 
+/** Maps a connection status to its indicator color. */
+function getStatusDotColor(status: ConnectionStatus | undefined): string {
+  switch (status) {
+    case 'connected':
+      return '#34C759';
+    case 'failed':
+      return '#FF3B30';
+    case 'untested':
+    default:
+      return '#8E8E93';
+  }
+}
+
 function ProviderCard({ provider, modelCount, onPress, isLast }: ProviderCardProps) {
   const { colors } = useTheme();
+  const { suffix: maskedKeyDisplay } = useMaskedKey(provider.id);
+  const connectionState = useProviderStore((s) => s.connectionStatuses[provider.id]);
+  const statusDotColor = getStatusDotColor(connectionState?.status);
   const apiTypeLabel = formatApiType(provider);
   const modelCountLabel = `${modelCount} model${modelCount !== 1 ? 's' : ''}`;
 
@@ -432,7 +730,7 @@ function ProviderCard({ provider, modelCount, onPress, isLast }: ProviderCardPro
 
         {/* Masked key */}
         <Text style={[styles.maskedKey, { color: colors.textTertiary }]}>
-          {maskApiKey(null)}
+          {maskedKeyDisplay}
         </Text>
 
         {/* Chevron */}
@@ -455,11 +753,12 @@ function ProviderCard({ provider, modelCount, onPress, isLast }: ProviderCardPro
 }
 
 interface SystemPromptRowProps {
-  prompt: SystemPrompt;
+  prompt: { id: string; name: string; content: string; isDefault: boolean };
+  onToggleDefault: () => void;
   isLast: boolean;
 }
 
-function SystemPromptRow({ prompt, isLast }: SystemPromptRowProps) {
+function SystemPromptRow({ prompt, onToggleDefault, isLast }: SystemPromptRowProps) {
   const { colors } = useTheme();
   const preview = truncateText(prompt.content, SNIPPET_MAX_CHARS);
 
@@ -473,11 +772,22 @@ function SystemPromptRow({ prompt, isLast }: SystemPromptRowProps) {
           >
             {prompt.name}
           </Text>
-          {prompt.isDefault && (
-            <Text style={[styles.defaultCheck, { color: colors.accent }]}>
+          <Pressable
+            onPress={onToggleDefault}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            accessibilityRole="button"
+            accessibilityLabel={prompt.isDefault ? `${prompt.name} is default` : `Set ${prompt.name} as default`}
+            accessibilityHint="Tap to set as default system prompt"
+          >
+            <Text
+              style={[
+                styles.defaultCheck,
+                { color: prompt.isDefault ? colors.accent : colors.textTertiary },
+              ]}
+            >
               {'\u2713'}
             </Text>
-          )}
+          </Pressable>
         </View>
         <Text
           style={[styles.promptPreview, { color: colors.textTertiary }]}
@@ -514,15 +824,17 @@ function SystemPromptRow({ prompt, isLast }: SystemPromptRowProps) {
 interface GenerationParamRowProps {
   label: string;
   value: string;
+  onPress: () => void;
   isLast: boolean;
 }
 
-function GenerationParamRow({ label, value, isLast }: GenerationParamRowProps) {
+function GenerationParamRow({ label, value, onPress, isLast }: GenerationParamRowProps) {
   const { colors } = useTheme();
 
   return (
     <Pressable
       style={styles.paramRow}
+      onPress={onPress}
       accessibilityRole="button"
       accessibilityLabel={`${label}: ${value}`}
       accessibilityHint="Tap to adjust"
@@ -758,6 +1070,68 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '400',
     marginRight: 6,
+  },
+
+  // Edit parameter modal
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 40,
+  },
+  modalContent: {
+    width: '100%',
+    borderRadius: 14,
+    padding: 20,
+  },
+  modalTitle: {
+    fontSize: 17,
+    fontWeight: '600',
+    marginBottom: 6,
+  },
+  modalDescription: {
+    fontSize: 13,
+    fontWeight: '400',
+    lineHeight: 18,
+    marginBottom: 16,
+  },
+  modalInput: {
+    fontSize: 17,
+    fontWeight: '400',
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    marginBottom: 20,
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+  },
+  modalButton: {
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 8,
+    minWidth: 70,
+    alignItems: 'center',
+  },
+  modalCancelButton: {
+    marginRight: 8,
+  },
+  modalSaveButton: {},
+  modalButtonText: {
+    fontSize: 15,
+    fontWeight: '600',
+  },
+  modalTextArea: {
+    minHeight: 100,
+    textAlignVertical: 'top',
+  },
+  addPromptModalWrapper: {
+    width: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 
   // Empty state
