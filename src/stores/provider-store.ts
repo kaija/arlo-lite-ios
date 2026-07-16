@@ -8,6 +8,7 @@ import {
 } from '@/database/repositories/provider-repo';
 import type {
   Provider,
+  GenerationParams,
   CreateProviderData,
   UpdateProviderData,
 } from '@/database/repositories/provider-repo';
@@ -19,6 +20,8 @@ import { testConnection as testConnectionService } from '@/services/completion-s
 import { ProviderError } from '@/providers/errors';
 import { generateId } from '@/utils/uuid';
 import { getCurrentTimestamp } from '@/utils/date';
+
+export type { Provider, GenerationParams, CreateProviderData, UpdateProviderData };
 
 /**
  * Connection status for a provider's API key / endpoint validation.
