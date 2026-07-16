@@ -109,7 +109,7 @@ Wire together existing stores, services, and UI components into a fully function
     - Import `formatTokenMetadata` from `src/utils/token-formatting.ts`
     - _Requirements: 7.1, 7.2, 7.3, 7.4_
 
-- [ ] 9. ErrorBanner component and wiring
+- [x] 9. ErrorBanner component and wiring
   - [x] 9.1 Create `src/components/chat/ErrorBanner.tsx`
     - Implement `ErrorBannerProps: { message, detail?, isRetryable, onRetry, onDismiss }`
     - Render inline in message stream style: warning icon + single-line message + expandable detail + Retry button
@@ -117,7 +117,7 @@ Wire together existing stores, services, and UI components into a fully function
     - VoiceOver: announce error, label retry button
     - _Requirements: 8.1, 8.2, 8.3_
 
-  - [-] 9.2 Wire ErrorBanner in `src/components/layout/ChatShell.tsx`
+  - [x] 9.2 Wire ErrorBanner in `src/components/layout/ChatShell.tsx`
     - Import `useChat` error state (currently useChat is already used in ChatShell)
     - When `error` is non-null and not streaming, render ErrorBanner as ListFooterComponent or after the streaming footer
     - Pass `onRetry` → `retry()`, `onDismiss` → `clearError()`
@@ -157,53 +157,53 @@ Wire together existing stores, services, and UI components into a fully function
     - Include in the fetch request body when defined
     - _Requirements: 2.4_
 
-- [~] 13. Checkpoint - Full integration verification
+- [-] 13. Checkpoint - Full integration verification
   - Ensure all tests pass and the app builds without errors.
 
-- [ ] 14. Property tests
-  - [~] 14.1 Write property tests for generation params schema invariant
+- [x] 14. Property tests
+  - [x] 14.1 Write property tests for generation params schema invariant
     - **Property 3: Generation Params Schema Invariant**
     - **Validates: Requirements 2.1**
     - Verify temperature in [0.0, 2.0], maxTokens positive integer, defaults correct
     - Place in `src/stores/__tests__/provider-store.property.test.ts`
 
-  - [~] 14.2 Write property tests for API key masking
+  - [x] 14.2 Write property tests for API key masking
     - **Property 6: API Key Masking**
     - **Validates: Requirements 3.1, 3.3**
     - For any key length ≥ 4, output ends with last 4 chars; for no key → "No key"
     - Place in `src/components/overlays/__tests__/provider-card.property.test.ts`
 
-  - [~] 14.3 Write property tests for connection status mapping
+  - [x] 14.3 Write property tests for connection status mapping
     - **Property 7: Connection Status Mapping**
     - **Validates: Requirements 4.1, 4.2, 4.3, 4.4**
     - For each status value, verify correct color output
 
-  - [~] 14.4 Write property tests for model selection round-trip
+  - [x] 14.4 Write property tests for model selection round-trip
     - **Property 8: Model Selection Round-Trip Persistence**
     - **Validates: Requirements 5.1, 5.2**
     - Switch model, switch away, switch back → same model restored
 
-  - [~] 14.5 Write property tests for thinking level round-trip
+  - [x] 14.5 Write property tests for thinking level round-trip
     - **Property 9: Thinking Level Round-Trip Persistence**
     - **Validates: Requirements 6.1, 6.2**
     - Set thinking level, switch away, switch back → same level restored
 
-  - [~] 14.6 Write property tests for cost metadata formatting
+  - [x] 14.6 Write property tests for cost metadata formatting
     - **Property 10: Cost Metadata Conditional Formatting**
     - **Validates: Requirements 7.1, 7.2, 7.4**
     - Non-null fields → formatted output; any null → no output
 
-  - [~] 14.7 Write property tests for error banner retry visibility
+  - [x] 14.7 Write property tests for error banner retry visibility
     - **Property 11: Error Banner Retry Visibility**
     - **Validates: Requirements 8.2, 8.3**
     - isRetryable true → retry visible; false → no retry
 
-  - [~] 14.8 Write property tests for system prompt prepend
+  - [x] 14.8 Write property tests for system prompt prepend
     - **Property 12: System Prompt Prepend Correctness**
     - **Validates: Requirements 10.1, 10.2, 10.3**
     - Non-null default → messages[0] is system; null → no system prepend
 
-  - [~] 14.9 Write property tests for context ring computation
+  - [x] 14.9 Write property tests for context ring computation
     - **Property 13 + 14: Context Ring Usage + Thresholds**
     - **Validates: Requirements 11.1, 11.2, 11.3, 11.4, 11.5**
     - Verify percentage calculation and color thresholds
