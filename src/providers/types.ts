@@ -147,11 +147,11 @@ export interface CompletionResponse {
 }
 
 /**
- * Common Provider interface — all provider adapters implement this.
+ * Common provider interface — SDK-based and raw-fetch providers
+ * both implement this contract.
  *
  * Adding a new provider requires only implementing this interface.
- * The interface covers the full lifecycle: building requests, parsing
- * responses (streaming and non-streaming), thinking-level mapping,
+ * The interface covers completions (streaming and non-streaming),
  * model discovery, and API key validation.
  */
 export interface IProvider {
@@ -159,41 +159,39 @@ export interface IProvider {
   readonly type: ProviderType;
 
   /**
-   * Build the HTTP request for a completion.
+   * Execute a non-streaming completion request.
    *
-   * @param config - The provider configuration (base URL, API mode, etc.)
+   * @param config - Provider configuration (baseUrl, apiMode, etc.)
    * @param request - The completion request parameters
-   * @returns An object containing the full URL, headers, and JSON-serialized body
+   * @param apiKey - API key for authentication
+   * @returns Parsed CompletionResponse
+   * @throws ProviderError on auth, network, or server failures
    */
-  buildRequest(config: ProviderConfig, request: CompletionRequest): {
-    url: string;
-    headers: Record<string, string>;
-    body: string;
-  };
+  complete(
+    config: ProviderConfig,
+    request: CompletionRequest,
+    apiKey: string,
+  ): Promise<CompletionResponse>;
 
   /**
-   * Parse a non-streaming response into a structured CompletionResponse.
+   * Execute a streaming completion request.
    *
-   * @param raw - The raw JSON response from the provider API
-   * @returns A normalized CompletionResponse
-   */
-  parseResponse(raw: unknown): CompletionResponse;
-
-  /**
-   * Parse a single SSE line into a StreamChunk.
+   * Returns an AsyncIterable that yields StreamChunks as they arrive.
+   * The iterable terminates with a 'done' chunk on success or an 'error'
+   * chunk on failure.
    *
-   * @param line - A single line from the SSE stream (e.g. "data: {...}")
-   * @returns A StreamChunk if the line contains parseable data, or null if it should be skipped
+   * @param config - Provider configuration
+   * @param request - The completion request parameters
+   * @param apiKey - API key for authentication
+   * @param signal - AbortSignal for cancellation
+   * @returns AsyncIterable of StreamChunk objects
    */
-  parseStreamChunk(line: string): StreamChunk | null;
-
-  /**
-   * Map an abstract ThinkingLevel to provider-specific request parameters.
-   *
-   * @param level - The abstract thinking effort level
-   * @returns A record of provider-specific parameters to merge into the request body
-   */
-  mapThinkingLevel(level: ThinkingLevel): Record<string, unknown>;
+  streamCompletion(
+    config: ProviderConfig,
+    request: CompletionRequest,
+    apiKey: string,
+    signal: AbortSignal,
+  ): AsyncIterable<StreamChunk>;
 
   /**
    * List available models from the provider API.
