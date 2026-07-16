@@ -73,7 +73,12 @@
     "validating": "Validating API key...",
     "validationSuccess": "API key validated successfully",
     "validationFailed": "API key validation failed",
-    "empty": "No providers configured"
+    "testConnection": "Test Connection",
+    "connected": "Connected",
+    "connectionFailed": "Connection failed",
+    "connectionTimeout": "Connection timed out. Please check your network.",
+    "empty": "No providers configured",
+    "addModels": "Add models"
   },
 
   "models": {
@@ -97,7 +102,10 @@
     "selectFromList": "Select from API",
     "manualEntry": "Manual Entry",
     "empty": "No models added",
-    "save": "Save"
+    "save": "Save",
+    "fromCache": "Loaded from cache",
+    "noModelsAvailable": "No models available. Enter a model ID manually.",
+    "modelIdTooLong": "Model ID must be 256 characters or fewer"
   },
 
   "modelSwitcher": {

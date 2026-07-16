@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { Card } from '@/components/common';
 import { useTheme, Theme } from '@/theme';
 import type { ProviderType } from '@/database/repositories/provider-repo';
+import type { ConnectionStatus } from '@/stores/provider-store';
 
 export interface ProviderCardProps {
   /** Provider display name */
@@ -15,13 +16,28 @@ export interface ProviderCardProps {
   modelCount: number;
   /** Called when the card is pressed */
   onPress: () => void;
+  /** Connection status: 'connected', 'failed', or 'untested' */
+  connectionStatus?: ConnectionStatus;
+  /** Short error message when connection status is 'failed' (max 80 chars) */
+  connectionError?: string;
+  /** Called when "Add models" prompt is tapped */
+  onAddModels?: () => void;
 }
 
 /**
- * Displays a provider as a tappable card with name, type badge, and model count.
+ * Displays a provider as a tappable card with name, type badge, model count,
+ * and connection status indicator.
  * Used in the ProviderListScreen to list all configured providers.
  */
-export function ProviderCard({ name, type, modelCount, onPress }: ProviderCardProps) {
+export function ProviderCard({
+  name,
+  type,
+  modelCount,
+  onPress,
+  connectionStatus = 'untested',
+  connectionError,
+  onAddModels,
+}: ProviderCardProps) {
   const { t } = useTranslation();
   const theme = useTheme();
   const styles = createStyles(theme);
@@ -38,12 +54,30 @@ export function ProviderCard({ name, type, modelCount, onPress }: ProviderCardPr
       <Card>
         <View style={styles.row}>
           <View style={styles.info}>
-            <Text style={styles.name} numberOfLines={1}>
-              {name}
-            </Text>
-            <Text style={styles.modelCount}>
-              {modelCount} {modelCount === 1 ? 'model' : 'models'}
-            </Text>
+            <View style={styles.nameRow}>
+              <View style={[styles.statusDot, getStatusDotStyle(connectionStatus, theme)]} />
+              <Text style={styles.name} numberOfLines={1}>
+                {name}
+              </Text>
+            </View>
+            {connectionStatus === 'failed' && connectionError ? (
+              <Text style={styles.errorText} numberOfLines={1}>
+                {connectionError}
+              </Text>
+            ) : modelCount === 0 && onAddModels ? (
+              <Text
+                style={styles.addModelsText}
+                onPress={onAddModels}
+                accessibilityRole="link"
+                accessibilityLabel={t('providers.addModels')}
+              >
+                {t('providers.addModels')}
+              </Text>
+            ) : (
+              <Text style={styles.modelCount}>
+                {modelCount} {modelCount === 1 ? 'model' : 'models'}
+              </Text>
+            )}
           </View>
           <View style={styles.badge}>
             <Text style={styles.badgeText}>{typeLabel}</Text>
@@ -52,6 +86,18 @@ export function ProviderCard({ name, type, modelCount, onPress }: ProviderCardPr
       </Card>
     </TouchableOpacity>
   );
+}
+
+function getStatusDotStyle(status: ConnectionStatus, theme: Theme): ViewStyle {
+  switch (status) {
+    case 'connected':
+      return { backgroundColor: theme.colors.success };
+    case 'failed':
+      return { backgroundColor: theme.colors.error };
+    case 'untested':
+    default:
+      return { backgroundColor: theme.colors.textTertiary };
+  }
 }
 
 function getTypeLabel(type: ProviderType, t: (key: string) => string): string {
@@ -79,16 +125,44 @@ function createStyles(theme: Theme) {
     marginRight: theme.spacing.md,
   };
 
+  const nameRow: ViewStyle = {
+    flexDirection: 'row',
+    alignItems: 'center',
+  };
+
+  const statusDot: ViewStyle = {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    marginRight: theme.spacing.sm,
+  };
+
   const name: TextStyle = {
     ...theme.typography.body,
     fontWeight: '600',
     color: theme.colors.text,
+    flex: 1,
   };
 
   const modelCount: TextStyle = {
     ...theme.typography.caption1,
     color: theme.colors.textSecondary,
     marginTop: theme.spacing.xs,
+    marginLeft: 8 + theme.spacing.sm, // align with name (dot width + dot margin)
+  };
+
+  const errorText: TextStyle = {
+    ...theme.typography.caption1,
+    color: theme.colors.error,
+    marginTop: theme.spacing.xs,
+    marginLeft: 8 + theme.spacing.sm,
+  };
+
+  const addModelsText: TextStyle = {
+    ...theme.typography.caption1,
+    color: theme.colors.accent,
+    marginTop: theme.spacing.xs,
+    marginLeft: 8 + theme.spacing.sm,
   };
 
   const badge: ViewStyle = {
@@ -104,5 +178,16 @@ function createStyles(theme: Theme) {
     color: theme.colors.accent,
   };
 
-  return StyleSheet.create({ row, info, name, modelCount, badge, badgeText });
+  return StyleSheet.create({
+    row,
+    info,
+    nameRow,
+    statusDot,
+    name,
+    modelCount,
+    errorText,
+    addModelsText,
+    badge,
+    badgeText,
+  });
 }

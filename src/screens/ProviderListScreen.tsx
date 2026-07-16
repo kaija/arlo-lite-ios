@@ -23,6 +23,7 @@ export function ProviderListScreen() {
   const navigation = useNavigation<NavigationProp>();
   const providers = useProviderStore((state) => state.providers);
   const models = useProviderStore((state) => state.models);
+  const connectionStatuses = useProviderStore((state) => state.connectionStatuses);
   const styles = createStyles(theme);
 
   function getModelCount(providerId: string): number {
@@ -37,7 +38,12 @@ export function ProviderListScreen() {
     navigation.navigate('ProviderDetail', {});
   }
 
+  function handleAddModels(providerId: string) {
+    navigation.navigate('ProviderDetail', { providerId });
+  }
+
   function renderItem({ item }: { item: Provider }) {
+    const connectionState = connectionStatuses[item.id];
     return (
       <View style={styles.cardWrapper}>
         <ProviderCard
@@ -45,6 +51,9 @@ export function ProviderListScreen() {
           type={item.type}
           modelCount={getModelCount(item.id)}
           onPress={() => handleProviderPress(item.id)}
+          connectionStatus={connectionState?.status ?? 'untested'}
+          connectionError={connectionState?.error}
+          onAddModels={() => handleAddModels(item.id)}
         />
       </View>
     );
