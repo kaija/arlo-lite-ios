@@ -709,12 +709,21 @@ function ProviderCard({ provider, modelCount, onPress, isLast }: ProviderCardPro
 
         {/* Info */}
         <View style={styles.providerInfo}>
-          <Text
-            style={[styles.providerName, { color: colors.text }]}
-            numberOfLines={1}
-          >
-            {provider.name}
-          </Text>
+          <View style={styles.providerNameRow}>
+            <View
+              style={[
+                styles.statusDot,
+                { backgroundColor: statusDotColor },
+              ]}
+              accessibilityLabel={`Connection status: ${connectionState?.status ?? 'untested'}`}
+            />
+            <Text
+              style={[styles.providerName, { color: colors.text }]}
+              numberOfLines={1}
+            >
+              {provider.name}
+            </Text>
+          </View>
           <View style={styles.providerMeta}>
             <Text style={[styles.providerMetaText, { color: colors.textTertiary }]}>
               {modelCountLabel}
@@ -955,6 +964,16 @@ const styles = StyleSheet.create({
   providerInfo: {
     flex: 1,
     marginLeft: 12,
+  },
+  providerNameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  statusDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    marginRight: 6,
   },
   providerName: {
     fontSize: 15,
