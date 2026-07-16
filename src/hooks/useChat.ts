@@ -14,6 +14,7 @@ import { useCallback, useRef } from 'react';
 import { useSessionStore } from '@/stores/session-store';
 import { useChatStore } from '@/stores/chat-store';
 import { useProviderStore } from '@/stores/provider-store';
+import { useSettingsStore } from '@/stores/settings-store';
 import { streamCompletion, complete } from '@/services/completion-service';
 import type { CompletionServiceOptions } from '@/services/completion-service';
 import { ProviderError } from '@/providers/errors';
@@ -121,6 +122,20 @@ export function useChat(): UseChatResult {
       content: msg.content,
       ...(msg.thinkingContent ? { thinkingContent: msg.thinkingContent } : {}),
     }));
+  }
+
+  /**
+   * Prepend the default system prompt (if configured) to the messages array.
+   * Reads from the SettingsStore and inserts at index 0.
+   */
+  function prependSystemPrompt(chatMessages: ChatMessage[]): ChatMessage[] {
+    const { defaultSystemPromptId, systemPrompts } = useSettingsStore.getState();
+    if (!defaultSystemPromptId) return chatMessages;
+
+    const prompt = systemPrompts.find((p) => p.id === defaultSystemPromptId);
+    if (!prompt) return chatMessages;
+
+    return [{ role: 'system', content: prompt.content }, ...chatMessages];
   }
 
   /**
@@ -326,12 +341,14 @@ export function useChat(): UseChatResult {
         providerConfig: providerConfigForService,
         modelId: activeModelId,
         thinkingLevel,
+        temperature: providerConfig.generationParams.temperature,
+        maxTokens: providerConfig.generationParams.maxTokens,
       };
 
       if (providerConfig.streamingEnabled) {
-        await handleStreaming(chatMessages, options, activeSessionId, modelConfig);
+        await handleStreaming(prependSystemPrompt(chatMessages), options, activeSessionId, modelConfig);
       } else {
-        await handleNonStreaming(chatMessages, options, activeSessionId, modelConfig);
+        await handleNonStreaming(prependSystemPrompt(chatMessages), options, activeSessionId, modelConfig);
       }
     },
     [
@@ -395,12 +412,14 @@ export function useChat(): UseChatResult {
         providerConfig: providerConfigForService,
         modelId: activeModelId,
         thinkingLevel,
+        temperature: providerConfig.generationParams.temperature,
+        maxTokens: providerConfig.generationParams.maxTokens,
       };
 
       if (providerConfig.streamingEnabled) {
-        await handleStreaming(chatMessages, options, activeSessionId, modelConfig);
+        await handleStreaming(prependSystemPrompt(chatMessages), options, activeSessionId, modelConfig);
       } else {
-        await handleNonStreaming(chatMessages, options, activeSessionId, modelConfig);
+        await handleNonStreaming(prependSystemPrompt(chatMessages), options, activeSessionId, modelConfig);
       }
     },
     [
