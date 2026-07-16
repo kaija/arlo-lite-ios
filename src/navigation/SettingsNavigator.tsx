@@ -4,12 +4,19 @@ import { createStackNavigator } from '@react-navigation/stack';
 import type { SettingsStackParamList } from './types';
 import { SettingsScreen } from '@/screens/SettingsScreen';
 import { ProviderListScreen } from '@/screens/ProviderListScreen';
-import { ProviderDetailScreen } from '@/screens/ProviderDetailScreen';
 import { AboutScreen } from '@/screens/AboutScreen';
 
 const Stack = createStackNavigator<SettingsStackParamList>();
 
 // -- Placeholder screens (replaced by real implementations in later tasks) --
+
+function ProviderDetailPlaceholder() {
+  return (
+    <View style={styles.container}>
+      <Text style={styles.text}>Provider Detail</Text>
+    </View>
+  );
+}
 
 function ModelDetailPlaceholder() {
   return (
@@ -48,7 +55,7 @@ export function SettingsNavigator() {
       />
       <Stack.Screen
         name="ProviderDetail"
-        component={ProviderDetailScreen}
+        component={ProviderDetailPlaceholder}
         options={{ title: 'Provider' }}
       />
       <Stack.Screen
