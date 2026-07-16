@@ -95,6 +95,14 @@ jest.mock('../CodeBlock', () => ({
   CodeBlock: () => null,
 }));
 
+// Mock SVG icons
+jest.mock('@/components/icons', () => ({
+  CopyIcon: () => 'CopyIcon',
+  RegenerateIcon: () => 'RegenerateIcon',
+  EditIcon: () => 'EditIcon',
+  DeleteIcon: () => 'DeleteIcon',
+}));
+
 function createMessage(overrides: Partial<Message> = {}): Message {
   return {
     id: 'msg-1',
@@ -172,34 +180,34 @@ describe('MessageFlow', () => {
   });
 
   it('hides action buttons while streaming', () => {
-    const { queryByText } = renderMessageFlow({
+    const { queryByLabelText } = renderMessageFlow({
       message: createMessage({ role: 'assistant' }),
       isStreaming: true,
     });
-    expect(queryByText('Copy')).toBeNull();
-    expect(queryByText('Regenerate')).toBeNull();
-    expect(queryByText('Delete')).toBeNull();
+    expect(queryByLabelText('Copy message')).toBeNull();
+    expect(queryByLabelText('Regenerate response')).toBeNull();
+    expect(queryByLabelText('Delete message')).toBeNull();
   });
 
   it('shows copy, regenerate, delete buttons for assistant when not streaming', () => {
-    const { getByText } = renderMessageFlow({
+    const { getByLabelText } = renderMessageFlow({
       message: createMessage({ role: 'assistant' }),
       isStreaming: false,
     });
-    expect(getByText('Copy')).toBeTruthy();
-    expect(getByText('Regenerate')).toBeTruthy();
-    expect(getByText('Delete')).toBeTruthy();
+    expect(getByLabelText('Copy message')).toBeTruthy();
+    expect(getByLabelText('Regenerate response')).toBeTruthy();
+    expect(getByLabelText('Delete message')).toBeTruthy();
   });
 
   it('shows copy, edit, delete buttons for user messages', () => {
-    const { getByText, queryByText } = renderMessageFlow({
+    const { getByLabelText, queryByLabelText } = renderMessageFlow({
       message: createMessage({ role: 'user' }),
       isStreaming: false,
     });
-    expect(getByText('Copy')).toBeTruthy();
-    expect(getByText('Edit')).toBeTruthy();
-    expect(getByText('Delete')).toBeTruthy();
-    expect(queryByText('Regenerate')).toBeNull();
+    expect(getByLabelText('Copy message')).toBeTruthy();
+    expect(getByLabelText('Edit message')).toBeTruthy();
+    expect(getByLabelText('Delete message')).toBeTruthy();
+    expect(queryByLabelText('Regenerate response')).toBeNull();
   });
 
   it('does not render avatar when showAvatars is false', () => {

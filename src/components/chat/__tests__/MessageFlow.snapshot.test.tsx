@@ -100,6 +100,14 @@ jest.mock('../CodeBlock', () => ({
   CodeBlock: () => null,
 }));
 
+// Mock SVG icons
+jest.mock('@/components/icons', () => ({
+  CopyIcon: () => 'CopyIcon',
+  RegenerateIcon: () => 'RegenerateIcon',
+  EditIcon: () => 'EditIcon',
+  DeleteIcon: () => 'DeleteIcon',
+}));
+
 // ─── Helpers ───────────────────────────────────────────────────────────────────
 
 function createMessage(overrides: Partial<Message> = {}): Message {

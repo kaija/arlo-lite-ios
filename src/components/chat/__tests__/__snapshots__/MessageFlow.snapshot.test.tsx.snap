@@ -126,25 +126,10 @@ exports[`MessageFlow Snapshots renders a user message and matches snapshot (Req 
             "justifyContent": "center",
             "minHeight": 44,
             "minWidth": 44,
-            "paddingHorizontal": 8,
           }
         }
       >
-        <Text
-          style={
-            [
-              {
-                "fontSize": 13,
-                "fontWeight": "500",
-              },
-              {
-                "color": "#8E8E93",
-              },
-            ]
-          }
-        >
-          Copy
-        </Text>
+        CopyIcon
       </View>
     </View>
     <View
@@ -196,25 +181,10 @@ exports[`MessageFlow Snapshots renders a user message and matches snapshot (Req 
             "justifyContent": "center",
             "minHeight": 44,
             "minWidth": 44,
-            "paddingHorizontal": 8,
           }
         }
       >
-        <Text
-          style={
-            [
-              {
-                "fontSize": 13,
-                "fontWeight": "500",
-              },
-              {
-                "color": "#8E8E93",
-              },
-            ]
-          }
-        >
-          Edit
-        </Text>
+        EditIcon
       </View>
     </View>
     <View
@@ -266,25 +236,10 @@ exports[`MessageFlow Snapshots renders a user message and matches snapshot (Req 
             "justifyContent": "center",
             "minHeight": 44,
             "minWidth": 44,
-            "paddingHorizontal": 8,
           }
         }
       >
-        <Text
-          style={
-            [
-              {
-                "fontSize": 13,
-                "fontWeight": "500",
-              },
-              {
-                "color": "#8E8E93",
-              },
-            ]
-          }
-        >
-          Delete
-        </Text>
+        DeleteIcon
       </View>
     </View>
   </View>
@@ -417,25 +372,10 @@ exports[`MessageFlow Snapshots renders a user message with token metadata and ma
             "justifyContent": "center",
             "minHeight": 44,
             "minWidth": 44,
-            "paddingHorizontal": 8,
           }
         }
       >
-        <Text
-          style={
-            [
-              {
-                "fontSize": 13,
-                "fontWeight": "500",
-              },
-              {
-                "color": "#8E8E93",
-              },
-            ]
-          }
-        >
-          Copy
-        </Text>
+        CopyIcon
       </View>
     </View>
     <View
@@ -487,25 +427,10 @@ exports[`MessageFlow Snapshots renders a user message with token metadata and ma
             "justifyContent": "center",
             "minHeight": 44,
             "minWidth": 44,
-            "paddingHorizontal": 8,
           }
         }
       >
-        <Text
-          style={
-            [
-              {
-                "fontSize": 13,
-                "fontWeight": "500",
-              },
-              {
-                "color": "#8E8E93",
-              },
-            ]
-          }
-        >
-          Edit
-        </Text>
+        EditIcon
       </View>
     </View>
     <View
@@ -557,25 +482,10 @@ exports[`MessageFlow Snapshots renders a user message with token metadata and ma
             "justifyContent": "center",
             "minHeight": 44,
             "minWidth": 44,
-            "paddingHorizontal": 8,
           }
         }
       >
-        <Text
-          style={
-            [
-              {
-                "fontSize": 13,
-                "fontWeight": "500",
-              },
-              {
-                "color": "#8E8E93",
-              },
-            ]
-          }
-        >
-          Delete
-        </Text>
+        DeleteIcon
       </View>
     </View>
   </View>
@@ -699,25 +609,10 @@ exports[`MessageFlow Snapshots renders an assistant message and matches snapshot
             "justifyContent": "center",
             "minHeight": 44,
             "minWidth": 44,
-            "paddingHorizontal": 8,
           }
         }
       >
-        <Text
-          style={
-            [
-              {
-                "fontSize": 13,
-                "fontWeight": "500",
-              },
-              {
-                "color": "#8E8E93",
-              },
-            ]
-          }
-        >
-          Copy
-        </Text>
+        CopyIcon
       </View>
     </View>
     <View
@@ -769,25 +664,10 @@ exports[`MessageFlow Snapshots renders an assistant message and matches snapshot
             "justifyContent": "center",
             "minHeight": 44,
             "minWidth": 44,
-            "paddingHorizontal": 8,
           }
         }
       >
-        <Text
-          style={
-            [
-              {
-                "fontSize": 13,
-                "fontWeight": "500",
-              },
-              {
-                "color": "#8E8E93",
-              },
-            ]
-          }
-        >
-          Regenerate
-        </Text>
+        RegenerateIcon
       </View>
     </View>
     <View
@@ -839,25 +719,10 @@ exports[`MessageFlow Snapshots renders an assistant message and matches snapshot
             "justifyContent": "center",
             "minHeight": 44,
             "minWidth": 44,
-            "paddingHorizontal": 8,
           }
         }
       >
-        <Text
-          style={
-            [
-              {
-                "fontSize": 13,
-                "fontWeight": "500",
-              },
-              {
-                "color": "#8E8E93",
-              },
-            ]
-          }
-        >
-          Delete
-        </Text>
+        DeleteIcon
       </View>
     </View>
   </View>
@@ -1055,25 +920,10 @@ exports[`MessageFlow Snapshots renders an assistant message with token metadata 
             "justifyContent": "center",
             "minHeight": 44,
             "minWidth": 44,
-            "paddingHorizontal": 8,
           }
         }
       >
-        <Text
-          style={
-            [
-              {
-                "fontSize": 13,
-                "fontWeight": "500",
-              },
-              {
-                "color": "#8E8E93",
-              },
-            ]
-          }
-        >
-          Copy
-        </Text>
+        CopyIcon
       </View>
     </View>
     <View
@@ -1125,25 +975,10 @@ exports[`MessageFlow Snapshots renders an assistant message with token metadata 
             "justifyContent": "center",
             "minHeight": 44,
             "minWidth": 44,
-            "paddingHorizontal": 8,
           }
         }
       >
-        <Text
-          style={
-            [
-              {
-                "fontSize": 13,
-                "fontWeight": "500",
-              },
-              {
-                "color": "#8E8E93",
-              },
-            ]
-          }
-        >
-          Regenerate
-        </Text>
+        RegenerateIcon
       </View>
     </View>
     <View
@@ -1195,25 +1030,10 @@ exports[`MessageFlow Snapshots renders an assistant message with token metadata 
             "justifyContent": "center",
             "minHeight": 44,
             "minWidth": 44,
-            "paddingHorizontal": 8,
           }
         }
       >
-        <Text
-          style={
-            [
-              {
-                "fontSize": 13,
-                "fontWeight": "500",
-              },
-              {
-                "color": "#8E8E93",
-              },
-            ]
-          }
-        >
-          Delete
-        </Text>
+        DeleteIcon
       </View>
     </View>
   </View>
