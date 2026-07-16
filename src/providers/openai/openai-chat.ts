@@ -53,6 +53,10 @@ export function buildChatCompletionsRequest(
     body.reasoning_effort = thinkingParams.reasoning_effort;
   }
 
+  if (request.temperature !== undefined) {
+    body.temperature = request.temperature;
+  }
+
   if (request.maxTokens !== undefined) {
     body.max_tokens = request.maxTokens;
   }

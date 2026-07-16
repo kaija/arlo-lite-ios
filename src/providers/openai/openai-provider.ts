@@ -195,6 +195,10 @@ export class OpenAIProvider implements IProvider {
       stream: false,
     };
 
+    if (request.temperature !== undefined) {
+      params.temperature = request.temperature;
+    }
+
     if (request.maxTokens !== undefined) {
       params.max_tokens = request.maxTokens;
     }
@@ -223,6 +227,10 @@ export class OpenAIProvider implements IProvider {
       input,
       stream: false,
     };
+
+    if (request.temperature !== undefined) {
+      params.temperature = request.temperature;
+    }
 
     if (request.maxTokens !== undefined) {
       params.max_output_tokens = request.maxTokens;
@@ -257,6 +265,10 @@ export class OpenAIProvider implements IProvider {
       stream: true,
       stream_options: { include_usage: true },
     };
+
+    if (request.temperature !== undefined) {
+      params.temperature = request.temperature;
+    }
 
     if (request.maxTokens !== undefined) {
       params.max_tokens = request.maxTokens;
@@ -334,6 +346,10 @@ export class OpenAIProvider implements IProvider {
       input,
       stream: true,
     };
+
+    if (request.temperature !== undefined) {
+      params.temperature = request.temperature;
+    }
 
     if (request.maxTokens !== undefined) {
       params.max_output_tokens = request.maxTokens;
