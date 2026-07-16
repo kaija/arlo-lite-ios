@@ -15,8 +15,26 @@ import {
   storeApiKey,
   deleteApiKey,
 } from '@/database/secure-store';
+import { testConnection as testConnectionService } from '@/services/completion-service';
+import { ProviderError } from '@/providers/errors';
 import { generateId } from '@/utils/uuid';
 import { getCurrentTimestamp } from '@/utils/date';
+
+/**
+ * Connection status for a provider's API key / endpoint validation.
+ */
+export type ConnectionStatus = 'untested' | 'connected' | 'failed';
+
+/**
+ * State of a provider's connection test result.
+ */
+export interface ProviderConnectionState {
+  status: ConnectionStatus;
+  /** Short error message when status === 'failed' (max 80 chars). */
+  error?: string;
+  /** Unix timestamp (ms) of the last test attempt. */
+  lastTestedAt?: number;
+}
 
 /**
  * Model configuration stored in the models table.
@@ -92,6 +110,9 @@ export interface ProviderStore {
   /** All registered models across providers */
   models: ModelConfig[];
 
+  /** Connection test results keyed by provider ID */
+  connectionStatuses: Record<string, ProviderConnectionState>;
+
   /** Set the database instance for persistence */
   setDatabase: (db: SQLiteDatabase) => void;
 
@@ -115,12 +136,16 @@ export interface ProviderStore {
 
   /** Delete a model */
   deleteModel: (id: string) => Promise<void>;
+
+  /** Test connection for a provider by validating API key / endpoint reachability */
+  testConnection: (providerId: string) => Promise<void>;
 }
 
 export const useProviderStore = create<ProviderStore>((set, get) => ({
   db: null,
   providers: [],
   models: [],
+  connectionStatuses: {},
 
   setDatabase: (db: SQLiteDatabase) => {
     set({ db });
@@ -240,5 +265,70 @@ export const useProviderStore = create<ProviderStore>((set, get) => ({
     set((state) => ({
       models: state.models.filter((m) => m.id !== id),
     }));
+  },
+
+  testConnection: async (providerId: string) => {
+    const { providers } = get();
+    const provider = providers.find((p) => p.id === providerId);
+    if (!provider) {
+      set((state) => ({
+        connectionStatuses: {
+          ...state.connectionStatuses,
+          [providerId]: {
+            status: 'failed',
+            error: 'Provider not found',
+            lastTestedAt: Date.now(),
+          },
+        },
+      }));
+      return;
+    }
+
+    try {
+      await testConnectionService(providerId, {
+        id: provider.id,
+        type: provider.type,
+        name: provider.name,
+        baseUrl: provider.baseUrl,
+        apiMode: provider.apiMode ?? undefined,
+        streamingEnabled: provider.streamingEnabled,
+        createdAt: provider.createdAt,
+        updatedAt: provider.updatedAt,
+      });
+
+      set((state) => ({
+        connectionStatuses: {
+          ...state.connectionStatuses,
+          [providerId]: {
+            status: 'connected',
+            error: undefined,
+            lastTestedAt: Date.now(),
+          },
+        },
+      }));
+    } catch (error) {
+      let errorMessage = 'Connection failed';
+
+      if (error instanceof ProviderError) {
+        errorMessage = error.message.length > 80
+          ? error.message.slice(0, 77) + '...'
+          : error.message;
+      } else if (error instanceof Error) {
+        errorMessage = error.message.length > 80
+          ? error.message.slice(0, 77) + '...'
+          : error.message;
+      }
+
+      set((state) => ({
+        connectionStatuses: {
+          ...state.connectionStatuses,
+          [providerId]: {
+            status: 'failed',
+            error: errorMessage,
+            lastTestedAt: Date.now(),
+          },
+        },
+      }));
+    }
   },
 }));

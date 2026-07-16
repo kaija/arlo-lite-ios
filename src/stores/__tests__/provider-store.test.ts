@@ -15,6 +15,26 @@ jest.mock('@/database/secure-store', () => ({
   deleteApiKey: jest.fn(() => Promise.resolve()),
 }));
 
+// Mock completion-service
+jest.mock('@/services/completion-service', () => ({
+  testConnection: jest.fn(() => Promise.resolve(true)),
+}));
+
+// Mock providers/errors
+jest.mock('@/providers/errors', () => {
+  class ProviderError extends Error {
+    readonly category: string;
+    readonly retryAfterSeconds: number | null;
+    constructor(message: string, category: string, retryAfterSeconds: number | null = null) {
+      super(message);
+      this.name = 'ProviderError';
+      this.category = category;
+      this.retryAfterSeconds = retryAfterSeconds;
+    }
+  }
+  return { ProviderError };
+});
+
 // Mock uuid and date
 jest.mock('@/utils/uuid', () => ({
   generateId: jest.fn(() => 'mock-model-id'),
@@ -31,6 +51,8 @@ import {
   deleteProvider as deleteProviderInDb,
 } from '@/database/repositories/provider-repo';
 import { storeApiKey, deleteApiKey } from '@/database/secure-store';
+import { testConnection as testConnectionService } from '@/services/completion-service';
+import { ProviderError } from '@/providers/errors';
 import { generateId } from '@/utils/uuid';
 
 const mockCreateProvider = createProviderInDb as jest.MockedFunction<typeof createProviderInDb>;
@@ -40,6 +62,7 @@ const mockDeleteProvider = deleteProviderInDb as jest.MockedFunction<typeof dele
 const mockStoreApiKey = storeApiKey as jest.MockedFunction<typeof storeApiKey>;
 const mockDeleteApiKey = deleteApiKey as jest.MockedFunction<typeof deleteApiKey>;
 const mockGenerateId = generateId as jest.MockedFunction<typeof generateId>;
+const mockTestConnection = testConnectionService as jest.MockedFunction<typeof testConnectionService>;
 
 function createMockDb() {
   return {
@@ -60,6 +83,7 @@ describe('provider-store', () => {
       db: null,
       providers: [],
       models: [],
+      connectionStatuses: {},
     });
   });
 
@@ -435,6 +459,89 @@ describe('provider-store', () => {
       await useProviderStore.getState().deleteModel('m1');
 
       expect(useProviderStore.getState().models).toEqual([model2]);
+    });
+  });
+
+  describe('testConnection', () => {
+    const provider = {
+      id: 'p1', type: 'openai' as const, name: 'OpenAI',
+      baseUrl: 'https://api.openai.com/v1', apiMode: 'responses' as const,
+      streamingEnabled: true, createdAt: 100, updatedAt: 100,
+    };
+
+    it('sets status to connected on success', async () => {
+      mockTestConnection.mockResolvedValue(true);
+
+      useProviderStore.setState({ db: mockDb, providers: [provider] });
+      await useProviderStore.getState().testConnection('p1');
+
+      const statuses = useProviderStore.getState().connectionStatuses;
+      expect(statuses['p1'].status).toBe('connected');
+      expect(statuses['p1'].error).toBeUndefined();
+      expect(statuses['p1'].lastTestedAt).toBeDefined();
+    });
+
+    it('sets status to failed with error message on ProviderError', async () => {
+      mockTestConnection.mockRejectedValue(new ProviderError('API key not found', 'authentication'));
+
+      useProviderStore.setState({ db: mockDb, providers: [provider] });
+      await useProviderStore.getState().testConnection('p1');
+
+      const statuses = useProviderStore.getState().connectionStatuses;
+      expect(statuses['p1'].status).toBe('failed');
+      expect(statuses['p1'].error).toBe('API key not found');
+      expect(statuses['p1'].lastTestedAt).toBeDefined();
+    });
+
+    it('sets status to failed with generic message on unknown error', async () => {
+      mockTestConnection.mockRejectedValue(new Error('Something went wrong'));
+
+      useProviderStore.setState({ db: mockDb, providers: [provider] });
+      await useProviderStore.getState().testConnection('p1');
+
+      const statuses = useProviderStore.getState().connectionStatuses;
+      expect(statuses['p1'].status).toBe('failed');
+      expect(statuses['p1'].error).toBe('Something went wrong');
+      expect(statuses['p1'].lastTestedAt).toBeDefined();
+    });
+
+    it('sets status to failed when provider not found', async () => {
+      useProviderStore.setState({ db: mockDb, providers: [] });
+      await useProviderStore.getState().testConnection('non-existent');
+
+      const statuses = useProviderStore.getState().connectionStatuses;
+      expect(statuses['non-existent'].status).toBe('failed');
+      expect(statuses['non-existent'].error).toBe('Provider not found');
+    });
+
+    it('truncates long error messages to 80 chars', async () => {
+      const longMessage = 'A'.repeat(100);
+      mockTestConnection.mockRejectedValue(new ProviderError(longMessage, 'server'));
+
+      useProviderStore.setState({ db: mockDb, providers: [provider] });
+      await useProviderStore.getState().testConnection('p1');
+
+      const statuses = useProviderStore.getState().connectionStatuses;
+      expect(statuses['p1'].error!.length).toBeLessThanOrEqual(80);
+      expect(statuses['p1'].error).toBe('A'.repeat(77) + '...');
+    });
+
+    it('calls testConnection service with correct provider config', async () => {
+      mockTestConnection.mockResolvedValue(true);
+
+      useProviderStore.setState({ db: mockDb, providers: [provider] });
+      await useProviderStore.getState().testConnection('p1');
+
+      expect(mockTestConnection).toHaveBeenCalledWith('p1', {
+        id: 'p1',
+        type: 'openai',
+        name: 'OpenAI',
+        baseUrl: 'https://api.openai.com/v1',
+        apiMode: 'responses',
+        streamingEnabled: true,
+        createdAt: 100,
+        updatedAt: 100,
+      });
     });
   });
 });
