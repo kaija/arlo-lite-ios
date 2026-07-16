@@ -8,6 +8,7 @@ import {
   Alert,
   StyleSheet,
   TouchableOpacity,
+  ActivityIndicator,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import type { StackScreenProps } from '@react-navigation/stack';
@@ -45,6 +46,8 @@ export function ProviderDetailScreen({ route, navigation }: Props) {
   const addProvider = useProviderStore((s) => s.addProvider);
   const updateProvider = useProviderStore((s) => s.updateProvider);
   const deleteProvider = useProviderStore((s) => s.deleteProvider);
+  const storeTestConnection = useProviderStore((s) => s.testConnection);
+  const connectionStatuses = useProviderStore((s) => s.connectionStatuses);
 
   // Find existing provider for edit mode
   const existingProvider = useMemo(
@@ -60,6 +63,8 @@ export function ProviderDetailScreen({ route, navigation }: Props) {
   const [apiMode, setApiMode] = useState<OpenAIApiMode>('responses');
   const [streamingEnabled, setStreamingEnabled] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [isTestingConnection, setIsTestingConnection] = useState(false);
+  const [testResult, setTestResult] = useState<{ success: boolean; message: string } | null>(null);
 
   // Load existing provider data in edit mode
   useEffect(() => {
@@ -101,6 +106,45 @@ export function ProviderDetailScreen({ route, navigation }: Props) {
     },
     [],
   );
+
+  // Handle "Test Connection" tap
+  const handleTestConnection = useCallback(async () => {
+    if (!providerId || !apiKey.trim() || isTestingConnection) return;
+
+    setIsTestingConnection(true);
+    setTestResult(null);
+
+    const timeoutId = setTimeout(() => {
+      setIsTestingConnection(false);
+      setTestResult({
+        success: false,
+        message: t('providers.connectionTimeout'),
+      });
+    }, 5000);
+
+    try {
+      await storeTestConnection(providerId);
+      clearTimeout(timeoutId);
+
+      const status = useProviderStore.getState().connectionStatuses[providerId];
+      if (status?.status === 'connected') {
+        setTestResult({ success: true, message: t('providers.connected') });
+      } else {
+        setTestResult({
+          success: false,
+          message: status?.error ?? t('providers.connectionFailed'),
+        });
+      }
+    } catch {
+      clearTimeout(timeoutId);
+      setTestResult({
+        success: false,
+        message: t('providers.connectionFailed'),
+      });
+    } finally {
+      setIsTestingConnection(false);
+    }
+  }, [providerId, apiKey, isTestingConnection, storeTestConnection, t]);
 
   // Validate form
   const isFormValid = useMemo(() => {
@@ -267,6 +311,44 @@ export function ProviderDetailScreen({ route, navigation }: Props) {
           autoCapitalize="none"
           autoCorrect={false}
         />
+
+        {/* Test Connection button and result (edit mode only) */}
+        {isEditMode && (
+          <View style={styles.testConnectionContainer}>
+            <TouchableOpacity
+              style={[
+                styles.testConnectionButton,
+                (isTestingConnection || !apiKey.trim()) && styles.testConnectionButtonDisabled,
+              ]}
+              onPress={handleTestConnection}
+              disabled={isTestingConnection || !apiKey.trim()}
+              accessibilityLabel={t('providers.testConnection')}
+              accessibilityRole="button"
+              accessibilityState={{ disabled: isTestingConnection || !apiKey.trim() }}
+            >
+              {isTestingConnection ? (
+                <ActivityIndicator size="small" color={theme.colors.accent} />
+              ) : (
+                <Text style={styles.testConnectionButtonText}>
+                  {t('providers.testConnection')}
+                </Text>
+              )}
+            </TouchableOpacity>
+
+            {testResult && (
+              <Text
+                style={[
+                  styles.testResultText,
+                  testResult.success ? styles.testResultSuccess : styles.testResultError,
+                ]}
+                accessibilityRole="text"
+                accessibilityLabel={testResult.message}
+              >
+                {testResult.message}
+              </Text>
+            )}
+          </View>
+        )}
       </View>
 
       {/* Base URL */}
@@ -505,6 +587,39 @@ function createStyles(theme: Theme) {
       ...theme.typography.body,
       color: theme.colors.error,
       fontWeight: '600',
+    },
+    testConnectionContainer: {
+      marginTop: theme.spacing.md,
+    },
+    testConnectionButton: {
+      backgroundColor: theme.colors.inputBackground,
+      borderRadius: theme.borderRadii.md,
+      paddingVertical: theme.spacing.md,
+      paddingHorizontal: theme.spacing.md,
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      minHeight: 44,
+    },
+    testConnectionButtonDisabled: {
+      opacity: 0.5,
+    },
+    testConnectionButtonText: {
+      ...theme.typography.body,
+      color: theme.colors.accent,
+      fontWeight: '500',
+    },
+    testResultText: {
+      ...theme.typography.body,
+      fontSize: 14,
+      marginTop: theme.spacing.sm,
+    },
+    testResultSuccess: {
+      color: theme.colors.accent,
+    },
+    testResultError: {
+      color: theme.colors.error,
     },
   });
 }
