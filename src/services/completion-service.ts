@@ -28,7 +28,7 @@ import type {
  * Options required to initiate a completion request.
  *
  * Combines provider identity, configuration, model selection,
- * and reasoning effort into a single parameter object.
+ * reasoning effort, and generation parameters into a single parameter object.
  */
 export interface CompletionServiceOptions {
   /** The unique identifier of the provider (used to retrieve the stored API key). */
@@ -39,6 +39,10 @@ export interface CompletionServiceOptions {
   modelId: string;
   /** The thinking/reasoning effort level for this request. */
   thinkingLevel: ThinkingLevel;
+  /** Sampling temperature (0.0–2.0). Passed through to the provider adapter. */
+  temperature?: number;
+  /** Maximum number of tokens to generate. Passed through to the provider adapter. */
+  maxTokens?: number;
 }
 
 /**
@@ -69,6 +73,8 @@ export async function* streamCompletion(
     model: options.modelId,
     thinkingLevel: options.thinkingLevel,
     stream: true,
+    temperature: options.temperature,
+    maxTokens: options.maxTokens,
   };
 
   yield* provider.streamCompletion(options.providerConfig, request, apiKey, signal);
@@ -99,6 +105,8 @@ export async function complete(
     model: options.modelId,
     thinkingLevel: options.thinkingLevel,
     stream: false,
+    temperature: options.temperature,
+    maxTokens: options.maxTokens,
   };
 
   return provider.complete(options.providerConfig, request, apiKey);
