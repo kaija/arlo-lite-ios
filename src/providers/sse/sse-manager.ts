@@ -2,13 +2,19 @@
  * SSE stream manager for LLM provider communication.
  *
  * Uses fetch with ReadableStream to consume Server-Sent Events from
- * provider APIs. Delegates chunk parsing to the provider's
- * parseStreamChunk method, enabling provider-specific SSE format handling.
+ * provider APIs. Delegates chunk parsing to a caller-supplied parse function,
+ * enabling provider-specific SSE format handling.
  *
  * Supports abort/cancel via AbortController for user-initiated stop.
  */
 
-import type { IProvider, StreamChunk, TokenUsage } from '../types';
+import type { StreamChunk, TokenUsage } from '../types';
+
+/**
+ * A function that parses a single SSE line into a StreamChunk or null.
+ * Providers supply their own implementation when using createSSEStream.
+ */
+export type SSELineParser = (line: string) => StreamChunk | null;
 
 /**
  * Callbacks invoked during SSE stream processing.
@@ -34,13 +40,13 @@ export interface SSEConnection {
  * Create and start an SSE stream connection to a provider API.
  *
  * Sends a POST request with the given headers and body, then reads the
- * response as a text stream. Each line is passed to the provider's
- * parseStreamChunk method to produce typed StreamChunk objects.
+ * response as a text stream. Each line is passed to the supplied parse
+ * function to produce typed StreamChunk objects.
  *
  * @param url - The full API endpoint URL
  * @param headers - HTTP headers (including auth and content-type)
  * @param body - JSON-serialized request body
- * @param provider - The provider adapter for parsing SSE chunks
+ * @param parseChunk - Function that parses a single SSE line into a StreamChunk or null
  * @param callbacks - Event callbacks for chunks, completion, and errors
  * @returns An SSEConnection with an abort method for cancellation
  */
@@ -48,13 +54,13 @@ export function createSSEStream(
   url: string,
   headers: Record<string, string>,
   body: string,
-  provider: IProvider,
+  parseChunk: SSELineParser,
   callbacks: SSECallbacks
 ): SSEConnection {
   const controller = new AbortController();
 
   // Start the streaming request asynchronously
-  processStream(url, headers, body, provider, callbacks, controller.signal).catch(
+  processStream(url, headers, body, parseChunk, callbacks, controller.signal).catch(
     (error: unknown) => {
       // Only report errors that aren't from intentional abort
       if (!controller.signal.aborted) {
@@ -78,7 +84,7 @@ async function processStream(
   url: string,
   headers: Record<string, string>,
   body: string,
-  provider: IProvider,
+  parseChunk: SSELineParser,
   callbacks: SSECallbacks,
   signal: AbortSignal
 ): Promise<void> {
@@ -113,16 +119,16 @@ async function processStream(
     return;
   }
 
-  await readStream(response.body, provider, callbacks, signal);
+  await readStream(response.body, parseChunk, callbacks, signal);
 }
 
 /**
  * Internal: Read from a ReadableStream, splitting into SSE lines and
- * delegating parsing to the provider.
+ * delegating parsing to the supplied parse function.
  */
 async function readStream(
   body: ReadableStream<Uint8Array>,
-  provider: IProvider,
+  parseChunk: SSELineParser,
   callbacks: SSECallbacks,
   signal: AbortSignal
 ): Promise<void> {
@@ -137,7 +143,7 @@ async function readStream(
       if (done) {
         // Process any remaining buffered data
         if (buffer.trim()) {
-          processLine(buffer, provider, callbacks);
+          processLine(buffer, parseChunk, callbacks);
         }
         callbacks.onComplete();
         return;
@@ -155,7 +161,7 @@ async function readStream(
       // Process each complete line
       for (const line of lines) {
         if (signal.aborted) return;
-        processLine(line, provider, callbacks);
+        processLine(line, parseChunk, callbacks);
       }
     }
   } catch (error: unknown) {
@@ -170,14 +176,14 @@ async function readStream(
 }
 
 /**
- * Internal: Process a single SSE line through the provider's parser.
+ * Internal: Process a single SSE line through the parse function.
  */
 function processLine(
   line: string,
-  provider: IProvider,
+  parseChunk: SSELineParser,
   callbacks: SSECallbacks
 ): void {
-  const chunk = provider.parseStreamChunk(line);
+  const chunk = parseChunk(line);
 
   if (!chunk) return;
 

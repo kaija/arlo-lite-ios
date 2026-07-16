@@ -3,7 +3,7 @@
  */
 
 export { createSSEStream } from './sse-manager';
-export type { SSECallbacks, SSEConnection } from './sse-manager';
+export type { SSECallbacks, SSEConnection, SSELineParser } from './sse-manager';
 export { parseOpenAISSELine, splitSSEBuffer } from './openai-parser';
 export type { OpenAIParsedLine } from './openai-parser';
 export {

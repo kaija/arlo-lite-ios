@@ -1,6 +1,6 @@
 import { createSSEStream } from '../sse-manager';
-import type { SSECallbacks } from '../sse-manager';
-import type { IProvider, StreamChunk } from '../../types';
+import type { SSECallbacks, SSELineParser } from '../sse-manager';
+import type { StreamChunk } from '../../types';
 
 /**
  * Helper: create a ReadableStream from an array of string chunks.
@@ -22,11 +22,11 @@ function createMockReadableStream(chunks: string[]): ReadableStream<Uint8Array> 
 }
 
 /**
- * Helper: create a minimal mock provider that parses lines using simple rules.
+ * Helper: create a minimal mock parse function that parses lines using simple rules.
  */
-function createMockProvider(
+function createMockParser(
   parseFn?: (line: string) => StreamChunk | null
-): IProvider {
+): SSELineParser {
   const defaultParse = (line: string): StreamChunk | null => {
     if (!line || line.startsWith(':') || !line.startsWith('data: ')) {
       return null;
@@ -49,15 +49,7 @@ function createMockProvider(
     }
   };
 
-  return {
-    type: 'openai',
-    buildRequest: jest.fn(),
-    parseResponse: jest.fn(),
-    parseStreamChunk: parseFn ?? defaultParse,
-    mapThinkingLevel: jest.fn(),
-    listModels: jest.fn(),
-    validateApiKey: jest.fn(),
-  };
+  return parseFn ?? defaultParse;
 }
 
 /**
@@ -103,7 +95,7 @@ describe('createSSEStream', () => {
       onError: jest.fn(),
     };
 
-    createSSEStream('https://api.example.com/chat', {}, '{}', createMockProvider(), callbacks);
+    createSSEStream('https://api.example.com/chat', {}, '{}', createMockParser(), callbacks);
     await flushPromises();
 
     expect(callbacks.onChunk).toHaveBeenCalledTimes(2);
@@ -124,7 +116,7 @@ describe('createSSEStream', () => {
       onError: jest.fn(),
     };
 
-    createSSEStream('https://api.example.com/chat', {}, '{}', createMockProvider(), callbacks);
+    createSSEStream('https://api.example.com/chat', {}, '{}', createMockParser(), callbacks);
     await flushPromises();
 
     expect(callbacks.onComplete).toHaveBeenCalledWith({
@@ -146,7 +138,7 @@ describe('createSSEStream', () => {
       onError: jest.fn(),
     };
 
-    createSSEStream('https://api.example.com/chat', {}, '{}', createMockProvider(), callbacks);
+    createSSEStream('https://api.example.com/chat', {}, '{}', createMockParser(), callbacks);
     await flushPromises();
 
     expect(callbacks.onChunk).toHaveBeenCalledWith({ type: 'text', content: 'hello' });
@@ -170,7 +162,7 @@ describe('createSSEStream', () => {
       onError: jest.fn(),
     };
 
-    createSSEStream('https://api.example.com/chat', {}, '{}', createMockProvider(), callbacks);
+    createSSEStream('https://api.example.com/chat', {}, '{}', createMockParser(), callbacks);
     await flushPromises();
 
     expect(callbacks.onError).toHaveBeenCalled();
@@ -195,7 +187,7 @@ describe('createSSEStream', () => {
       onError: jest.fn(),
     };
 
-    createSSEStream('https://api.example.com/chat', {}, '{}', createMockProvider(), callbacks);
+    createSSEStream('https://api.example.com/chat', {}, '{}', createMockParser(), callbacks);
     await flushPromises();
 
     expect(callbacks.onError).toHaveBeenCalled();
@@ -215,7 +207,7 @@ describe('createSSEStream', () => {
       onError: jest.fn(),
     };
 
-    createSSEStream('https://api.example.com/chat', {}, '{}', createMockProvider(), callbacks);
+    createSSEStream('https://api.example.com/chat', {}, '{}', createMockParser(), callbacks);
     await flushPromises();
 
     expect(callbacks.onError).toHaveBeenCalled();
@@ -237,7 +229,7 @@ describe('createSSEStream', () => {
       onError: jest.fn(),
     };
 
-    createSSEStream('https://api.example.com/chat', {}, '{}', createMockProvider(), callbacks);
+    createSSEStream('https://api.example.com/chat', {}, '{}', createMockParser(), callbacks);
     await flushPromises();
 
     expect(callbacks.onChunk).toHaveBeenCalledWith({ type: 'thinking', content: 'Let me think...' });
@@ -258,7 +250,7 @@ describe('createSSEStream', () => {
       'https://api.example.com/chat',
       {},
       '{}',
-      createMockProvider(),
+      createMockParser(),
       callbacks
     );
 
@@ -299,7 +291,7 @@ describe('createSSEStream', () => {
       'https://api.example.com/chat',
       {},
       '{}',
-      createMockProvider(),
+      createMockParser(),
       callbacks
     );
 
@@ -329,7 +321,7 @@ describe('createSSEStream', () => {
       'https://api.example.com/chat',
       { 'Authorization': 'Bearer key', 'Content-Type': 'application/json' },
       '{"model":"gpt-4"}',
-      createMockProvider(),
+      createMockParser(),
       callbacks
     );
 
@@ -364,7 +356,7 @@ describe('createSSEStream', () => {
       onError: jest.fn(),
     };
 
-    createSSEStream('https://api.example.com/chat', {}, '{}', createMockProvider(), callbacks);
+    createSSEStream('https://api.example.com/chat', {}, '{}', createMockParser(), callbacks);
     await flushPromises();
 
     expect(callbacks.onChunk).toHaveBeenCalledWith({ type: 'text', content: 'Hello' });
@@ -380,7 +372,7 @@ describe('createSSEStream', () => {
       onError: jest.fn(),
     };
 
-    createSSEStream('https://api.example.com/chat', {}, '{}', createMockProvider(), callbacks);
+    createSSEStream('https://api.example.com/chat', {}, '{}', createMockParser(), callbacks);
     await flushPromises();
 
     expect(callbacks.onError).toHaveBeenCalled();
@@ -403,7 +395,7 @@ describe('createSSEStream', () => {
       onError: jest.fn(),
     };
 
-    createSSEStream('https://api.example.com/chat', {}, '{}', createMockProvider(), callbacks);
+    createSSEStream('https://api.example.com/chat', {}, '{}', createMockParser(), callbacks);
     await flushPromises();
 
     expect(callbacks.onChunk).toHaveBeenCalledTimes(1);
