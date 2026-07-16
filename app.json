@@ -29,9 +29,7 @@
       "expo-secure-store",
       "expo-localization",
       "expo-speech-recognition",
-      "expo-asset",
-      "expo-router",
-      "expo-font"
+      "expo-router"
     ]
   }
 }
