@@ -86,6 +86,7 @@ const mockSession: Session = {
   providerId: 'openai',
   modelId: 'gpt-4o',
   systemPromptId: null,
+  thinkingLevel: null,
   totalCost: 0,
   tokenCount: 0,
   createdAt: Date.now(),

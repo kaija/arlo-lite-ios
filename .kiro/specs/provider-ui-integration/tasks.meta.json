@@ -1,0 +1,589 @@
+{
+  "pbtResults": {},
+  "executionHistory": {
+    "1.1 Create migration v2 in `src/database/migrations/v2.ts`": [
+      {
+        "executionId": "bcde2d97-d091-4a4f-b30c-8b9abc0927e1",
+        "chatSessionId": "sess_04b538b7-b82f-498e-8af8-1645d8c30265",
+        "timestamp": 1784176676683
+      },
+      {
+        "executionId": "bcde2d97-d091-4a4f-b30c-8b9abc0927e1",
+        "chatSessionId": "sess_04b538b7-b82f-498e-8af8-1645d8c30265",
+        "timestamp": 1784176697961
+      },
+      {
+        "executionId": "bcde2d97-d091-4a4f-b30c-8b9abc0927e1",
+        "chatSessionId": "sess_04b538b7-b82f-498e-8af8-1645d8c30265",
+        "timestamp": 1784176999047
+      }
+    ],
+    "1.2 Update Provider interface and row mapping in `src/database/repositories/provider-repo.ts`": [
+      {
+        "executionId": "bcde2d97-d091-4a4f-b30c-8b9abc0927e1",
+        "chatSessionId": "sess_04b538b7-b82f-498e-8af8-1645d8c30265",
+        "timestamp": 1784176676712
+      },
+      {
+        "executionId": "bcde2d97-d091-4a4f-b30c-8b9abc0927e1",
+        "chatSessionId": "sess_04b538b7-b82f-498e-8af8-1645d8c30265",
+        "timestamp": 1784176699106
+      },
+      {
+        "executionId": "bcde2d97-d091-4a4f-b30c-8b9abc0927e1",
+        "chatSessionId": "sess_04b538b7-b82f-498e-8af8-1645d8c30265",
+        "timestamp": 1784177000495
+      }
+    ],
+    "1.3 Update Session interface and row mapping in `src/database/repositories/session-repo.ts`": [
+      {
+        "executionId": "bcde2d97-d091-4a4f-b30c-8b9abc0927e1",
+        "chatSessionId": "sess_04b538b7-b82f-498e-8af8-1645d8c30265",
+        "timestamp": 1784176676735
+      },
+      {
+        "executionId": "bcde2d97-d091-4a4f-b30c-8b9abc0927e1",
+        "chatSessionId": "sess_04b538b7-b82f-498e-8af8-1645d8c30265",
+        "timestamp": 1784176700390
+      },
+      {
+        "executionId": "bcde2d97-d091-4a4f-b30c-8b9abc0927e1",
+        "chatSessionId": "sess_04b538b7-b82f-498e-8af8-1645d8c30265",
+        "timestamp": 1784177001580
+      }
+    ],
+    "2.1 Update `src/stores/provider-store.ts` to expose generation params": [
+      {
+        "executionId": "bcde2d97-d091-4a4f-b30c-8b9abc0927e1",
+        "chatSessionId": "sess_04b538b7-b82f-498e-8af8-1645d8c30265",
+        "timestamp": 1784176676764
+      },
+      {
+        "executionId": "bcde2d97-d091-4a4f-b30c-8b9abc0927e1",
+        "chatSessionId": "sess_04b538b7-b82f-498e-8af8-1645d8c30265",
+        "timestamp": 1784177109028
+      },
+      {
+        "executionId": "bcde2d97-d091-4a4f-b30c-8b9abc0927e1",
+        "chatSessionId": "sess_04b538b7-b82f-498e-8af8-1645d8c30265",
+        "timestamp": 1784177302297
+      }
+    ],
+    "3.1 Update ChatStore to persist model selection in `src/stores/chat-store.ts`": [
+      {
+        "executionId": "bcde2d97-d091-4a4f-b30c-8b9abc0927e1",
+        "chatSessionId": "sess_04b538b7-b82f-498e-8af8-1645d8c30265",
+        "timestamp": 1784176676796
+      },
+      {
+        "executionId": "bcde2d97-d091-4a4f-b30c-8b9abc0927e1",
+        "chatSessionId": "sess_04b538b7-b82f-498e-8af8-1645d8c30265",
+        "timestamp": 1784177446731
+      },
+      {
+        "executionId": "bcde2d97-d091-4a4f-b30c-8b9abc0927e1",
+        "chatSessionId": "sess_04b538b7-b82f-498e-8af8-1645d8c30265",
+        "timestamp": 1784177812154
+      }
+    ],
+    "3.2 Update ChatShell to restore model and thinking level on session switch": [
+      {
+        "executionId": "bcde2d97-d091-4a4f-b30c-8b9abc0927e1",
+        "chatSessionId": "sess_04b538b7-b82f-498e-8af8-1645d8c30265",
+        "timestamp": 1784176676821
+      },
+      {
+        "executionId": "bcde2d97-d091-4a4f-b30c-8b9abc0927e1",
+        "chatSessionId": "sess_04b538b7-b82f-498e-8af8-1645d8c30265",
+        "timestamp": 1784177447580
+      },
+      {
+        "executionId": "bcde2d97-d091-4a4f-b30c-8b9abc0927e1",
+        "chatSessionId": "sess_04b538b7-b82f-498e-8af8-1645d8c30265",
+        "timestamp": 1784177813002
+      }
+    ],
+    "3.3 Persist thinking level changes to session": [
+      {
+        "executionId": "bcde2d97-d091-4a4f-b30c-8b9abc0927e1",
+        "chatSessionId": "sess_04b538b7-b82f-498e-8af8-1645d8c30265",
+        "timestamp": 1784176676845
+      },
+      {
+        "executionId": "bcde2d97-d091-4a4f-b30c-8b9abc0927e1",
+        "chatSessionId": "sess_04b538b7-b82f-498e-8af8-1645d8c30265",
+        "timestamp": 1784177448321
+      },
+      {
+        "executionId": "bcde2d97-d091-4a4f-b30c-8b9abc0927e1",
+        "chatSessionId": "sess_04b538b7-b82f-498e-8af8-1645d8c30265",
+        "timestamp": 1784177813801
+      }
+    ],
+    "3.4 Persist model selection changes to session": [
+      {
+        "executionId": "bcde2d97-d091-4a4f-b30c-8b9abc0927e1",
+        "chatSessionId": "sess_04b538b7-b82f-498e-8af8-1645d8c30265",
+        "timestamp": 1784176676873
+      },
+      {
+        "executionId": "bcde2d97-d091-4a4f-b30c-8b9abc0927e1",
+        "chatSessionId": "sess_04b538b7-b82f-498e-8af8-1645d8c30265",
+        "timestamp": 1784177449138
+      },
+      {
+        "executionId": "bcde2d97-d091-4a4f-b30c-8b9abc0927e1",
+        "chatSessionId": "sess_04b538b7-b82f-498e-8af8-1645d8c30265",
+        "timestamp": 1784177814220
+      }
+    ],
+    "4.1 Update `src/services/completion-service.ts` to accept and inject generation params": [
+      {
+        "executionId": "bcde2d97-d091-4a4f-b30c-8b9abc0927e1",
+        "chatSessionId": "sess_04b538b7-b82f-498e-8af8-1645d8c30265",
+        "timestamp": 1784176676906
+      },
+      {
+        "executionId": "bcde2d97-d091-4a4f-b30c-8b9abc0927e1",
+        "chatSessionId": "sess_04b538b7-b82f-498e-8af8-1645d8c30265",
+        "timestamp": 1784177450574
+      },
+      {
+        "executionId": "bcde2d97-d091-4a4f-b30c-8b9abc0927e1",
+        "chatSessionId": "sess_04b538b7-b82f-498e-8af8-1645d8c30265",
+        "timestamp": 1784177816101
+      }
+    ],
+    "4.2 Update `src/hooks/useChat.ts` to pass generation params from provider store": [
+      {
+        "executionId": "bcde2d97-d091-4a4f-b30c-8b9abc0927e1",
+        "chatSessionId": "sess_04b538b7-b82f-498e-8af8-1645d8c30265",
+        "timestamp": 1784176676935
+      },
+      {
+        "executionId": "bcde2d97-d091-4a4f-b30c-8b9abc0927e1",
+        "chatSessionId": "sess_04b538b7-b82f-498e-8af8-1645d8c30265",
+        "timestamp": 1784178100570
+      },
+      {
+        "executionId": "bcde2d97-d091-4a4f-b30c-8b9abc0927e1",
+        "chatSessionId": "sess_04b538b7-b82f-498e-8af8-1645d8c30265",
+        "timestamp": 1784178740672
+      }
+    ],
+    "4.3 Update `src/hooks/useChat.ts` to prepend system prompt": [
+      {
+        "executionId": "bcde2d97-d091-4a4f-b30c-8b9abc0927e1",
+        "chatSessionId": "sess_04b538b7-b82f-498e-8af8-1645d8c30265",
+        "timestamp": 1784176676968
+      },
+      {
+        "executionId": "bcde2d97-d091-4a4f-b30c-8b9abc0927e1",
+        "chatSessionId": "sess_04b538b7-b82f-498e-8af8-1645d8c30265",
+        "timestamp": 1784178100594
+      },
+      {
+        "executionId": "bcde2d97-d091-4a4f-b30c-8b9abc0927e1",
+        "chatSessionId": "sess_04b538b7-b82f-498e-8af8-1645d8c30265",
+        "timestamp": 1784178741501
+      }
+    ],
+    "5.1 Wire system prompts in `src/components/overlays/SettingsScreen.tsx`": [
+      {
+        "executionId": "bcde2d97-d091-4a4f-b30c-8b9abc0927e1",
+        "chatSessionId": "sess_04b538b7-b82f-498e-8af8-1645d8c30265",
+        "timestamp": 1784176676994
+      },
+      {
+        "executionId": "bcde2d97-d091-4a4f-b30c-8b9abc0927e1",
+        "chatSessionId": "sess_04b538b7-b82f-498e-8af8-1645d8c30265",
+        "timestamp": 1784178100971
+      },
+      {
+        "executionId": "bcde2d97-d091-4a4f-b30c-8b9abc0927e1",
+        "chatSessionId": "sess_04b538b7-b82f-498e-8af8-1645d8c30265",
+        "timestamp": 1784178742225
+      }
+    ],
+    "5.2 Wire generation parameters in SettingsScreen": [
+      {
+        "executionId": "bcde2d97-d091-4a4f-b30c-8b9abc0927e1",
+        "chatSessionId": "sess_04b538b7-b82f-498e-8af8-1645d8c30265",
+        "timestamp": 1784176677018
+      },
+      {
+        "executionId": "bcde2d97-d091-4a4f-b30c-8b9abc0927e1",
+        "chatSessionId": "sess_04b538b7-b82f-498e-8af8-1645d8c30265",
+        "timestamp": 1784178101911
+      },
+      {
+        "executionId": "bcde2d97-d091-4a4f-b30c-8b9abc0927e1",
+        "chatSessionId": "sess_04b538b7-b82f-498e-8af8-1645d8c30265",
+        "timestamp": 1784178743055
+      }
+    ],
+    "6.1 Load and display masked API key suffix in ProviderCard": [
+      {
+        "executionId": "bcde2d97-d091-4a4f-b30c-8b9abc0927e1",
+        "chatSessionId": "sess_04b538b7-b82f-498e-8af8-1645d8c30265",
+        "timestamp": 1784176677039
+      },
+      {
+        "executionId": "bcde2d97-d091-4a4f-b30c-8b9abc0927e1",
+        "chatSessionId": "sess_04b538b7-b82f-498e-8af8-1645d8c30265",
+        "timestamp": 1784178103550
+      },
+      {
+        "executionId": "bcde2d97-d091-4a4f-b30c-8b9abc0927e1",
+        "chatSessionId": "sess_04b538b7-b82f-498e-8af8-1645d8c30265",
+        "timestamp": 1784178744426
+      }
+    ],
+    "6.2 Display connection status dot on ProviderCard": [
+      {
+        "executionId": "bcde2d97-d091-4a4f-b30c-8b9abc0927e1",
+        "chatSessionId": "sess_04b538b7-b82f-498e-8af8-1645d8c30265",
+        "timestamp": 1784176677071
+      },
+      {
+        "executionId": "bcde2d97-d091-4a4f-b30c-8b9abc0927e1",
+        "chatSessionId": "sess_04b538b7-b82f-498e-8af8-1645d8c30265",
+        "timestamp": 1784178751982
+      },
+      {
+        "executionId": "bcde2d97-d091-4a4f-b30c-8b9abc0927e1",
+        "chatSessionId": "sess_04b538b7-b82f-498e-8af8-1645d8c30265",
+        "timestamp": 1784178907719
+      }
+    ],
+    "7. Checkpoint - Verify store integration": [
+      {
+        "executionId": "bcde2d97-d091-4a4f-b30c-8b9abc0927e1",
+        "chatSessionId": "sess_04b538b7-b82f-498e-8af8-1645d8c30265",
+        "timestamp": 1784176677097
+      },
+      {
+        "executionId": "bcde2d97-d091-4a4f-b30c-8b9abc0927e1",
+        "chatSessionId": "sess_04b538b7-b82f-498e-8af8-1645d8c30265",
+        "timestamp": 1784178926072
+      },
+      {
+        "executionId": "bcde2d97-d091-4a4f-b30c-8b9abc0927e1",
+        "chatSessionId": "sess_04b538b7-b82f-498e-8af8-1645d8c30265",
+        "timestamp": 1784179807513
+      }
+    ],
+    "8.1 Add cost metadata line to `src/components/chat/MessageFlow.tsx`": [
+      {
+        "executionId": "bcde2d97-d091-4a4f-b30c-8b9abc0927e1",
+        "chatSessionId": "sess_04b538b7-b82f-498e-8af8-1645d8c30265",
+        "timestamp": 1784176677127
+      },
+      {
+        "executionId": "bcde2d97-d091-4a4f-b30c-8b9abc0927e1",
+        "chatSessionId": "sess_04b538b7-b82f-498e-8af8-1645d8c30265",
+        "timestamp": 1784178926960
+      },
+      {
+        "executionId": "bcde2d97-d091-4a4f-b30c-8b9abc0927e1",
+        "chatSessionId": "sess_04b538b7-b82f-498e-8af8-1645d8c30265",
+        "timestamp": 1784179808341
+      }
+    ],
+    "9.1 Create `src/components/chat/ErrorBanner.tsx`": [
+      {
+        "executionId": "bcde2d97-d091-4a4f-b30c-8b9abc0927e1",
+        "chatSessionId": "sess_04b538b7-b82f-498e-8af8-1645d8c30265",
+        "timestamp": 1784176677152
+      },
+      {
+        "executionId": "bcde2d97-d091-4a4f-b30c-8b9abc0927e1",
+        "chatSessionId": "sess_04b538b7-b82f-498e-8af8-1645d8c30265",
+        "timestamp": 1784178929127
+      },
+      {
+        "executionId": "bcde2d97-d091-4a4f-b30c-8b9abc0927e1",
+        "chatSessionId": "sess_04b538b7-b82f-498e-8af8-1645d8c30265",
+        "timestamp": 1784179809661
+      }
+    ],
+    "9.2 Wire ErrorBanner in `src/components/layout/ChatShell.tsx`": [
+      {
+        "executionId": "bcde2d97-d091-4a4f-b30c-8b9abc0927e1",
+        "chatSessionId": "sess_04b538b7-b82f-498e-8af8-1645d8c30265",
+        "timestamp": 1784176677177
+      },
+      {
+        "executionId": "bcde2d97-d091-4a4f-b30c-8b9abc0927e1",
+        "chatSessionId": "sess_04b538b7-b82f-498e-8af8-1645d8c30265",
+        "timestamp": 1784179816165
+      }
+    ],
+    "10.1 Remove `src/screens/ProviderDetailScreen.tsx`": [
+      {
+        "executionId": "bcde2d97-d091-4a4f-b30c-8b9abc0927e1",
+        "chatSessionId": "sess_04b538b7-b82f-498e-8af8-1645d8c30265",
+        "timestamp": 1784176677206
+      },
+      {
+        "executionId": "bcde2d97-d091-4a4f-b30c-8b9abc0927e1",
+        "chatSessionId": "sess_04b538b7-b82f-498e-8af8-1645d8c30265",
+        "timestamp": 1784177109530
+      },
+      {
+        "executionId": "bcde2d97-d091-4a4f-b30c-8b9abc0927e1",
+        "chatSessionId": "sess_04b538b7-b82f-498e-8af8-1645d8c30265",
+        "timestamp": 1784177302851
+      }
+    ],
+    "10.2 Remove `src/screens/__tests__/ProviderDetailScreen.test.ts` (if it exists)": [
+      {
+        "executionId": "bcde2d97-d091-4a4f-b30c-8b9abc0927e1",
+        "chatSessionId": "sess_04b538b7-b82f-498e-8af8-1645d8c30265",
+        "timestamp": 1784176677239
+      },
+      {
+        "executionId": "bcde2d97-d091-4a4f-b30c-8b9abc0927e1",
+        "chatSessionId": "sess_04b538b7-b82f-498e-8af8-1645d8c30265",
+        "timestamp": 1784177110394
+      },
+      {
+        "executionId": "bcde2d97-d091-4a4f-b30c-8b9abc0927e1",
+        "chatSessionId": "sess_04b538b7-b82f-498e-8af8-1645d8c30265",
+        "timestamp": 1784177303911
+      }
+    ],
+    "10.3 Clean up imports referencing `src/screens/ProviderDetailScreen`": [
+      {
+        "executionId": "bcde2d97-d091-4a4f-b30c-8b9abc0927e1",
+        "chatSessionId": "sess_04b538b7-b82f-498e-8af8-1645d8c30265",
+        "timestamp": 1784176677268
+      },
+      {
+        "executionId": "bcde2d97-d091-4a4f-b30c-8b9abc0927e1",
+        "chatSessionId": "sess_04b538b7-b82f-498e-8af8-1645d8c30265",
+        "timestamp": 1784177111152
+      },
+      {
+        "executionId": "bcde2d97-d091-4a4f-b30c-8b9abc0927e1",
+        "chatSessionId": "sess_04b538b7-b82f-498e-8af8-1645d8c30265",
+        "timestamp": 1784177304922
+      }
+    ],
+    "11.1 Add `temperature` field to `CompletionRequest` in `src/providers/types.ts`": [
+      {
+        "executionId": "bcde2d97-d091-4a4f-b30c-8b9abc0927e1",
+        "chatSessionId": "sess_04b538b7-b82f-498e-8af8-1645d8c30265",
+        "timestamp": 1784176677296
+      },
+      {
+        "executionId": "bcde2d97-d091-4a4f-b30c-8b9abc0927e1",
+        "chatSessionId": "sess_04b538b7-b82f-498e-8af8-1645d8c30265",
+        "timestamp": 1784177112702
+      },
+      {
+        "executionId": "bcde2d97-d091-4a4f-b30c-8b9abc0927e1",
+        "chatSessionId": "sess_04b538b7-b82f-498e-8af8-1645d8c30265",
+        "timestamp": 1784177306379
+      }
+    ],
+    "12.1 Update AnthropicProvider to pass `temperature` from CompletionRequest": [
+      {
+        "executionId": "bcde2d97-d091-4a4f-b30c-8b9abc0927e1",
+        "chatSessionId": "sess_04b538b7-b82f-498e-8af8-1645d8c30265",
+        "timestamp": 1784176677321
+      },
+      {
+        "executionId": "bcde2d97-d091-4a4f-b30c-8b9abc0927e1",
+        "chatSessionId": "sess_04b538b7-b82f-498e-8af8-1645d8c30265",
+        "timestamp": 1784177829456
+      },
+      {
+        "executionId": "bcde2d97-d091-4a4f-b30c-8b9abc0927e1",
+        "chatSessionId": "sess_04b538b7-b82f-498e-8af8-1645d8c30265",
+        "timestamp": 1784178086921
+      }
+    ],
+    "12.2 Update OpenAIProvider to pass `temperature` from CompletionRequest": [
+      {
+        "executionId": "bcde2d97-d091-4a4f-b30c-8b9abc0927e1",
+        "chatSessionId": "sess_04b538b7-b82f-498e-8af8-1645d8c30265",
+        "timestamp": 1784176677346
+      },
+      {
+        "executionId": "bcde2d97-d091-4a4f-b30c-8b9abc0927e1",
+        "chatSessionId": "sess_04b538b7-b82f-498e-8af8-1645d8c30265",
+        "timestamp": 1784177829477
+      },
+      {
+        "executionId": "bcde2d97-d091-4a4f-b30c-8b9abc0927e1",
+        "chatSessionId": "sess_04b538b7-b82f-498e-8af8-1645d8c30265",
+        "timestamp": 1784178088045
+      }
+    ],
+    "12.3 Update CustomProvider to pass `temperature` from CompletionRequest": [
+      {
+        "executionId": "bcde2d97-d091-4a4f-b30c-8b9abc0927e1",
+        "chatSessionId": "sess_04b538b7-b82f-498e-8af8-1645d8c30265",
+        "timestamp": 1784176677370
+      },
+      {
+        "executionId": "bcde2d97-d091-4a4f-b30c-8b9abc0927e1",
+        "chatSessionId": "sess_04b538b7-b82f-498e-8af8-1645d8c30265",
+        "timestamp": 1784177830597
+      },
+      {
+        "executionId": "bcde2d97-d091-4a4f-b30c-8b9abc0927e1",
+        "chatSessionId": "sess_04b538b7-b82f-498e-8af8-1645d8c30265",
+        "timestamp": 1784178089164
+      }
+    ],
+    "13. Checkpoint - Full integration verification": [
+      {
+        "executionId": "bcde2d97-d091-4a4f-b30c-8b9abc0927e1",
+        "chatSessionId": "sess_04b538b7-b82f-498e-8af8-1645d8c30265",
+        "timestamp": 1784176677396
+      }
+    ],
+    "14.1 Write property tests for generation params schema invariant": [
+      {
+        "executionId": "bcde2d97-d091-4a4f-b30c-8b9abc0927e1",
+        "chatSessionId": "sess_04b538b7-b82f-498e-8af8-1645d8c30265",
+        "timestamp": 1784176677421
+      }
+    ],
+    "14.2 Write property tests for API key masking": [
+      {
+        "executionId": "bcde2d97-d091-4a4f-b30c-8b9abc0927e1",
+        "chatSessionId": "sess_04b538b7-b82f-498e-8af8-1645d8c30265",
+        "timestamp": 1784176677445
+      }
+    ],
+    "14.3 Write property tests for connection status mapping": [
+      {
+        "executionId": "bcde2d97-d091-4a4f-b30c-8b9abc0927e1",
+        "chatSessionId": "sess_04b538b7-b82f-498e-8af8-1645d8c30265",
+        "timestamp": 1784176677468
+      }
+    ],
+    "14.4 Write property tests for model selection round-trip": [
+      {
+        "executionId": "bcde2d97-d091-4a4f-b30c-8b9abc0927e1",
+        "chatSessionId": "sess_04b538b7-b82f-498e-8af8-1645d8c30265",
+        "timestamp": 1784176677498
+      }
+    ],
+    "14.5 Write property tests for thinking level round-trip": [
+      {
+        "executionId": "bcde2d97-d091-4a4f-b30c-8b9abc0927e1",
+        "chatSessionId": "sess_04b538b7-b82f-498e-8af8-1645d8c30265",
+        "timestamp": 1784176677530
+      }
+    ],
+    "14.6 Write property tests for cost metadata formatting": [
+      {
+        "executionId": "bcde2d97-d091-4a4f-b30c-8b9abc0927e1",
+        "chatSessionId": "sess_04b538b7-b82f-498e-8af8-1645d8c30265",
+        "timestamp": 1784176677554
+      }
+    ],
+    "14.7 Write property tests for error banner retry visibility": [
+      {
+        "executionId": "bcde2d97-d091-4a4f-b30c-8b9abc0927e1",
+        "chatSessionId": "sess_04b538b7-b82f-498e-8af8-1645d8c30265",
+        "timestamp": 1784176677578
+      }
+    ],
+    "14.8 Write property tests for system prompt prepend": [
+      {
+        "executionId": "bcde2d97-d091-4a4f-b30c-8b9abc0927e1",
+        "chatSessionId": "sess_04b538b7-b82f-498e-8af8-1645d8c30265",
+        "timestamp": 1784176677602
+      }
+    ],
+    "14.9 Write property tests for context ring computation": [
+      {
+        "executionId": "bcde2d97-d091-4a4f-b30c-8b9abc0927e1",
+        "chatSessionId": "sess_04b538b7-b82f-498e-8af8-1645d8c30265",
+        "timestamp": 1784176677622
+      }
+    ],
+    "15. Final checkpoint": [
+      {
+        "executionId": "bcde2d97-d091-4a4f-b30c-8b9abc0927e1",
+        "chatSessionId": "sess_04b538b7-b82f-498e-8af8-1645d8c30265",
+        "timestamp": 1784176677651
+      }
+    ],
+    "1. Database migration and schema updates": [
+      {
+        "executionId": "bcde2d97-d091-4a4f-b30c-8b9abc0927e1",
+        "chatSessionId": "sess_04b538b7-b82f-498e-8af8-1645d8c30265",
+        "timestamp": 1784177001612
+      }
+    ],
+    "2. Provider store generation params integration": [
+      {
+        "executionId": "bcde2d97-d091-4a4f-b30c-8b9abc0927e1",
+        "chatSessionId": "sess_04b538b7-b82f-498e-8af8-1645d8c30265",
+        "timestamp": 1784177302346
+      }
+    ],
+    "10. Delete duplicate ProviderDetailScreen": [
+      {
+        "executionId": "bcde2d97-d091-4a4f-b30c-8b9abc0927e1",
+        "chatSessionId": "sess_04b538b7-b82f-498e-8af8-1645d8c30265",
+        "timestamp": 1784177304951
+      }
+    ],
+    "11. CompletionRequest type extension": [
+      {
+        "executionId": "bcde2d97-d091-4a4f-b30c-8b9abc0927e1",
+        "chatSessionId": "sess_04b538b7-b82f-498e-8af8-1645d8c30265",
+        "timestamp": 1784177306410
+      }
+    ],
+    "3. Session model and thinking level persistence": [
+      {
+        "executionId": "bcde2d97-d091-4a4f-b30c-8b9abc0927e1",
+        "chatSessionId": "sess_04b538b7-b82f-498e-8af8-1645d8c30265",
+        "timestamp": 1784177814245
+      }
+    ],
+    "12. Provider adapters: pass temperature and maxTokens": [
+      {
+        "executionId": "bcde2d97-d091-4a4f-b30c-8b9abc0927e1",
+        "chatSessionId": "sess_04b538b7-b82f-498e-8af8-1645d8c30265",
+        "timestamp": 1784178089212
+      }
+    ],
+    "4. CompletionService system prompt and generation params": [
+      {
+        "executionId": "bcde2d97-d091-4a4f-b30c-8b9abc0927e1",
+        "chatSessionId": "sess_04b538b7-b82f-498e-8af8-1645d8c30265",
+        "timestamp": 1784178741526
+      }
+    ],
+    "5. SettingsScreen wiring": [
+      {
+        "executionId": "bcde2d97-d091-4a4f-b30c-8b9abc0927e1",
+        "chatSessionId": "sess_04b538b7-b82f-498e-8af8-1645d8c30265",
+        "timestamp": 1784178743080
+      }
+    ],
+    "6. ProviderCard enhancements": [
+      {
+        "executionId": "bcde2d97-d091-4a4f-b30c-8b9abc0927e1",
+        "chatSessionId": "sess_04b538b7-b82f-498e-8af8-1645d8c30265",
+        "timestamp": 1784178907745
+      }
+    ],
+    "8. MessageFlow cost display": [
+      {
+        "executionId": "bcde2d97-d091-4a4f-b30c-8b9abc0927e1",
+        "chatSessionId": "sess_04b538b7-b82f-498e-8af8-1645d8c30265",
+        "timestamp": 1784179808439
+      }
+    ]
+  }
+}

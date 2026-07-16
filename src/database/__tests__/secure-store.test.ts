@@ -6,14 +6,14 @@ import {
 } from '../secure-store';
 
 // Mock expo-secure-store
-const mockSetItemAsync = jest.fn(() => Promise.resolve());
-const mockGetItemAsync = jest.fn(() => Promise.resolve(null));
-const mockDeleteItemAsync = jest.fn(() => Promise.resolve());
+const mockSetItemAsync = jest.fn<Promise<void>, [string, string]>();
+const mockGetItemAsync = jest.fn<Promise<string | null>, [string]>().mockResolvedValue(null);
+const mockDeleteItemAsync = jest.fn<Promise<void>, [string]>();
 
 jest.mock('expo-secure-store', () => ({
-  setItemAsync: (...args: unknown[]) => mockSetItemAsync(...args),
-  getItemAsync: (...args: unknown[]) => mockGetItemAsync(...args),
-  deleteItemAsync: (...args: unknown[]) => mockDeleteItemAsync(...args),
+  setItemAsync: (...args: [string, string]) => mockSetItemAsync(...args),
+  getItemAsync: (...args: [string]) => mockGetItemAsync(...args),
+  deleteItemAsync: (...args: [string]) => mockDeleteItemAsync(...args),
 }));
 
 describe('secure-store', () => {
@@ -24,13 +24,13 @@ describe('secure-store', () => {
   describe('buildSecureKey', () => {
     it('builds the correct key pattern for a provider', () => {
       expect(buildSecureKey('provider-123')).toBe(
-        'arlo:provider:provider-123:apiKey'
+        'arlo.provider.provider-123.apiKey'
       );
     });
 
     it('handles provider IDs with special characters', () => {
       expect(buildSecureKey('my-custom_provider.v2')).toBe(
-        'arlo:provider:my-custom_provider.v2:apiKey'
+        'arlo.provider.my-custom_provider.v2.apiKey'
       );
     });
   });
@@ -40,7 +40,7 @@ describe('secure-store', () => {
       await storeApiKey('provider-1', 'sk-test-key-123');
 
       expect(mockSetItemAsync).toHaveBeenCalledWith(
-        'arlo:provider:provider-1:apiKey',
+        'arlo.provider.provider-1.apiKey',
         'sk-test-key-123'
       );
     });
@@ -75,7 +75,7 @@ describe('secure-store', () => {
       const result = await getApiKey('provider-1');
 
       expect(mockGetItemAsync).toHaveBeenCalledWith(
-        'arlo:provider:provider-1:apiKey'
+        'arlo.provider.provider-1.apiKey'
       );
       expect(result).toBe('sk-retrieved-key');
     });
@@ -101,7 +101,7 @@ describe('secure-store', () => {
       await deleteApiKey('provider-1');
 
       expect(mockDeleteItemAsync).toHaveBeenCalledWith(
-        'arlo:provider:provider-1:apiKey'
+        'arlo.provider.provider-1.apiKey'
       );
     });
 

@@ -49,6 +49,7 @@ interface ProviderRow {
   base_url: string;
   api_mode: string | null;
   streaming_enabled: number;
+  generation_params: string;
   created_at: number;
   updated_at: number;
 }
@@ -75,6 +76,7 @@ interface SessionRow {
   provider_id: string;
   model_id: string;
   system_prompt_id: string | null;
+  thinking_level: string | null;
   total_cost: number;
   token_count: number;
   created_at: number;
@@ -140,6 +142,9 @@ export async function exportBackupPayload(
     baseUrl: row.base_url,
     apiMode: row.api_mode as Provider['apiMode'],
     streamingEnabled: row.streaming_enabled === 1,
+    generationParams: row.generation_params
+      ? JSON.parse(row.generation_params)
+      : { temperature: 0.7, maxTokens: 4096 },
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   }));
@@ -166,6 +171,7 @@ export async function exportBackupPayload(
     providerId: row.provider_id,
     modelId: row.model_id,
     systemPromptId: row.system_prompt_id,
+    thinkingLevel: row.thinking_level ?? null,
     totalCost: row.total_cost,
     tokenCount: row.token_count,
     createdAt: row.created_at,

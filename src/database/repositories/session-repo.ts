@@ -133,7 +133,7 @@ export async function updateSession(
   updates: UpdateSessionData
 ): Promise<Session | null> {
   const setClauses: string[] = [];
-  const params: unknown[] = [];
+  const params: (string | number | null)[] = [];
 
   if (updates.title !== undefined) {
     setClauses.push('title = ?');

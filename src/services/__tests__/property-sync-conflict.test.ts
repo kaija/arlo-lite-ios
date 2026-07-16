@@ -142,6 +142,10 @@ function providerArb(idArb: fc.Arbitrary<string>, updatedAtArb: fc.Arbitrary<num
     baseUrl: fc.webUrl(),
     apiMode: apiModeArb,
     streamingEnabled: fc.boolean(),
+    generationParams: fc.record({
+      temperature: fc.double({ min: 0, max: 2, noNaN: true, noDefaultInfinity: true }),
+      maxTokens: fc.integer({ min: 1, max: 100000 }),
+    }),
     createdAt: fc.integer({ min: 1_000_000_000, max: 2_000_000_000 }),
     updatedAt: updatedAtArb,
   });
@@ -155,6 +159,7 @@ function sessionArb(idArb: fc.Arbitrary<string>, updatedAtArb: fc.Arbitrary<numb
     providerId: fc.uuid(),
     modelId: fc.string({ minLength: 1, maxLength: 60 }),
     systemPromptId: fc.oneof(fc.uuid(), fc.constant(null)),
+    thinkingLevel: fc.oneof(fc.constantFrom('off', 'minimal', 'low', 'medium', 'high', 'xhigh'), fc.constant(null)),
     totalCost: fc.float({ min: 0, max: 1000, noNaN: true, noDefaultInfinity: true }),
     tokenCount: fc.integer({ min: 0, max: 1_000_000 }),
     createdAt: fc.integer({ min: 1_000_000_000, max: 2_000_000_000 }),
@@ -368,7 +373,7 @@ describe('Property 13: Sync conflict resolution (last-write-wins)', () => {
           fc.uuid(),
           // Generate two distinct timestamps
           fc.integer({ min: 1_000_000_000, max: 2_000_000_000 }),
-          fc.integer({ min: 1_000_000_000, max: 2_000_000_000 }).filter((_, index) => true),
+          fc.integer({ min: 1_000_000_000, max: 2_000_000_000 }).filter((_t: number) => true),
           providerArb(fc.constant('dummy'), fc.constant(0)),
           providerArb(fc.constant('dummy'), fc.constant(0)),
           async (id, ts1, ts2, fieldsA, fieldsB) => {

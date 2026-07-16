@@ -18,6 +18,7 @@ function sessionArbitrary(updatedAtArb: fc.Arbitrary<number>): fc.Arbitrary<Sess
     providerId: fc.string({ minLength: 1, maxLength: 20 }),
     modelId: fc.string({ minLength: 1, maxLength: 20 }),
     systemPromptId: fc.option(fc.string({ minLength: 1, maxLength: 20 }), { nil: null }),
+    thinkingLevel: fc.option(fc.constantFrom('off', 'minimal', 'low', 'medium', 'high', 'xhigh'), { nil: null }),
     totalCost: fc.float({ min: 0, max: 1000, noNaN: true }),
     tokenCount: fc.nat({ max: 100000 }),
     createdAt: updatedAtArb.map((t) => t - 1000),

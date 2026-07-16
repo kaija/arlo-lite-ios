@@ -15,7 +15,7 @@ export interface UIState {
   sidebarOpen: boolean;
   /** Whether the settings overlay is visible */
   settingsVisible: boolean;
-  /** Provider ID for the detail screen, or null when closed */
+  /** Provider ID for the detail screen, empty string for "add new", or null when closed */
   providerDetailId: string | null;
   /** Whether the model picker dropdown is visible */
   modelPickerVisible: boolean;
@@ -40,7 +40,7 @@ export interface UIActions {
   openRename: (sessionId: string) => void;
   /** Close the rename dialog */
   closeRename: () => void;
-  /** Open the provider detail screen for a specific provider */
+  /** Open the provider detail screen for a specific provider, or pass empty string to add new */
   openProviderDetail: (id: string) => void;
   /** Close the provider detail screen */
   closeProviderDetail: () => void;

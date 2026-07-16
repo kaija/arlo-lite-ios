@@ -15,13 +15,18 @@ jest.mock('expo-sqlite', () => ({
   openDatabaseAsync: jest.fn(() => Promise.resolve(mockDb)),
 }));
 
-// Mock the migration
+// Mock the migrations
 jest.mock('../migrations/v1', () => ({
   migrateV1: jest.fn(() => Promise.resolve()),
 }));
 
+jest.mock('../migrations/v2', () => ({
+  migrateV2: jest.fn(() => Promise.resolve()),
+}));
+
 import * as SQLite from 'expo-sqlite';
 import { migrateV1 } from '../migrations/v1';
+import { migrateV2 } from '../migrations/v2';
 
 describe('database', () => {
   beforeEach(() => {
@@ -30,7 +35,7 @@ describe('database', () => {
 
   describe('initDatabase', () => {
     it('opens database with correct name', async () => {
-      mockGetFirstAsync.mockResolvedValue({ user_version: 1 });
+      mockGetFirstAsync.mockResolvedValue({ user_version: 2 });
 
       await initDatabase();
 
@@ -38,7 +43,7 @@ describe('database', () => {
     });
 
     it('enables WAL mode', async () => {
-      mockGetFirstAsync.mockResolvedValue({ user_version: 1 });
+      mockGetFirstAsync.mockResolvedValue({ user_version: 2 });
 
       await initDatabase();
 
@@ -46,7 +51,7 @@ describe('database', () => {
     });
 
     it('enables foreign keys', async () => {
-      mockGetFirstAsync.mockResolvedValue({ user_version: 1 });
+      mockGetFirstAsync.mockResolvedValue({ user_version: 2 });
 
       await initDatabase();
 
@@ -59,19 +64,21 @@ describe('database', () => {
       await initDatabase();
 
       expect(migrateV1).toHaveBeenCalledWith(mockDb);
-      expect(mockExecAsync).toHaveBeenCalledWith('PRAGMA user_version = 1');
+      expect(migrateV2).toHaveBeenCalledWith(mockDb);
+      expect(mockExecAsync).toHaveBeenCalledWith('PRAGMA user_version = 2');
     });
 
     it('skips migrations when user_version is current', async () => {
-      mockGetFirstAsync.mockResolvedValue({ user_version: 1 });
+      mockGetFirstAsync.mockResolvedValue({ user_version: 2 });
 
       await initDatabase();
 
       expect(migrateV1).not.toHaveBeenCalled();
+      expect(migrateV2).not.toHaveBeenCalled();
     });
 
     it('returns the database instance', async () => {
-      mockGetFirstAsync.mockResolvedValue({ user_version: 1 });
+      mockGetFirstAsync.mockResolvedValue({ user_version: 2 });
 
       const db = await initDatabase();
 

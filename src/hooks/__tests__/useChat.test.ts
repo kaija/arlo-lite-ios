@@ -17,6 +17,15 @@ jest.mock('@/stores/provider-store', () => ({
   useProviderStore: jest.fn(),
 }));
 
+jest.mock('@/stores/settings-store', () => ({
+  useSettingsStore: Object.assign(jest.fn(), {
+    getState: jest.fn(() => ({
+      defaultSystemPromptId: null,
+      systemPrompts: [],
+    })),
+  }),
+}));
+
 jest.mock('@/services/completion-service', () => ({
   streamCompletion: jest.fn(),
   complete: jest.fn(),

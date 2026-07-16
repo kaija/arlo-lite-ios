@@ -101,8 +101,8 @@ describe('session-store', () => {
 
     it('loads sessions from the database', async () => {
       const sessions = [
-        { id: 's1', title: 'Chat 1', providerId: 'p1', modelId: 'm1', systemPromptId: null, totalCost: 0, tokenCount: 0, createdAt: 100, updatedAt: 200 },
-        { id: 's2', title: 'Chat 2', providerId: 'p1', modelId: 'm1', systemPromptId: null, totalCost: 0, tokenCount: 0, createdAt: 50, updatedAt: 150 },
+        { id: 's1', title: 'Chat 1', providerId: 'p1', modelId: 'm1', systemPromptId: null, totalCost: 0, thinkingLevel: null, tokenCount: 0, createdAt: 100, updatedAt: 200 },
+        { id: 's2', title: 'Chat 2', providerId: 'p1', modelId: 'm1', systemPromptId: null, totalCost: 0, thinkingLevel: null, tokenCount: 0, createdAt: 50, updatedAt: 150 },
       ];
       mockGetAllSessions.mockResolvedValue(sessions);
 
@@ -124,7 +124,7 @@ describe('session-store', () => {
     it('creates a session in DB and adds to state', async () => {
       const newSession = {
         id: 's1', title: 'New Chat', providerId: 'p1', modelId: 'm1',
-        systemPromptId: null, totalCost: 0, tokenCount: 0,
+        systemPromptId: null, thinkingLevel: null, totalCost: 0, tokenCount: 0,
         createdAt: 1700000000000, updatedAt: 1700000000000,
       };
       mockCreateSession.mockResolvedValue(newSession);
@@ -145,12 +145,12 @@ describe('session-store', () => {
     it('prepends new session to the list', async () => {
       const existingSession = {
         id: 's0', title: 'Old Chat', providerId: 'p1', modelId: 'm1',
-        systemPromptId: null, totalCost: 0, tokenCount: 0,
+        systemPromptId: null, thinkingLevel: null, totalCost: 0, tokenCount: 0,
         createdAt: 1000, updatedAt: 1000,
       };
       const newSession = {
         id: 's1', title: 'New Chat', providerId: 'p1', modelId: 'm1',
-        systemPromptId: null, totalCost: 0, tokenCount: 0,
+        systemPromptId: null, thinkingLevel: null, totalCost: 0, tokenCount: 0,
         createdAt: 2000, updatedAt: 2000,
       };
       mockCreateSession.mockResolvedValue(newSession);
@@ -173,7 +173,7 @@ describe('session-store', () => {
     it('deletes session from DB and removes from state', async () => {
       const session = {
         id: 's1', title: 'Chat', providerId: 'p1', modelId: 'm1',
-        systemPromptId: null, totalCost: 0, tokenCount: 0,
+        systemPromptId: null, thinkingLevel: null, totalCost: 0, tokenCount: 0,
         createdAt: 100, updatedAt: 100,
       };
       mockDeleteSession.mockResolvedValue();
@@ -195,12 +195,12 @@ describe('session-store', () => {
     it('does not clear activeSessionId when deleting a different session', async () => {
       const session1 = {
         id: 's1', title: 'Chat 1', providerId: 'p1', modelId: 'm1',
-        systemPromptId: null, totalCost: 0, tokenCount: 0,
+        systemPromptId: null, thinkingLevel: null, totalCost: 0, tokenCount: 0,
         createdAt: 100, updatedAt: 100,
       };
       const session2 = {
         id: 's2', title: 'Chat 2', providerId: 'p1', modelId: 'm1',
-        systemPromptId: null, totalCost: 0, tokenCount: 0,
+        systemPromptId: null, thinkingLevel: null, totalCost: 0, tokenCount: 0,
         createdAt: 200, updatedAt: 200,
       };
       mockDeleteSession.mockResolvedValue();
@@ -228,7 +228,7 @@ describe('session-store', () => {
     it('renames session in DB and updates state', async () => {
       const session = {
         id: 's1', title: 'Old Title', providerId: 'p1', modelId: 'm1',
-        systemPromptId: null, totalCost: 0, tokenCount: 0,
+        systemPromptId: null, thinkingLevel: null, totalCost: 0, tokenCount: 0,
         createdAt: 100, updatedAt: 100,
       };
       const updatedSession = { ...session, title: 'New Title', updatedAt: 200 };
@@ -244,7 +244,7 @@ describe('session-store', () => {
     it('does nothing when update returns null', async () => {
       const session = {
         id: 's1', title: 'Old Title', providerId: 'p1', modelId: 'm1',
-        systemPromptId: null, totalCost: 0, tokenCount: 0,
+        systemPromptId: null, thinkingLevel: null, totalCost: 0, tokenCount: 0,
         createdAt: 100, updatedAt: 100,
       };
       mockUpdateSession.mockResolvedValue(null);
@@ -272,7 +272,7 @@ describe('session-store', () => {
     it('creates message in DB and adds to state', async () => {
       const session = {
         id: 's1', title: 'Existing Chat', providerId: 'p1', modelId: 'm1',
-        systemPromptId: null, totalCost: 0, tokenCount: 0,
+        systemPromptId: null, thinkingLevel: null, totalCost: 0, tokenCount: 0,
         createdAt: 100, updatedAt: 100,
       };
       const newMessage = {
@@ -307,7 +307,7 @@ describe('session-store', () => {
     it('auto-generates title from first user message when session is "New Chat"', async () => {
       const session = {
         id: 's1', title: 'New Chat', providerId: 'p1', modelId: 'm1',
-        systemPromptId: null, totalCost: 0, tokenCount: 0,
+        systemPromptId: null, thinkingLevel: null, totalCost: 0, tokenCount: 0,
         createdAt: 100, updatedAt: 100,
       };
       const newMessage = {
@@ -336,7 +336,7 @@ describe('session-store', () => {
       const longContent = 'A'.repeat(80);
       const session = {
         id: 's1', title: 'New Chat', providerId: 'p1', modelId: 'm1',
-        systemPromptId: null, totalCost: 0, tokenCount: 0,
+        systemPromptId: null, thinkingLevel: null, totalCost: 0, tokenCount: 0,
         createdAt: 100, updatedAt: 100,
       };
       const newMessage = {
@@ -365,7 +365,7 @@ describe('session-store', () => {
     it('does not auto-generate title for assistant messages', async () => {
       const session = {
         id: 's1', title: 'New Chat', providerId: 'p1', modelId: 'm1',
-        systemPromptId: null, totalCost: 0, tokenCount: 0,
+        systemPromptId: null, thinkingLevel: null, totalCost: 0, tokenCount: 0,
         createdAt: 100, updatedAt: 100,
       };
       const newMessage = {
@@ -393,7 +393,7 @@ describe('session-store', () => {
     it('does not auto-generate title when there are existing user messages', async () => {
       const session = {
         id: 's1', title: 'New Chat', providerId: 'p1', modelId: 'm1',
-        systemPromptId: null, totalCost: 0, tokenCount: 0,
+        systemPromptId: null, thinkingLevel: null, totalCost: 0, tokenCount: 0,
         createdAt: 100, updatedAt: 100,
       };
       const existingMessage = {

@@ -103,8 +103,8 @@ describe('provider-store', () => {
 
     it('loads providers from the database', async () => {
       const providers = [
-        { id: 'p1', type: 'openai' as const, name: 'OpenAI', baseUrl: 'https://api.openai.com/v1', apiMode: 'responses' as const, streamingEnabled: true, createdAt: 100, updatedAt: 100 },
-        { id: 'p2', type: 'anthropic' as const, name: 'Anthropic', baseUrl: 'https://api.anthropic.com', apiMode: null, streamingEnabled: true, createdAt: 200, updatedAt: 200 },
+        { id: 'p1', type: 'openai' as const, name: 'OpenAI', baseUrl: 'https://api.openai.com/v1', apiMode: 'responses' as const, generationParams: { temperature: 0.7, maxTokens: 4096 }, streamingEnabled: true, createdAt: 100, updatedAt: 100 },
+        { id: 'p2', type: 'anthropic' as const, name: 'Anthropic', baseUrl: 'https://api.anthropic.com', apiMode: null, generationParams: { temperature: 0.7, maxTokens: 4096 }, streamingEnabled: true, createdAt: 200, updatedAt: 200 },
       ];
       mockGetAllProviders.mockResolvedValue(providers);
 
@@ -173,7 +173,7 @@ describe('provider-store', () => {
       const newProvider = {
         id: 'p1', type: 'openai' as const, name: 'OpenAI',
         baseUrl: 'https://api.openai.com/v1', apiMode: 'responses' as const,
-        streamingEnabled: true, createdAt: 1700000000000, updatedAt: 1700000000000,
+        generationParams: { temperature: 0.7, maxTokens: 4096 }, streamingEnabled: true, createdAt: 1700000000000, updatedAt: 1700000000000,
       };
       mockCreateProvider.mockResolvedValue(newProvider);
 
@@ -199,7 +199,7 @@ describe('provider-store', () => {
       const newProvider = {
         id: 'p1', type: 'openai' as const, name: 'OpenAI',
         baseUrl: 'https://api.openai.com/v1', apiMode: null,
-        streamingEnabled: true, createdAt: 1700000000000, updatedAt: 1700000000000,
+        generationParams: { temperature: 0.7, maxTokens: 4096 }, streamingEnabled: true, createdAt: 1700000000000, updatedAt: 1700000000000,
       };
       mockCreateProvider.mockResolvedValue(newProvider);
 
@@ -216,7 +216,7 @@ describe('provider-store', () => {
       const newProvider = {
         id: 'p1', type: 'anthropic' as const, name: 'Anthropic',
         baseUrl: 'https://api.anthropic.com', apiMode: null,
-        streamingEnabled: true, createdAt: 1700000000000, updatedAt: 1700000000000,
+        generationParams: { temperature: 0.7, maxTokens: 4096 }, streamingEnabled: true, createdAt: 1700000000000, updatedAt: 1700000000000,
       };
       mockCreateProvider.mockResolvedValue(newProvider);
 
@@ -242,7 +242,7 @@ describe('provider-store', () => {
       const existingProvider = {
         id: 'p1', type: 'openai' as const, name: 'OpenAI',
         baseUrl: 'https://api.openai.com/v1', apiMode: null,
-        streamingEnabled: true, createdAt: 100, updatedAt: 100,
+        generationParams: { temperature: 0.7, maxTokens: 4096 }, streamingEnabled: true, createdAt: 100, updatedAt: 100,
       };
       const updatedProvider = { ...existingProvider, name: 'OpenAI Updated', updatedAt: 200 };
       mockUpdateProvider.mockResolvedValue(updatedProvider);
@@ -258,7 +258,7 @@ describe('provider-store', () => {
       const existingProvider = {
         id: 'p1', type: 'openai' as const, name: 'OpenAI',
         baseUrl: 'https://api.openai.com/v1', apiMode: null,
-        streamingEnabled: true, createdAt: 100, updatedAt: 100,
+        generationParams: { temperature: 0.7, maxTokens: 4096 }, streamingEnabled: true, createdAt: 100, updatedAt: 100,
       };
       mockUpdateProvider.mockResolvedValue(null);
 
@@ -280,7 +280,7 @@ describe('provider-store', () => {
       const provider = {
         id: 'p1', type: 'openai' as const, name: 'OpenAI',
         baseUrl: 'https://api.openai.com/v1', apiMode: null,
-        streamingEnabled: true, createdAt: 100, updatedAt: 100,
+        generationParams: { temperature: 0.7, maxTokens: 4096 }, streamingEnabled: true, createdAt: 100, updatedAt: 100,
       };
       const model = {
         id: 'm1', providerId: 'p1', modelId: 'gpt-4o', displayName: 'GPT-4o',
@@ -303,11 +303,11 @@ describe('provider-store', () => {
     it('only removes models belonging to the deleted provider', async () => {
       const provider1 = {
         id: 'p1', type: 'openai' as const, name: 'OpenAI',
-        baseUrl: 'url1', apiMode: null, streamingEnabled: true, createdAt: 100, updatedAt: 100,
+        baseUrl: 'url1', apiMode: null, generationParams: { temperature: 0.7, maxTokens: 4096 }, streamingEnabled: true, createdAt: 100, updatedAt: 100,
       };
       const provider2 = {
         id: 'p2', type: 'anthropic' as const, name: 'Anthropic',
-        baseUrl: 'url2', apiMode: null, streamingEnabled: true, createdAt: 200, updatedAt: 200,
+        baseUrl: 'url2', apiMode: null, generationParams: { temperature: 0.7, maxTokens: 4096 }, streamingEnabled: true, createdAt: 200, updatedAt: 200,
       };
       const model1 = {
         id: 'm1', providerId: 'p1', modelId: 'gpt-4o', displayName: 'GPT-4o',
@@ -466,7 +466,7 @@ describe('provider-store', () => {
     const provider = {
       id: 'p1', type: 'openai' as const, name: 'OpenAI',
       baseUrl: 'https://api.openai.com/v1', apiMode: 'responses' as const,
-      streamingEnabled: true, createdAt: 100, updatedAt: 100,
+      generationParams: { temperature: 0.7, maxTokens: 4096 }, streamingEnabled: true, createdAt: 100, updatedAt: 100,
     };
 
     it('sets status to connected on success', async () => {

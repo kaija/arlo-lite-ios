@@ -11,18 +11,21 @@ import * as SecureStore from 'expo-secure-store';
  *   backup/export payloads.
  * - When the app is uninstalled, Keychain items are removed on iOS,
  *   ensuring keys cannot persist across reinstalls.
- * - The key pattern `arlo:provider:{providerId}:apiKey` namespaces
+ * - The key pattern `arlo.provider.{providerId}.apiKey` namespaces
  *   entries to avoid collisions with other secure storage consumers.
  */
 
 /**
  * Builds the secure storage key for a provider's API key.
  *
+ * Uses dots as separators since expo-secure-store only allows
+ * alphanumeric characters, ".", "-", and "_" in keys.
+ *
  * @param providerId - The unique identifier of the provider.
  * @returns The namespaced key string used in secure storage.
  */
 export function buildSecureKey(providerId: string): string {
-  return `arlo:provider:${providerId}:apiKey`;
+  return `arlo.provider.${providerId}.apiKey`;
 }
 
 /**

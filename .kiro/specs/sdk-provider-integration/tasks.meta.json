@@ -1,0 +1,610 @@
+{
+  "pbtResults": {
+    "3.3 Write property tests for Anthropic response mapping": {
+      "status": "passed",
+      "lastRunTimestamp": 1784166549285
+    },
+    "3.2 Write property tests for Anthropic request parameter mapping": {
+      "status": "passed",
+      "lastRunTimestamp": 1784166587926
+    },
+    "3.4 Write property tests for Anthropic stream event mapping": {
+      "status": "passed",
+      "lastRunTimestamp": 1784166970104
+    },
+    "3.5 Write property tests for Anthropic error classification": {
+      "status": "passed",
+      "lastRunTimestamp": 1784167438671
+    },
+    "4.2 Write property tests for OpenAI request parameter mapping": {
+      "status": "passed",
+      "lastRunTimestamp": 1784167767573
+    },
+    "4.3 Write property tests for OpenAI response and stream mapping": {
+      "status": "passed",
+      "lastRunTimestamp": 1784167814810
+    },
+    "4.4 Write property tests for OpenAI error classification": {
+      "status": "passed",
+      "lastRunTimestamp": 1784167907600
+    },
+    "13.2 Write property test for model ID length validation": {
+      "status": "passed",
+      "lastRunTimestamp": 1784168777812
+    },
+    "15.2 Write property test for model list sorting": {
+      "status": "passed",
+      "lastRunTimestamp": 1784169525041
+    },
+    "15.3 Write property test for streaming/non-streaming parameter consistency": {
+      "status": "passed",
+      "lastRunTimestamp": 1784169747328
+    },
+    "15.1 Write property tests for ProviderError retry behavior": {
+      "status": "passed",
+      "lastRunTimestamp": 1784169894622
+    }
+  },
+  "executionHistory": {
+    "1.1 Install @anthropic-ai/sdk and openai with pinned versions": [
+      {
+        "executionId": "5261e600-306a-4ac3-9ac0-0e3fbf22127d",
+        "chatSessionId": "sess_6e00669e-0ef4-465c-a1f4-950c6186570e",
+        "timestamp": 1784161881713
+      },
+      {
+        "executionId": "5261e600-306a-4ac3-9ac0-0e3fbf22127d",
+        "chatSessionId": "sess_6e00669e-0ef4-465c-a1f4-950c6186570e",
+        "timestamp": 1784161910394
+      },
+      {
+        "executionId": "5261e600-306a-4ac3-9ac0-0e3fbf22127d",
+        "chatSessionId": "sess_6e00669e-0ef4-465c-a1f4-950c6186570e",
+        "timestamp": 1784164719950
+      }
+    ],
+    "1.2 Verify TypeScript compilation and build compatibility": [
+      {
+        "executionId": "5261e600-306a-4ac3-9ac0-0e3fbf22127d",
+        "chatSessionId": "sess_6e00669e-0ef4-465c-a1f4-950c6186570e",
+        "timestamp": 1784161881793
+      },
+      {
+        "executionId": "5261e600-306a-4ac3-9ac0-0e3fbf22127d",
+        "chatSessionId": "sess_6e00669e-0ef4-465c-a1f4-950c6186570e",
+        "timestamp": 1784164780365
+      },
+      {
+        "executionId": "5261e600-306a-4ac3-9ac0-0e3fbf22127d",
+        "chatSessionId": "sess_6e00669e-0ef4-465c-a1f4-950c6186570e",
+        "timestamp": 1784165158382
+      }
+    ],
+    "2.1 Define ProviderError class and error categories in `src/providers/errors.ts`": [
+      {
+        "executionId": "5261e600-306a-4ac3-9ac0-0e3fbf22127d",
+        "chatSessionId": "sess_6e00669e-0ef4-465c-a1f4-950c6186570e",
+        "timestamp": 1784161881832
+      },
+      {
+        "executionId": "5261e600-306a-4ac3-9ac0-0e3fbf22127d",
+        "chatSessionId": "sess_6e00669e-0ef4-465c-a1f4-950c6186570e",
+        "timestamp": 1784164781968
+      },
+      {
+        "executionId": "5261e600-306a-4ac3-9ac0-0e3fbf22127d",
+        "chatSessionId": "sess_6e00669e-0ef4-465c-a1f4-950c6186570e",
+        "timestamp": 1784165160012
+      }
+    ],
+    "2.2 Refactor IProvider interface in `src/providers/types.ts`": [
+      {
+        "executionId": "5261e600-306a-4ac3-9ac0-0e3fbf22127d",
+        "chatSessionId": "sess_6e00669e-0ef4-465c-a1f4-950c6186570e",
+        "timestamp": 1784161881883
+      },
+      {
+        "executionId": "5261e600-306a-4ac3-9ac0-0e3fbf22127d",
+        "chatSessionId": "sess_6e00669e-0ef4-465c-a1f4-950c6186570e",
+        "timestamp": 1784165213165
+      },
+      {
+        "executionId": "5261e600-306a-4ac3-9ac0-0e3fbf22127d",
+        "chatSessionId": "sess_6e00669e-0ef4-465c-a1f4-950c6186570e",
+        "timestamp": 1784165290219
+      }
+    ],
+    "3.1 Rewrite AnthropicProvider with @anthropic-ai/sdk in `src/providers/anthropic/anthropic-provider.ts`": [
+      {
+        "executionId": "5261e600-306a-4ac3-9ac0-0e3fbf22127d",
+        "chatSessionId": "sess_6e00669e-0ef4-465c-a1f4-950c6186570e",
+        "timestamp": 1784161881933
+      },
+      {
+        "executionId": "5261e600-306a-4ac3-9ac0-0e3fbf22127d",
+        "chatSessionId": "sess_6e00669e-0ef4-465c-a1f4-950c6186570e",
+        "timestamp": 1784165349297
+      },
+      {
+        "executionId": "5261e600-306a-4ac3-9ac0-0e3fbf22127d",
+        "chatSessionId": "sess_6e00669e-0ef4-465c-a1f4-950c6186570e",
+        "timestamp": 1784166226173
+      }
+    ],
+    "3.2 Write property tests for Anthropic request parameter mapping": [
+      {
+        "executionId": "5261e600-306a-4ac3-9ac0-0e3fbf22127d",
+        "chatSessionId": "sess_6e00669e-0ef4-465c-a1f4-950c6186570e",
+        "timestamp": 1784161881977
+      },
+      {
+        "executionId": "5261e600-306a-4ac3-9ac0-0e3fbf22127d",
+        "chatSessionId": "sess_6e00669e-0ef4-465c-a1f4-950c6186570e",
+        "timestamp": 1784166372629
+      },
+      {
+        "executionId": "5261e600-306a-4ac3-9ac0-0e3fbf22127d",
+        "chatSessionId": "sess_6e00669e-0ef4-465c-a1f4-950c6186570e",
+        "timestamp": 1784167461164
+      }
+    ],
+    "3.3 Write property tests for Anthropic response mapping": [
+      {
+        "executionId": "5261e600-306a-4ac3-9ac0-0e3fbf22127d",
+        "chatSessionId": "sess_6e00669e-0ef4-465c-a1f4-950c6186570e",
+        "timestamp": 1784161882013
+      },
+      {
+        "executionId": "5261e600-306a-4ac3-9ac0-0e3fbf22127d",
+        "chatSessionId": "sess_6e00669e-0ef4-465c-a1f4-950c6186570e",
+        "timestamp": 1784166373322
+      },
+      {
+        "executionId": "5261e600-306a-4ac3-9ac0-0e3fbf22127d",
+        "chatSessionId": "sess_6e00669e-0ef4-465c-a1f4-950c6186570e",
+        "timestamp": 1784167461840
+      }
+    ],
+    "3.4 Write property tests for Anthropic stream event mapping": [
+      {
+        "executionId": "5261e600-306a-4ac3-9ac0-0e3fbf22127d",
+        "chatSessionId": "sess_6e00669e-0ef4-465c-a1f4-950c6186570e",
+        "timestamp": 1784161882047
+      },
+      {
+        "executionId": "5261e600-306a-4ac3-9ac0-0e3fbf22127d",
+        "chatSessionId": "sess_6e00669e-0ef4-465c-a1f4-950c6186570e",
+        "timestamp": 1784166373999
+      },
+      {
+        "executionId": "5261e600-306a-4ac3-9ac0-0e3fbf22127d",
+        "chatSessionId": "sess_6e00669e-0ef4-465c-a1f4-950c6186570e",
+        "timestamp": 1784167462707
+      }
+    ],
+    "3.5 Write property tests for Anthropic error classification": [
+      {
+        "executionId": "5261e600-306a-4ac3-9ac0-0e3fbf22127d",
+        "chatSessionId": "sess_6e00669e-0ef4-465c-a1f4-950c6186570e",
+        "timestamp": 1784161882079
+      },
+      {
+        "executionId": "5261e600-306a-4ac3-9ac0-0e3fbf22127d",
+        "chatSessionId": "sess_6e00669e-0ef4-465c-a1f4-950c6186570e",
+        "timestamp": 1784166374893
+      },
+      {
+        "executionId": "5261e600-306a-4ac3-9ac0-0e3fbf22127d",
+        "chatSessionId": "sess_6e00669e-0ef4-465c-a1f4-950c6186570e",
+        "timestamp": 1784167463694
+      }
+    ],
+    "4.1 Rewrite OpenAIProvider with openai SDK in `src/providers/openai/openai-provider.ts`": [
+      {
+        "executionId": "5261e600-306a-4ac3-9ac0-0e3fbf22127d",
+        "chatSessionId": "sess_6e00669e-0ef4-465c-a1f4-950c6186570e",
+        "timestamp": 1784161882112
+      },
+      {
+        "executionId": "5261e600-306a-4ac3-9ac0-0e3fbf22127d",
+        "chatSessionId": "sess_6e00669e-0ef4-465c-a1f4-950c6186570e",
+        "timestamp": 1784165350174
+      },
+      {
+        "executionId": "5261e600-306a-4ac3-9ac0-0e3fbf22127d",
+        "chatSessionId": "sess_6e00669e-0ef4-465c-a1f4-950c6186570e",
+        "timestamp": 1784166227024
+      }
+    ],
+    "4.2 Write property tests for OpenAI request parameter mapping": [
+      {
+        "executionId": "5261e600-306a-4ac3-9ac0-0e3fbf22127d",
+        "chatSessionId": "sess_6e00669e-0ef4-465c-a1f4-950c6186570e",
+        "timestamp": 1784161882169
+      },
+      {
+        "executionId": "5261e600-306a-4ac3-9ac0-0e3fbf22127d",
+        "chatSessionId": "sess_6e00669e-0ef4-465c-a1f4-950c6186570e",
+        "timestamp": 1784167579447
+      },
+      {
+        "executionId": "5261e600-306a-4ac3-9ac0-0e3fbf22127d",
+        "chatSessionId": "sess_6e00669e-0ef4-465c-a1f4-950c6186570e",
+        "timestamp": 1784167941408
+      }
+    ],
+    "4.3 Write property tests for OpenAI response and stream mapping": [
+      {
+        "executionId": "5261e600-306a-4ac3-9ac0-0e3fbf22127d",
+        "chatSessionId": "sess_6e00669e-0ef4-465c-a1f4-950c6186570e",
+        "timestamp": 1784161882211
+      },
+      {
+        "executionId": "5261e600-306a-4ac3-9ac0-0e3fbf22127d",
+        "chatSessionId": "sess_6e00669e-0ef4-465c-a1f4-950c6186570e",
+        "timestamp": 1784167580173
+      },
+      {
+        "executionId": "5261e600-306a-4ac3-9ac0-0e3fbf22127d",
+        "chatSessionId": "sess_6e00669e-0ef4-465c-a1f4-950c6186570e",
+        "timestamp": 1784167942259
+      }
+    ],
+    "4.4 Write property tests for OpenAI error classification": [
+      {
+        "executionId": "5261e600-306a-4ac3-9ac0-0e3fbf22127d",
+        "chatSessionId": "sess_6e00669e-0ef4-465c-a1f4-950c6186570e",
+        "timestamp": 1784161882247
+      },
+      {
+        "executionId": "5261e600-306a-4ac3-9ac0-0e3fbf22127d",
+        "chatSessionId": "sess_6e00669e-0ef4-465c-a1f4-950c6186570e",
+        "timestamp": 1784167581825
+      },
+      {
+        "executionId": "5261e600-306a-4ac3-9ac0-0e3fbf22127d",
+        "chatSessionId": "sess_6e00669e-0ef4-465c-a1f4-950c6186570e",
+        "timestamp": 1784167943724
+      }
+    ],
+    "5. Checkpoint - Verify SDK providers compile and pass tests": [
+      {
+        "executionId": "5261e600-306a-4ac3-9ac0-0e3fbf22127d",
+        "chatSessionId": "sess_6e00669e-0ef4-465c-a1f4-950c6186570e",
+        "timestamp": 1784161882286
+      },
+      {
+        "executionId": "5261e600-306a-4ac3-9ac0-0e3fbf22127d",
+        "chatSessionId": "sess_6e00669e-0ef4-465c-a1f4-950c6186570e",
+        "timestamp": 1784168010111
+      },
+      {
+        "executionId": "5261e600-306a-4ac3-9ac0-0e3fbf22127d",
+        "chatSessionId": "sess_6e00669e-0ef4-465c-a1f4-950c6186570e",
+        "timestamp": 1784168458774
+      }
+    ],
+    "6.1 Rewrite CustomProvider in `src/providers/custom/custom-provider.ts`": [
+      {
+        "executionId": "5261e600-306a-4ac3-9ac0-0e3fbf22127d",
+        "chatSessionId": "sess_6e00669e-0ef4-465c-a1f4-950c6186570e",
+        "timestamp": 1784161882328
+      },
+      {
+        "executionId": "5261e600-306a-4ac3-9ac0-0e3fbf22127d",
+        "chatSessionId": "sess_6e00669e-0ef4-465c-a1f4-950c6186570e",
+        "timestamp": 1784165351843
+      },
+      {
+        "executionId": "5261e600-306a-4ac3-9ac0-0e3fbf22127d",
+        "chatSessionId": "sess_6e00669e-0ef4-465c-a1f4-950c6186570e",
+        "timestamp": 1784166228834
+      }
+    ],
+    "7.1 Create `src/services/completion-service.ts`": [
+      {
+        "executionId": "5261e600-306a-4ac3-9ac0-0e3fbf22127d",
+        "chatSessionId": "sess_6e00669e-0ef4-465c-a1f4-950c6186570e",
+        "timestamp": 1784161882365
+      },
+      {
+        "executionId": "5261e600-306a-4ac3-9ac0-0e3fbf22127d",
+        "chatSessionId": "sess_6e00669e-0ef4-465c-a1f4-950c6186570e",
+        "timestamp": 1784166376302
+      },
+      {
+        "executionId": "5261e600-306a-4ac3-9ac0-0e3fbf22127d",
+        "chatSessionId": "sess_6e00669e-0ef4-465c-a1f4-950c6186570e",
+        "timestamp": 1784167464840
+      }
+    ],
+    "8.1 Add connection status state to provider store in `src/stores/provider-store.ts`": [
+      {
+        "executionId": "5261e600-306a-4ac3-9ac0-0e3fbf22127d",
+        "chatSessionId": "sess_6e00669e-0ef4-465c-a1f4-950c6186570e",
+        "timestamp": 1784161882403
+      },
+      {
+        "executionId": "5261e600-306a-4ac3-9ac0-0e3fbf22127d",
+        "chatSessionId": "sess_6e00669e-0ef4-465c-a1f4-950c6186570e",
+        "timestamp": 1784168007695
+      },
+      {
+        "executionId": "5261e600-306a-4ac3-9ac0-0e3fbf22127d",
+        "chatSessionId": "sess_6e00669e-0ef4-465c-a1f4-950c6186570e",
+        "timestamp": 1784168459581
+      }
+    ],
+    "9.1 Refactor `src/hooks/useChat.ts` to use CompletionService": [
+      {
+        "executionId": "5261e600-306a-4ac3-9ac0-0e3fbf22127d",
+        "chatSessionId": "sess_6e00669e-0ef4-465c-a1f4-950c6186570e",
+        "timestamp": 1784161882445
+      },
+      {
+        "executionId": "5261e600-306a-4ac3-9ac0-0e3fbf22127d",
+        "chatSessionId": "sess_6e00669e-0ef4-465c-a1f4-950c6186570e",
+        "timestamp": 1784168008604
+      },
+      {
+        "executionId": "5261e600-306a-4ac3-9ac0-0e3fbf22127d",
+        "chatSessionId": "sess_6e00669e-0ef4-465c-a1f4-950c6186570e",
+        "timestamp": 1784168461171
+      }
+    ],
+    "10. Checkpoint - Verify end-to-end completion flow": [
+      {
+        "executionId": "5261e600-306a-4ac3-9ac0-0e3fbf22127d",
+        "chatSessionId": "sess_6e00669e-0ef4-465c-a1f4-950c6186570e",
+        "timestamp": 1784161882481
+      },
+      {
+        "executionId": "5261e600-306a-4ac3-9ac0-0e3fbf22127d",
+        "chatSessionId": "sess_6e00669e-0ef4-465c-a1f4-950c6186570e",
+        "timestamp": 1784168606715
+      },
+      {
+        "executionId": "5261e600-306a-4ac3-9ac0-0e3fbf22127d",
+        "chatSessionId": "sess_6e00669e-0ef4-465c-a1f4-950c6186570e",
+        "timestamp": 1784169277805
+      }
+    ],
+    "11.1 Update `src/components/settings/ProviderCard.tsx` and `src/screens/ProviderListScreen.tsx`": [
+      {
+        "executionId": "5261e600-306a-4ac3-9ac0-0e3fbf22127d",
+        "chatSessionId": "sess_6e00669e-0ef4-465c-a1f4-950c6186570e",
+        "timestamp": 1784161882549
+      },
+      {
+        "executionId": "5261e600-306a-4ac3-9ac0-0e3fbf22127d",
+        "chatSessionId": "sess_6e00669e-0ef4-465c-a1f4-950c6186570e",
+        "timestamp": 1784168607647
+      },
+      {
+        "executionId": "5261e600-306a-4ac3-9ac0-0e3fbf22127d",
+        "chatSessionId": "sess_6e00669e-0ef4-465c-a1f4-950c6186570e",
+        "timestamp": 1784169279063
+      }
+    ],
+    "12.1 Add \"Test Connection\" flow to `src/screens/ProviderDetailScreen.tsx`": [
+      {
+        "executionId": "5261e600-306a-4ac3-9ac0-0e3fbf22127d",
+        "chatSessionId": "sess_6e00669e-0ef4-465c-a1f4-950c6186570e",
+        "timestamp": 1784161882581
+      },
+      {
+        "executionId": "5261e600-306a-4ac3-9ac0-0e3fbf22127d",
+        "chatSessionId": "sess_6e00669e-0ef4-465c-a1f4-950c6186570e",
+        "timestamp": 1784168608473
+      },
+      {
+        "executionId": "5261e600-306a-4ac3-9ac0-0e3fbf22127d",
+        "chatSessionId": "sess_6e00669e-0ef4-465c-a1f4-950c6186570e",
+        "timestamp": 1784169279946
+      }
+    ],
+    "13.1 Update `src/screens/ModelDetailScreen.tsx` for SDK-powered model listing": [
+      {
+        "executionId": "5261e600-306a-4ac3-9ac0-0e3fbf22127d",
+        "chatSessionId": "sess_6e00669e-0ef4-465c-a1f4-950c6186570e",
+        "timestamp": 1784161882614
+      },
+      {
+        "executionId": "5261e600-306a-4ac3-9ac0-0e3fbf22127d",
+        "chatSessionId": "sess_6e00669e-0ef4-465c-a1f4-950c6186570e",
+        "timestamp": 1784168609303
+      },
+      {
+        "executionId": "5261e600-306a-4ac3-9ac0-0e3fbf22127d",
+        "chatSessionId": "sess_6e00669e-0ef4-465c-a1f4-950c6186570e",
+        "timestamp": 1784169280822
+      }
+    ],
+    "13.2 Write property test for model ID length validation": [
+      {
+        "executionId": "5261e600-306a-4ac3-9ac0-0e3fbf22127d",
+        "chatSessionId": "sess_6e00669e-0ef4-465c-a1f4-950c6186570e",
+        "timestamp": 1784161882661
+      },
+      {
+        "executionId": "5261e600-306a-4ac3-9ac0-0e3fbf22127d",
+        "chatSessionId": "sess_6e00669e-0ef4-465c-a1f4-950c6186570e",
+        "timestamp": 1784168610965
+      },
+      {
+        "executionId": "5261e600-306a-4ac3-9ac0-0e3fbf22127d",
+        "chatSessionId": "sess_6e00669e-0ef4-465c-a1f4-950c6186570e",
+        "timestamp": 1784169282595
+      }
+    ],
+    "14. Checkpoint - Verify UI screens render correctly": [
+      {
+        "executionId": "5261e600-306a-4ac3-9ac0-0e3fbf22127d",
+        "chatSessionId": "sess_6e00669e-0ef4-465c-a1f4-950c6186570e",
+        "timestamp": 1784161882698
+      },
+      {
+        "executionId": "5261e600-306a-4ac3-9ac0-0e3fbf22127d",
+        "chatSessionId": "sess_6e00669e-0ef4-465c-a1f4-950c6186570e",
+        "timestamp": 1784169394279
+      },
+      {
+        "executionId": "5261e600-306a-4ac3-9ac0-0e3fbf22127d",
+        "chatSessionId": "sess_6e00669e-0ef4-465c-a1f4-950c6186570e",
+        "timestamp": 1784169915564
+      }
+    ],
+    "15.1 Write property tests for ProviderError retry behavior": [
+      {
+        "executionId": "5261e600-306a-4ac3-9ac0-0e3fbf22127d",
+        "chatSessionId": "sess_6e00669e-0ef4-465c-a1f4-950c6186570e",
+        "timestamp": 1784161882732
+      },
+      {
+        "executionId": "5261e600-306a-4ac3-9ac0-0e3fbf22127d",
+        "chatSessionId": "sess_6e00669e-0ef4-465c-a1f4-950c6186570e",
+        "timestamp": 1784169394244
+      },
+      {
+        "executionId": "5261e600-306a-4ac3-9ac0-0e3fbf22127d",
+        "chatSessionId": "sess_6e00669e-0ef4-465c-a1f4-950c6186570e",
+        "timestamp": 1784169916397
+      }
+    ],
+    "15.2 Write property test for model list sorting": [
+      {
+        "executionId": "5261e600-306a-4ac3-9ac0-0e3fbf22127d",
+        "chatSessionId": "sess_6e00669e-0ef4-465c-a1f4-950c6186570e",
+        "timestamp": 1784161882764
+      },
+      {
+        "executionId": "5261e600-306a-4ac3-9ac0-0e3fbf22127d",
+        "chatSessionId": "sess_6e00669e-0ef4-465c-a1f4-950c6186570e",
+        "timestamp": 1784169394405
+      },
+      {
+        "executionId": "5261e600-306a-4ac3-9ac0-0e3fbf22127d",
+        "chatSessionId": "sess_6e00669e-0ef4-465c-a1f4-950c6186570e",
+        "timestamp": 1784169917439
+      }
+    ],
+    "15.3 Write property test for streaming/non-streaming parameter consistency": [
+      {
+        "executionId": "5261e600-306a-4ac3-9ac0-0e3fbf22127d",
+        "chatSessionId": "sess_6e00669e-0ef4-465c-a1f4-950c6186570e",
+        "timestamp": 1784161882798
+      },
+      {
+        "executionId": "5261e600-306a-4ac3-9ac0-0e3fbf22127d",
+        "chatSessionId": "sess_6e00669e-0ef4-465c-a1f4-950c6186570e",
+        "timestamp": 1784169396074
+      },
+      {
+        "executionId": "5261e600-306a-4ac3-9ac0-0e3fbf22127d",
+        "chatSessionId": "sess_6e00669e-0ef4-465c-a1f4-950c6186570e",
+        "timestamp": 1784169918894
+      }
+    ],
+    "16. Final checkpoint - Ensure all tests pass": [
+      {
+        "executionId": "5261e600-306a-4ac3-9ac0-0e3fbf22127d",
+        "chatSessionId": "sess_6e00669e-0ef4-465c-a1f4-950c6186570e",
+        "timestamp": 1784161882846
+      },
+      {
+        "executionId": "5261e600-306a-4ac3-9ac0-0e3fbf22127d",
+        "chatSessionId": "sess_6e00669e-0ef4-465c-a1f4-950c6186570e",
+        "timestamp": 1784170009148
+      },
+      {
+        "executionId": "5261e600-306a-4ac3-9ac0-0e3fbf22127d",
+        "chatSessionId": "sess_6e00669e-0ef4-465c-a1f4-950c6186570e",
+        "timestamp": 1784170184323
+      }
+    ],
+    "1. Install SDK packages and configure Metro bundler": [
+      {
+        "executionId": "5261e600-306a-4ac3-9ac0-0e3fbf22127d",
+        "chatSessionId": "sess_6e00669e-0ef4-465c-a1f4-950c6186570e",
+        "timestamp": 1784165158418
+      }
+    ],
+    "2. Refactor IProvider interface and create ProviderError type": [
+      {
+        "executionId": "5261e600-306a-4ac3-9ac0-0e3fbf22127d",
+        "chatSessionId": "sess_6e00669e-0ef4-465c-a1f4-950c6186570e",
+        "timestamp": 1784165290249
+      }
+    ],
+    "6. Update CustomProvider to implement new IProvider interface": [
+      {
+        "executionId": "5261e600-306a-4ac3-9ac0-0e3fbf22127d",
+        "chatSessionId": "sess_6e00669e-0ef4-465c-a1f4-950c6186570e",
+        "timestamp": 1784166228864
+      }
+    ],
+    "3. Implement SDK-based AnthropicProvider": [
+      {
+        "executionId": "5261e600-306a-4ac3-9ac0-0e3fbf22127d",
+        "chatSessionId": "sess_6e00669e-0ef4-465c-a1f4-950c6186570e",
+        "timestamp": 1784167463727
+      }
+    ],
+    "7. Create CompletionService orchestration layer": [
+      {
+        "executionId": "5261e600-306a-4ac3-9ac0-0e3fbf22127d",
+        "chatSessionId": "sess_6e00669e-0ef4-465c-a1f4-950c6186570e",
+        "timestamp": 1784167464879
+      }
+    ],
+    "4. Implement SDK-based OpenAIProvider": [
+      {
+        "executionId": "5261e600-306a-4ac3-9ac0-0e3fbf22127d",
+        "chatSessionId": "sess_6e00669e-0ef4-465c-a1f4-950c6186570e",
+        "timestamp": 1784167943762
+      }
+    ],
+    "8. Update provider store with ConnectionStatus": [
+      {
+        "executionId": "5261e600-306a-4ac3-9ac0-0e3fbf22127d",
+        "chatSessionId": "sess_6e00669e-0ef4-465c-a1f4-950c6186570e",
+        "timestamp": 1784168459607
+      }
+    ],
+    "9. Migrate useChat hook to use CompletionService": [
+      {
+        "executionId": "5261e600-306a-4ac3-9ac0-0e3fbf22127d",
+        "chatSessionId": "sess_6e00669e-0ef4-465c-a1f4-950c6186570e",
+        "timestamp": 1784168461196
+      }
+    ],
+    "11. Update ProviderListScreen with connection status indicators": [
+      {
+        "executionId": "5261e600-306a-4ac3-9ac0-0e3fbf22127d",
+        "chatSessionId": "sess_6e00669e-0ef4-465c-a1f4-950c6186570e",
+        "timestamp": 1784169279091
+      }
+    ],
+    "12. Update ProviderDetailScreen with Test Connection": [
+      {
+        "executionId": "5261e600-306a-4ac3-9ac0-0e3fbf22127d",
+        "chatSessionId": "sess_6e00669e-0ef4-465c-a1f4-950c6186570e",
+        "timestamp": 1784169279972
+      }
+    ],
+    "13. Update ModelDetailScreen with SDK model listing and cache fallback": [
+      {
+        "executionId": "5261e600-306a-4ac3-9ac0-0e3fbf22127d",
+        "chatSessionId": "sess_6e00669e-0ef4-465c-a1f4-950c6186570e",
+        "timestamp": 1784169282653
+      }
+    ],
+    "15. Shared error handling and retry property tests": [
+      {
+        "executionId": "5261e600-306a-4ac3-9ac0-0e3fbf22127d",
+        "chatSessionId": "sess_6e00669e-0ef4-465c-a1f4-950c6186570e",
+        "timestamp": 1784169918929
+      }
+    ]
+  }
+}

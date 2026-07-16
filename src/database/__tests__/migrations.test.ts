@@ -1,6 +1,6 @@
 import { migrateV1 } from '../migrations/v1';
 
-const mockExecAsync = jest.fn(() => Promise.resolve());
+const mockExecAsync = jest.fn<Promise<void>, [string]>();
 
 const mockDb = {
   execAsync: mockExecAsync,

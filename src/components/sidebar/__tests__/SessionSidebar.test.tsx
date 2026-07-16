@@ -20,6 +20,12 @@ jest.mock('react-native-reanimated', () => {
   };
 });
 
+// Mock react-native-safe-area-context
+jest.mock('react-native-safe-area-context', () => ({
+  useSafeAreaInsets: () => ({ top: 0, bottom: 0, left: 0, right: 0 }),
+  SafeAreaProvider: ({ children }: { children: React.ReactNode }) => children,
+}));
+
 // Mock react-native-gesture-handler
 jest.mock('react-native-gesture-handler', () => {
   const View = require('react-native').View;
@@ -111,6 +117,7 @@ function createSession(overrides: Partial<Session> = {}): Session {
     providerId: 'provider-1',
     modelId: 'model-1',
     systemPromptId: null,
+    thinkingLevel: null,
     totalCost: 0,
     tokenCount: 0,
     createdAt: now,

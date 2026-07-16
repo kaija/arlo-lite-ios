@@ -67,7 +67,7 @@ describe('ModelSwitcher', () => {
   it('displays the active model display name on the chip', () => {
     useProviderStore.setState({
       providers: [
-        { id: 'p1', type: 'openai', name: 'OpenAI', baseUrl: 'https://api.openai.com/v1', apiMode: 'responses', streamingEnabled: true, createdAt: 1000, updatedAt: 1000 },
+        { id: 'p1', type: 'openai', name: 'OpenAI', baseUrl: 'https://api.openai.com/v1', apiMode: 'responses', generationParams: { temperature: 0.7, maxTokens: 4096 }, streamingEnabled: true, createdAt: 1000, updatedAt: 1000 },
       ],
       models: [
         { id: 'm1', providerId: 'p1', modelId: 'gpt-4o', displayName: 'GPT-4o', contextWindow: 128000, inputPrice: 5, outputPrice: 15, cachedInputPrice: null, cachedOutputPrice: null, supportsReasoning: false, supportsImageInput: true, supportsImageGeneration: false, supportsFileInput: false },
@@ -82,7 +82,7 @@ describe('ModelSwitcher', () => {
   it('opens modal when chip is pressed', () => {
     useProviderStore.setState({
       providers: [
-        { id: 'p1', type: 'openai', name: 'OpenAI', baseUrl: 'https://api.openai.com/v1', apiMode: 'responses', streamingEnabled: true, createdAt: 1000, updatedAt: 1000 },
+        { id: 'p1', type: 'openai', name: 'OpenAI', baseUrl: 'https://api.openai.com/v1', apiMode: 'responses', generationParams: { temperature: 0.7, maxTokens: 4096 }, streamingEnabled: true, createdAt: 1000, updatedAt: 1000 },
       ],
       models: [
         { id: 'm1', providerId: 'p1', modelId: 'gpt-4o', displayName: 'GPT-4o', contextWindow: 128000, inputPrice: 5, outputPrice: 15, cachedInputPrice: null, cachedOutputPrice: null, supportsReasoning: false, supportsImageInput: true, supportsImageGeneration: false, supportsFileInput: false },
@@ -100,7 +100,7 @@ describe('ModelSwitcher', () => {
   it('calls switchModel when a model is selected from the list', () => {
     useProviderStore.setState({
       providers: [
-        { id: 'p1', type: 'openai', name: 'OpenAI', baseUrl: 'https://api.openai.com/v1', apiMode: 'responses', streamingEnabled: true, createdAt: 1000, updatedAt: 1000 },
+        { id: 'p1', type: 'openai', name: 'OpenAI', baseUrl: 'https://api.openai.com/v1', apiMode: 'responses', generationParams: { temperature: 0.7, maxTokens: 4096 }, streamingEnabled: true, createdAt: 1000, updatedAt: 1000 },
       ],
       models: [
         { id: 'm1', providerId: 'p1', modelId: 'gpt-4o', displayName: 'GPT-4o', contextWindow: 128000, inputPrice: 5, outputPrice: 15, cachedInputPrice: null, cachedOutputPrice: null, supportsReasoning: false, supportsImageInput: true, supportsImageGeneration: false, supportsFileInput: false },

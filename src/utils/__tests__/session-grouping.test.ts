@@ -9,6 +9,7 @@ function makeSession(id: string, updatedAt: number): Session {
     providerId: 'provider-1',
     modelId: 'model-1',
     systemPromptId: null,
+    thinkingLevel: null,
     totalCost: 0,
     tokenCount: 0,
     createdAt: updatedAt - 1000,

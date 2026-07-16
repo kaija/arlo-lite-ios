@@ -153,7 +153,7 @@ export async function updateProvider(
   updates: UpdateProviderData
 ): Promise<Provider | null> {
   const setClauses: string[] = [];
-  const params: unknown[] = [];
+  const params: (string | number | null)[] = [];
 
   if (updates.name !== undefined) {
     setClauses.push('name = ?');

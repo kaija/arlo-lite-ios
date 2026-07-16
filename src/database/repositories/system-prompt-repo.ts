@@ -115,7 +115,7 @@ export async function updateSystemPrompt(
   updates: UpdateSystemPromptData
 ): Promise<SystemPrompt | null> {
   const setClauses: string[] = [];
-  const params: unknown[] = [];
+  const params: (string | number | null)[] = [];
 
   if (updates.name !== undefined) {
     setClauses.push('name = ?');

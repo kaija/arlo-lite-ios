@@ -18,6 +18,7 @@ import {
   Animated,
   Dimensions,
   Easing,
+  Modal,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -25,6 +26,7 @@ import {
   Text,
   TextInput,
   View,
+  ActivityIndicator,
 } from 'react-native';
 import Reanimated, {
   useAnimatedStyle,
@@ -34,17 +36,21 @@ import { GestureDetector } from 'react-native-gesture-handler';
 import { useTheme } from '@/theme';
 import { SETTINGS_SLIDE_DURATION, DIALOG_EASING } from '@/theme/animations';
 import { useProviderStore } from '@/stores/provider-store';
-import type { ModelConfig } from '@/stores/provider-store';
-import { getApiKey } from '@/database/secure-store';
+import type { ModelConfig, CreateModelData } from '@/stores/provider-store';
+import { getApiKey, storeApiKey } from '@/database/secure-store';
 import { useSwipeToDelete } from '@/hooks/useSwipeToDelete';
-import type { OpenAIApiMode } from '@/database/repositories/provider-repo';
+import { DEFAULT_PROVIDER_URLS } from '@/constants/defaults';
+import { getProvider } from '@/providers/registry';
+import { ProviderError } from '@/providers/errors';
+import type { OpenAIApiMode, ProviderType } from '@/database/repositories/provider-repo';
+import type { ProviderConfig } from '@/providers/types';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 export interface ProviderDetailScreenProps {
   /** Whether the overlay is visible */
   visible: boolean;
-  /** The provider ID to display */
+  /** The provider ID to display, or empty string for "add new" */
   providerId: string;
   /** Called when the user dismisses the screen */
   onClose: () => void;
@@ -189,6 +195,9 @@ export function ProviderDetailScreen({
 }: ProviderDetailScreenProps) {
   const { colors, borderRadii, spacing } = useTheme();
 
+  // Determine if we're in "add new" mode (empty providerId)
+  const isAddMode = providerId === '';
+
   // Animation
   const translateX = useMemo(() => new Animated.Value(SCREEN_WIDTH), []);
   const [shouldRender, setShouldRender] = useState(false);
@@ -218,16 +227,17 @@ export function ProviderDetailScreen({
   const providers = useProviderStore((s) => s.providers);
   const models = useProviderStore((s) => s.models);
   const updateProvider = useProviderStore((s) => s.updateProvider);
+  const addProvider = useProviderStore((s) => s.addProvider);
   const deleteModel = useProviderStore((s) => s.deleteModel);
 
   const provider = useMemo(
-    () => providers.find((p) => p.id === providerId),
-    [providers, providerId]
+    () => (isAddMode ? undefined : providers.find((p) => p.id === providerId)),
+    [providers, providerId, isAddMode]
   );
 
   const providerModels = useMemo(
-    () => models.filter((m) => m.providerId === providerId),
-    [models, providerId]
+    () => (isAddMode ? [] : models.filter((m) => m.providerId === providerId)),
+    [models, providerId, isAddMode]
   );
 
   // API key state
@@ -235,58 +245,73 @@ export function ProviderDetailScreen({
   const [keyRevealed, setKeyRevealed] = useState(false);
 
   useEffect(() => {
-    if (visible && providerId) {
+    if (visible && providerId && !isAddMode) {
       getApiKey(providerId).then((key) => {
         setApiKey(key);
       });
-      // Reset reveal state when opening
+      setKeyRevealed(false);
+    } else if (visible && isAddMode) {
+      setApiKey('');
       setKeyRevealed(false);
     }
-  }, [visible, providerId]);
+  }, [visible, providerId, isAddMode]);
 
   // Configuration state (editable)
   const [baseUrl, setBaseUrl] = useState('');
   const [streamingEnabled, setStreamingEnabled] = useState(true);
   const [apiMode, setApiMode] = useState<OpenAIApiMode>('responses');
 
+  // Add-mode specific state
+  const [newName, setNewName] = useState('');
+  const [newType, setNewType] = useState<ProviderType>('openai');
+  const [newApiKey, setNewApiKey] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
+
   useEffect(() => {
     if (provider) {
       setBaseUrl(provider.baseUrl);
       setStreamingEnabled(provider.streamingEnabled);
       setApiMode(provider.apiMode ?? 'responses');
+    } else if (isAddMode) {
+      setBaseUrl(DEFAULT_PROVIDER_URLS.openai);
+      setStreamingEnabled(true);
+      setApiMode('responses');
+      setNewName('');
+      setNewType('openai');
+      setNewApiKey('');
     }
-  }, [provider]);
+  }, [provider, isAddMode]);
 
-  // Handlers
+  // Handlers for edit mode
   const handleBaseUrlChange = useCallback(
     (text: string) => {
       const trimmed = text.slice(0, MAX_BASE_URL_LENGTH);
       setBaseUrl(trimmed);
-      if (providerId) {
+      if (providerId && !isAddMode) {
         updateProvider(providerId, { baseUrl: trimmed });
       }
     },
-    [providerId, updateProvider]
+    [providerId, isAddMode, updateProvider]
   );
 
   const handleStreamingToggle = useCallback(
     (value: boolean) => {
       setStreamingEnabled(value);
-      if (providerId) {
+      if (providerId && !isAddMode) {
         updateProvider(providerId, { streamingEnabled: value });
       }
     },
-    [providerId, updateProvider]
+    [providerId, isAddMode, updateProvider]
   );
 
   const handleApiModeChange = useCallback(
     (mode: OpenAIApiMode) => {
       setApiMode(mode);
-      if (providerId) {
+      if (providerId && !isAddMode) {
         updateProvider(providerId, { apiMode: mode });
       }
     },
-    [providerId, updateProvider]
+    [providerId, isAddMode, updateProvider]
   );
 
   const handleDeleteModel = useCallback(
@@ -296,7 +321,140 @@ export function ProviderDetailScreen({
     [deleteModel]
   );
 
+  // ─── Add Model Modal State ─────────────────────────────────────────
+
+  const [isModelModalVisible, setIsModelModalVisible] = useState(false);
+  const [newModelId, setNewModelId] = useState('');
+  const [newModelDisplayName, setNewModelDisplayName] = useState('');
+  const [isModelSaving, setIsModelSaving] = useState(false);
+  const [availableModels, setAvailableModels] = useState<string[]>([]);
+  const [isLoadingModels, setIsLoadingModels] = useState(false);
+  const addModel = useProviderStore((s) => s.addModel);
+
+  const handleOpenModelModal = useCallback(() => {
+    setNewModelId('');
+    setNewModelDisplayName('');
+    setAvailableModels([]);
+    setIsModelModalVisible(true);
+
+    // Fetch available models from provider API
+    if (provider) {
+      setIsLoadingModels(true);
+      getApiKey(provider.id).then(async (key) => {
+        if (!key) {
+          setIsLoadingModels(false);
+          return;
+        }
+        try {
+          const providerAdapter = getProvider(provider.type);
+          const providerConfig: ProviderConfig = {
+            id: provider.id,
+            type: provider.type,
+            name: provider.name,
+            baseUrl: provider.baseUrl,
+            apiMode: provider.apiMode ?? undefined,
+            streamingEnabled: provider.streamingEnabled,
+            createdAt: provider.createdAt,
+            updatedAt: provider.updatedAt,
+          };
+          const modelIds = await providerAdapter.listModels(providerConfig, key);
+          setAvailableModels(modelIds);
+        } catch {
+          // Silently fail — user can enter model ID manually
+        } finally {
+          setIsLoadingModels(false);
+        }
+      });
+    }
+  }, [provider]);
+
+  const handleCloseModelModal = useCallback(() => {
+    setIsModelModalVisible(false);
+  }, []);
+
+  const handleSelectModel = useCallback((modelId: string) => {
+    setNewModelId(modelId);
+    setNewModelDisplayName(modelId);
+  }, []);
+
+  const handleSaveModel = useCallback(async () => {
+    const trimmedId = newModelId.trim();
+    if (!trimmedId || isModelSaving || !provider) return;
+
+    setIsModelSaving(true);
+    try {
+      const data: CreateModelData = {
+        providerId: provider.id,
+        modelId: trimmedId,
+        displayName: newModelDisplayName.trim() || trimmedId,
+        contextWindow: null,
+        inputPrice: null,
+        outputPrice: null,
+        cachedInputPrice: null,
+        cachedOutputPrice: null,
+        supportsReasoning: false,
+        supportsImageInput: false,
+        supportsImageGeneration: false,
+        supportsFileInput: false,
+      };
+      await addModel(data);
+      setIsModelModalVisible(false);
+    } catch (error) {
+      Alert.alert(
+        'Error',
+        error instanceof Error ? error.message : String(error),
+      );
+    } finally {
+      setIsModelSaving(false);
+    }
+  }, [newModelId, newModelDisplayName, isModelSaving, provider, addModel]);
+
+  // Handler for add-mode type change
+  const handleTypeChange = useCallback((type: ProviderType) => {
+    setNewType(type);
+    if (type === 'openai') {
+      setBaseUrl(DEFAULT_PROVIDER_URLS.openai);
+    } else if (type === 'anthropic') {
+      setBaseUrl(DEFAULT_PROVIDER_URLS.anthropic);
+    } else {
+      setBaseUrl('');
+    }
+  }, []);
+
+  // Handler for saving a new provider
+  const handleSaveNewProvider = useCallback(async () => {
+    if (!newName.trim() || !newApiKey.trim() || !baseUrl.trim() || isSaving) return;
+
+    setIsSaving(true);
+    try {
+      await addProvider(
+        {
+          type: newType,
+          name: newName.trim(),
+          baseUrl: baseUrl.trim(),
+          apiMode: newType === 'openai' ? apiMode : undefined,
+          streamingEnabled,
+        },
+        newApiKey.trim(),
+      );
+      onClose();
+    } catch (error) {
+      Alert.alert(
+        'Error',
+        error instanceof Error ? error.message : String(error),
+      );
+    } finally {
+      setIsSaving(false);
+    }
+  }, [newName, newApiKey, baseUrl, isSaving, newType, apiMode, streamingEnabled, addProvider, onClose]);
+
+  // Validate add-mode form
+  const isFormValid = !!(newName.trim() && newApiKey.trim() && baseUrl.trim());
+
   if (!shouldRender) return null;
+
+  const PROVIDER_TYPES: ProviderType[] = ['openai', 'anthropic', 'custom'];
+  const effectiveType = isAddMode ? newType : (provider?.type ?? 'openai');
 
   return (
     <Animated.View
@@ -305,7 +463,7 @@ export function ProviderDetailScreen({
         { backgroundColor: colors.background, transform: [{ translateX }] },
       ]}
       accessibilityViewIsModal
-      accessibilityLabel="Provider detail"
+      accessibilityLabel={isAddMode ? 'Add provider' : 'Provider detail'}
     >
       {/* Header */}
       <View style={[styles.header, { borderBottomColor: colors.border }]}>
@@ -328,7 +486,7 @@ export function ProviderDetailScreen({
           style={[styles.headerTitle, { color: colors.text }]}
           numberOfLines={1}
         >
-          {provider?.name ?? 'Provider'}
+          {isAddMode ? 'Add Provider' : (provider?.name ?? 'Provider')}
         </Text>
 
         {/* Spacer for centering */}
@@ -341,249 +499,645 @@ export function ProviderDetailScreen({
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
       >
-        {/* API Key Section */}
-        <View style={styles.section}>
-          <Text style={[styles.sectionHeader, { color: colors.textTertiary }]}>
-            API KEY
-          </Text>
-          <View
-            style={[
-              styles.sectionCard,
-              { backgroundColor: colors.surface, borderRadius: borderRadii.groupedList },
-            ]}
-          >
-            <View style={styles.apiKeyRow}>
-              <Text
-                style={[styles.apiKeyText, { color: colors.text }]}
-                numberOfLines={1}
-                accessibilityLabel={
-                  keyRevealed ? 'API key revealed' : 'API key masked'
-                }
-              >
-                {apiKey
-                  ? keyRevealed
-                    ? apiKey
-                    : maskApiKey(apiKey)
-                  : '••••••••'}
+        {isAddMode ? (
+          /* ─── Add New Provider Form ─── */
+          <>
+            {/* Provider Type */}
+            <View style={styles.section}>
+              <Text style={[styles.sectionHeader, { color: colors.textTertiary }]}>
+                PROVIDER TYPE
               </Text>
-              <Pressable
-                onPressIn={() => setKeyRevealed(true)}
-                onPressOut={() => setKeyRevealed(false)}
-                style={styles.eyeToggle}
-                accessibilityRole="button"
-                accessibilityLabel={
-                  keyRevealed ? 'Hide API key' : 'Reveal API key'
-                }
-                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              <View
+                style={[
+                  styles.sectionCard,
+                  { backgroundColor: colors.surface, borderRadius: borderRadii.groupedList },
+                ]}
               >
-                <Text style={[styles.eyeIcon, { color: colors.textTertiary }]}>
-                  {keyRevealed ? '👁' : '👁‍🗨'}
+                <View style={styles.apiTypeSelector}>
+                  {PROVIDER_TYPES.map((pt, index) => (
+                    <Pressable
+                      key={pt}
+                      style={[
+                        styles.apiTypeOption,
+                        {
+                          backgroundColor:
+                            newType === pt ? colors.accent : colors.surfaceSecondary,
+                          borderTopLeftRadius: index === 0 ? 8 : 0,
+                          borderBottomLeftRadius: index === 0 ? 8 : 0,
+                          borderTopRightRadius: index === PROVIDER_TYPES.length - 1 ? 8 : 0,
+                          borderBottomRightRadius: index === PROVIDER_TYPES.length - 1 ? 8 : 0,
+                        },
+                      ]}
+                      onPress={() => handleTypeChange(pt)}
+                      accessibilityRole="radio"
+                      accessibilityState={{ selected: newType === pt }}
+                      accessibilityLabel={pt.charAt(0).toUpperCase() + pt.slice(1)}
+                    >
+                      <Text
+                        style={[
+                          styles.apiTypeText,
+                          {
+                            color: newType === pt ? colors.accentText : colors.text,
+                          },
+                        ]}
+                      >
+                        {pt.charAt(0).toUpperCase() + pt.slice(1)}
+                      </Text>
+                    </Pressable>
+                  ))}
+                </View>
+              </View>
+            </View>
+
+            {/* Display Name */}
+            <View style={styles.section}>
+              <Text style={[styles.sectionHeader, { color: colors.textTertiary }]}>
+                NAME
+              </Text>
+              <View
+                style={[
+                  styles.sectionCard,
+                  { backgroundColor: colors.surface, borderRadius: borderRadii.groupedList },
+                ]}
+              >
+                <TextInput
+                  style={[
+                    styles.configInput,
+                    {
+                      color: colors.text,
+                      backgroundColor: colors.inputBackground,
+                      borderColor: colors.border,
+                    },
+                  ]}
+                  value={newName}
+                  onChangeText={setNewName}
+                  placeholder="e.g. My OpenAI"
+                  placeholderTextColor={colors.textTertiary}
+                  accessibilityLabel="Provider name"
+                  autoCapitalize="words"
+                  autoCorrect={false}
+                />
+              </View>
+            </View>
+
+            {/* API Key */}
+            <View style={styles.section}>
+              <Text style={[styles.sectionHeader, { color: colors.textTertiary }]}>
+                API KEY
+              </Text>
+              <View
+                style={[
+                  styles.sectionCard,
+                  { backgroundColor: colors.surface, borderRadius: borderRadii.groupedList },
+                ]}
+              >
+                <TextInput
+                  style={[
+                    styles.configInput,
+                    {
+                      color: colors.text,
+                      backgroundColor: colors.inputBackground,
+                      borderColor: colors.border,
+                    },
+                  ]}
+                  value={newApiKey}
+                  onChangeText={setNewApiKey}
+                  placeholder="sk-..."
+                  placeholderTextColor={colors.textTertiary}
+                  accessibilityLabel="API key"
+                  secureTextEntry
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                />
+                <Text style={[styles.keychainNote, { color: colors.textTertiary }]}>
+                  Stored in the iOS Keychain. Never synced to iCloud.
+                </Text>
+              </View>
+            </View>
+
+            {/* Configuration */}
+            <View style={styles.section}>
+              <Text style={[styles.sectionHeader, { color: colors.textTertiary }]}>
+                CONFIGURATION
+              </Text>
+              <View
+                style={[
+                  styles.sectionCard,
+                  { backgroundColor: colors.surface, borderRadius: borderRadii.groupedList },
+                ]}
+              >
+                {/* Base URL */}
+                <View style={styles.configRow}>
+                  <Text style={[styles.configLabel, { color: colors.text }]}>
+                    Base URL
+                  </Text>
+                  <TextInput
+                    style={[
+                      styles.configInput,
+                      {
+                        color: colors.text,
+                        backgroundColor: colors.inputBackground,
+                        borderColor: colors.border,
+                      },
+                    ]}
+                    value={baseUrl}
+                    onChangeText={(text) => setBaseUrl(text.slice(0, MAX_BASE_URL_LENGTH))}
+                    maxLength={MAX_BASE_URL_LENGTH}
+                    keyboardType="url"
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                    accessibilityLabel="Base URL"
+                    placeholder="https://api.example.com"
+                    placeholderTextColor={colors.textTertiary}
+                  />
+                </View>
+
+                <View style={[styles.separator, { backgroundColor: colors.border }]} />
+
+                {/* Streaming Toggle */}
+                <View style={styles.switchRow}>
+                  <Text style={[styles.configLabel, { color: colors.text }]}>
+                    Streaming
+                  </Text>
+                  <Switch
+                    value={streamingEnabled}
+                    onValueChange={setStreamingEnabled}
+                    trackColor={{
+                      false: colors.surfaceSecondary,
+                      true: colors.accent,
+                    }}
+                    accessibilityLabel="Streaming enabled"
+                  />
+                </View>
+
+                {/* API Mode (OpenAI only) */}
+                {newType === 'openai' && (
+                  <>
+                    <View style={[styles.separator, { backgroundColor: colors.border }]} />
+                    <View style={styles.configRow}>
+                      <Text style={[styles.configLabel, { color: colors.text }]}>
+                        API Type
+                      </Text>
+                      <View style={styles.apiTypeSelector}>
+                        <Pressable
+                          style={[
+                            styles.apiTypeOption,
+                            {
+                              backgroundColor:
+                                apiMode === 'responses'
+                                  ? colors.accent
+                                  : colors.surfaceSecondary,
+                              borderTopLeftRadius: 8,
+                              borderBottomLeftRadius: 8,
+                            },
+                          ]}
+                          onPress={() => setApiMode('responses')}
+                          accessibilityRole="radio"
+                          accessibilityState={{ selected: apiMode === 'responses' }}
+                          accessibilityLabel="Responses API"
+                        >
+                          <Text
+                            style={[
+                              styles.apiTypeText,
+                              {
+                                color:
+                                  apiMode === 'responses'
+                                    ? colors.accentText
+                                    : colors.text,
+                              },
+                            ]}
+                          >
+                            Responses
+                          </Text>
+                        </Pressable>
+                        <Pressable
+                          style={[
+                            styles.apiTypeOption,
+                            {
+                              backgroundColor:
+                                apiMode === 'chat-completions'
+                                  ? colors.accent
+                                  : colors.surfaceSecondary,
+                              borderTopRightRadius: 8,
+                              borderBottomRightRadius: 8,
+                            },
+                          ]}
+                          onPress={() => setApiMode('chat-completions')}
+                          accessibilityRole="radio"
+                          accessibilityState={{ selected: apiMode === 'chat-completions' }}
+                          accessibilityLabel="Chat Completions API"
+                        >
+                          <Text
+                            style={[
+                              styles.apiTypeText,
+                              {
+                                color:
+                                  apiMode === 'chat-completions'
+                                    ? colors.accentText
+                                    : colors.text,
+                              },
+                            ]}
+                          >
+                            Chat Completions
+                          </Text>
+                        </Pressable>
+                      </View>
+                    </View>
+                  </>
+                )}
+              </View>
+            </View>
+
+            {/* Save Button */}
+            <View style={styles.section}>
+              <Pressable
+                style={[
+                  styles.saveButton,
+                  { backgroundColor: colors.accent },
+                  (!isFormValid || isSaving) && styles.saveButtonDisabled,
+                ]}
+                onPress={handleSaveNewProvider}
+                disabled={!isFormValid || isSaving}
+                accessibilityRole="button"
+                accessibilityLabel="Save provider"
+                accessibilityState={{ disabled: !isFormValid || isSaving }}
+              >
+                <Text style={[styles.saveButtonText, { color: colors.accentText }]}>
+                  {isSaving ? 'Saving…' : 'Save Provider'}
                 </Text>
               </Pressable>
             </View>
-            <Text style={[styles.keychainNote, { color: colors.textTertiary }]}>
-              Stored in the iOS Keychain. Never synced to iCloud.
-            </Text>
-          </View>
-        </View>
+          </>
+        ) : (
+          /* ─── Edit Existing Provider ─── */
+          <>
+            {/* API Key Section */}
+            <View style={styles.section}>
+              <Text style={[styles.sectionHeader, { color: colors.textTertiary }]}>
+                API KEY
+              </Text>
+              <View
+                style={[
+                  styles.sectionCard,
+                  { backgroundColor: colors.surface, borderRadius: borderRadii.groupedList },
+                ]}
+              >
+                <View style={styles.apiKeyRow}>
+                  <Text
+                    style={[styles.apiKeyText, { color: colors.text }]}
+                    numberOfLines={1}
+                    accessibilityLabel={
+                      keyRevealed ? 'API key revealed' : 'API key masked'
+                    }
+                  >
+                    {apiKey
+                      ? keyRevealed
+                        ? apiKey
+                        : maskApiKey(apiKey)
+                      : '••••••••'}
+                  </Text>
+                  <Pressable
+                    onPressIn={() => setKeyRevealed(true)}
+                    onPressOut={() => setKeyRevealed(false)}
+                    style={styles.eyeToggle}
+                    accessibilityRole="button"
+                    accessibilityLabel={
+                      keyRevealed ? 'Hide API key' : 'Reveal API key'
+                    }
+                    hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                  >
+                    <Text style={[styles.eyeIcon, { color: colors.textTertiary }]}>
+                      {keyRevealed ? '👁' : '👁‍🗨'}
+                    </Text>
+                  </Pressable>
+                </View>
+                <Text style={[styles.keychainNote, { color: colors.textTertiary }]}>
+                  Stored in the iOS Keychain. Never synced to iCloud.
+                </Text>
+              </View>
+            </View>
 
-        {/* Configuration Section */}
-        <View style={styles.section}>
-          <Text style={[styles.sectionHeader, { color: colors.textTertiary }]}>
-            CONFIGURATION
-          </Text>
-          <View
-            style={[
-              styles.sectionCard,
-              { backgroundColor: colors.surface, borderRadius: borderRadii.groupedList },
-            ]}
+            {/* Configuration Section */}
+            <View style={styles.section}>
+              <Text style={[styles.sectionHeader, { color: colors.textTertiary }]}>
+                CONFIGURATION
+              </Text>
+              <View
+                style={[
+                  styles.sectionCard,
+                  { backgroundColor: colors.surface, borderRadius: borderRadii.groupedList },
+                ]}
+              >
+                {/* Base URL */}
+                <View style={styles.configRow}>
+                  <Text style={[styles.configLabel, { color: colors.text }]}>
+                    Base URL
+                  </Text>
+                  <TextInput
+                    style={[
+                      styles.configInput,
+                      {
+                        color: colors.text,
+                        backgroundColor: colors.inputBackground,
+                        borderColor: colors.border,
+                      },
+                    ]}
+                    value={baseUrl}
+                    onChangeText={handleBaseUrlChange}
+                    maxLength={MAX_BASE_URL_LENGTH}
+                    keyboardType="url"
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                    accessibilityLabel="Base URL"
+                    placeholder="https://api.example.com"
+                    placeholderTextColor={colors.textTertiary}
+                  />
+                </View>
+
+                <View style={[styles.separator, { backgroundColor: colors.border }]} />
+
+                {/* Streaming Toggle */}
+                <View style={styles.switchRow}>
+                  <Text style={[styles.configLabel, { color: colors.text }]}>
+                    Streaming
+                  </Text>
+                  <Switch
+                    value={streamingEnabled}
+                    onValueChange={handleStreamingToggle}
+                    trackColor={{
+                      false: colors.surfaceSecondary,
+                      true: colors.accent,
+                    }}
+                    accessibilityLabel="Streaming enabled"
+                  />
+                </View>
+
+                {/* API Type Selector (OpenAI only) */}
+                {provider?.type === 'openai' && (
+                  <>
+                    <View style={[styles.separator, { backgroundColor: colors.border }]} />
+                    <View style={styles.configRow}>
+                      <Text style={[styles.configLabel, { color: colors.text }]}>
+                        API Type
+                      </Text>
+                      <View style={styles.apiTypeSelector}>
+                        <Pressable
+                          style={[
+                            styles.apiTypeOption,
+                            {
+                              backgroundColor:
+                                apiMode === 'responses'
+                                  ? colors.accent
+                                  : colors.surfaceSecondary,
+                              borderTopLeftRadius: 8,
+                              borderBottomLeftRadius: 8,
+                            },
+                          ]}
+                          onPress={() => handleApiModeChange('responses')}
+                          accessibilityRole="radio"
+                          accessibilityState={{ selected: apiMode === 'responses' }}
+                          accessibilityLabel="Responses API"
+                        >
+                          <Text
+                            style={[
+                              styles.apiTypeText,
+                              {
+                                color:
+                                  apiMode === 'responses'
+                                    ? colors.accentText
+                                    : colors.text,
+                              },
+                            ]}
+                          >
+                            Responses
+                          </Text>
+                        </Pressable>
+                        <Pressable
+                          style={[
+                            styles.apiTypeOption,
+                            {
+                              backgroundColor:
+                                apiMode === 'chat-completions'
+                                  ? colors.accent
+                                  : colors.surfaceSecondary,
+                              borderTopRightRadius: 8,
+                              borderBottomRightRadius: 8,
+                            },
+                          ]}
+                          onPress={() => handleApiModeChange('chat-completions')}
+                          accessibilityRole="radio"
+                          accessibilityState={{ selected: apiMode === 'chat-completions' }}
+                          accessibilityLabel="Chat Completions API"
+                        >
+                          <Text
+                            style={[
+                              styles.apiTypeText,
+                              {
+                                color:
+                                  apiMode === 'chat-completions'
+                                    ? colors.accentText
+                                    : colors.text,
+                              },
+                            ]}
+                          >
+                            Chat Completions
+                          </Text>
+                        </Pressable>
+                      </View>
+                    </View>
+                  </>
+                )}
+              </View>
+            </View>
+
+            {/* Models Section */}
+            <View style={styles.section}>
+              <Text style={[styles.sectionHeader, { color: colors.textTertiary }]}>
+                MODELS
+              </Text>
+              <View
+                style={[
+                  styles.sectionCard,
+                  { backgroundColor: colors.surface, borderRadius: borderRadii.groupedList },
+                ]}
+              >
+                {providerModels.length === 0 ? (
+                  <Pressable
+                    style={styles.addModelRow}
+                    onPress={handleOpenModelModal}
+                    accessibilityRole="button"
+                    accessibilityLabel="Add Model"
+                  >
+                    <Text style={[styles.addModelText, { color: colors.accent }]}>
+                      Add Model
+                    </Text>
+                  </Pressable>
+                ) : (
+                  <>
+                    {providerModels.map((model, index) => (
+                      <React.Fragment key={model.id}>
+                        {index > 0 && (
+                          <View
+                            style={[
+                              styles.separator,
+                              { backgroundColor: colors.border },
+                            ]}
+                          />
+                        )}
+                        <ModelRow
+                          model={model}
+                          onDelete={handleDeleteModel}
+                          colors={colors}
+                        />
+                      </React.Fragment>
+                    ))}
+                    <View
+                      style={[styles.separator, { backgroundColor: colors.border }]}
+                    />
+                    <Pressable
+                      style={styles.addModelRow}
+                      onPress={handleOpenModelModal}
+                      accessibilityRole="button"
+                      accessibilityLabel="Add Model"
+                    >
+                      <Text style={[styles.addModelText, { color: colors.accent }]}>
+                        Add Model
+                      </Text>
+                    </Pressable>
+                  </>
+                )}
+              </View>
+            </View>
+          </>
+        )}
+      </ScrollView>
+
+      {/* Add Model Modal */}
+      <Modal
+        visible={isModelModalVisible}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onRequestClose={handleCloseModelModal}
+      >
+        <View style={[styles.modalContainer, { backgroundColor: colors.background }]}>
+          {/* Modal Header */}
+          <View style={[styles.modalHeader, { borderBottomColor: colors.border }]}>
+            <Pressable
+              onPress={handleCloseModelModal}
+              accessibilityRole="button"
+              accessibilityLabel="Cancel"
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            >
+              <Text style={[styles.modalCancelText, { color: colors.accent }]}>Cancel</Text>
+            </Pressable>
+            <Text style={[styles.modalTitle, { color: colors.text }]}>Add Model</Text>
+            <View style={styles.modalHeaderSpacer} />
+          </View>
+
+          <ScrollView
+            style={styles.modalScroll}
+            contentContainerStyle={styles.modalContent}
+            keyboardShouldPersistTaps="handled"
           >
-            {/* Base URL */}
-            <View style={styles.configRow}>
-              <Text style={[styles.configLabel, { color: colors.text }]}>
-                Base URL
+            {/* Loading indicator */}
+            {isLoadingModels && (
+              <View style={styles.modelLoadingRow}>
+                <ActivityIndicator size="small" color={colors.accent} />
+                <Text style={[styles.modelLoadingText, { color: colors.textSecondary }]}>
+                  Fetching available models…
+                </Text>
+              </View>
+            )}
+
+            {/* Available models from API */}
+            {!isLoadingModels && availableModels.length > 0 && !newModelId.trim() && (
+              <View style={styles.modelListSection}>
+                <Text style={[styles.modelListHeader, { color: colors.textTertiary }]}>
+                  AVAILABLE MODELS
+                </Text>
+                {availableModels.map((modelId) => (
+                  <Pressable
+                    key={modelId}
+                    style={[styles.modelListItem, { backgroundColor: colors.surface }]}
+                    onPress={() => handleSelectModel(modelId)}
+                    accessibilityRole="button"
+                    accessibilityLabel={modelId}
+                  >
+                    <Text style={[styles.modelListItemText, { color: colors.text }]}>
+                      {modelId}
+                    </Text>
+                  </Pressable>
+                ))}
+              </View>
+            )}
+
+            {/* Manual entry */}
+            <View style={styles.modelFormSection}>
+              <Text style={[styles.modelFormLabel, { color: colors.textSecondary }]}>
+                Model ID
               </Text>
               <TextInput
                 style={[
-                  styles.configInput,
+                  styles.modelFormInput,
                   {
                     color: colors.text,
                     backgroundColor: colors.inputBackground,
                     borderColor: colors.border,
                   },
                 ]}
-                value={baseUrl}
-                onChangeText={handleBaseUrlChange}
-                maxLength={MAX_BASE_URL_LENGTH}
-                keyboardType="url"
+                value={newModelId}
+                onChangeText={setNewModelId}
+                placeholder="e.g. gpt-4o, claude-sonnet-4-20250514"
+                placeholderTextColor={colors.textTertiary}
+                accessibilityLabel="Model ID"
                 autoCapitalize="none"
                 autoCorrect={false}
-                accessibilityLabel="Base URL"
-                placeholder="https://api.example.com"
-                placeholderTextColor={colors.textTertiary}
               />
             </View>
 
-            <View style={[styles.separator, { backgroundColor: colors.border }]} />
-
-            {/* Streaming Toggle */}
-            <View style={styles.switchRow}>
-              <Text style={[styles.configLabel, { color: colors.text }]}>
-                Streaming
+            <View style={styles.modelFormSection}>
+              <Text style={[styles.modelFormLabel, { color: colors.textSecondary }]}>
+                Display Name (optional)
               </Text>
-              <Switch
-                value={streamingEnabled}
-                onValueChange={handleStreamingToggle}
-                trackColor={{
-                  false: colors.surfaceSecondary,
-                  true: colors.accent,
-                }}
-                accessibilityLabel="Streaming enabled"
+              <TextInput
+                style={[
+                  styles.modelFormInput,
+                  {
+                    color: colors.text,
+                    backgroundColor: colors.inputBackground,
+                    borderColor: colors.border,
+                  },
+                ]}
+                value={newModelDisplayName}
+                onChangeText={setNewModelDisplayName}
+                placeholder={newModelId || 'Same as Model ID'}
+                placeholderTextColor={colors.textTertiary}
+                accessibilityLabel="Display name"
+                autoCapitalize="words"
+                autoCorrect={false}
               />
             </View>
 
-            {/* API Type Selector (OpenAI only) */}
-            {provider?.type === 'openai' && (
-              <>
-                <View style={[styles.separator, { backgroundColor: colors.border }]} />
-                <View style={styles.configRow}>
-                  <Text style={[styles.configLabel, { color: colors.text }]}>
-                    API Type
-                  </Text>
-                  <View style={styles.apiTypeSelector}>
-                    <Pressable
-                      style={[
-                        styles.apiTypeOption,
-                        {
-                          backgroundColor:
-                            apiMode === 'responses'
-                              ? colors.accent
-                              : colors.surfaceSecondary,
-                          borderTopLeftRadius: 8,
-                          borderBottomLeftRadius: 8,
-                        },
-                      ]}
-                      onPress={() => handleApiModeChange('responses')}
-                      accessibilityRole="radio"
-                      accessibilityState={{ selected: apiMode === 'responses' }}
-                      accessibilityLabel="Responses API"
-                    >
-                      <Text
-                        style={[
-                          styles.apiTypeText,
-                          {
-                            color:
-                              apiMode === 'responses'
-                                ? colors.accentText
-                                : colors.text,
-                          },
-                        ]}
-                      >
-                        Responses
-                      </Text>
-                    </Pressable>
-                    <Pressable
-                      style={[
-                        styles.apiTypeOption,
-                        {
-                          backgroundColor:
-                            apiMode === 'chat-completions'
-                              ? colors.accent
-                              : colors.surfaceSecondary,
-                          borderTopRightRadius: 8,
-                          borderBottomRightRadius: 8,
-                        },
-                      ]}
-                      onPress={() => handleApiModeChange('chat-completions')}
-                      accessibilityRole="radio"
-                      accessibilityState={{ selected: apiMode === 'chat-completions' }}
-                      accessibilityLabel="Chat Completions API"
-                    >
-                      <Text
-                        style={[
-                          styles.apiTypeText,
-                          {
-                            color:
-                              apiMode === 'chat-completions'
-                                ? colors.accentText
-                                : colors.text,
-                          },
-                        ]}
-                      >
-                        Chat Completions
-                      </Text>
-                    </Pressable>
-                  </View>
-                </View>
-              </>
-            )}
-          </View>
+            {/* Save Button */}
+            <Pressable
+              style={[
+                styles.modelSaveButton,
+                { backgroundColor: colors.accent },
+                (!newModelId.trim() || isModelSaving) && styles.saveButtonDisabled,
+              ]}
+              onPress={handleSaveModel}
+              disabled={!newModelId.trim() || isModelSaving}
+              accessibilityRole="button"
+              accessibilityLabel="Save model"
+              accessibilityState={{ disabled: !newModelId.trim() || isModelSaving }}
+            >
+              <Text style={[styles.modelSaveButtonText, { color: colors.accentText }]}>
+                {isModelSaving ? 'Saving…' : 'Add Model'}
+              </Text>
+            </Pressable>
+          </ScrollView>
         </View>
-
-        {/* Models Section */}
-        <View style={styles.section}>
-          <Text style={[styles.sectionHeader, { color: colors.textTertiary }]}>
-            MODELS
-          </Text>
-          <View
-            style={[
-              styles.sectionCard,
-              { backgroundColor: colors.surface, borderRadius: borderRadii.groupedList },
-            ]}
-          >
-            {providerModels.length === 0 ? (
-              // Empty models → "Add Model" as sole item
-              <Pressable
-                style={styles.addModelRow}
-                onPress={() => {
-                  // Placeholder: navigate to add model flow
-                }}
-                accessibilityRole="button"
-                accessibilityLabel="Add Model"
-              >
-                <Text style={[styles.addModelText, { color: colors.accent }]}>
-                  Add Model
-                </Text>
-              </Pressable>
-            ) : (
-              <>
-                {providerModels.map((model, index) => (
-                  <React.Fragment key={model.id}>
-                    {index > 0 && (
-                      <View
-                        style={[
-                          styles.separator,
-                          { backgroundColor: colors.border },
-                        ]}
-                      />
-                    )}
-                    <ModelRow
-                      model={model}
-                      onDelete={handleDeleteModel}
-                      colors={colors}
-                    />
-                  </React.Fragment>
-                ))}
-                <View
-                  style={[styles.separator, { backgroundColor: colors.border }]}
-                />
-                <Pressable
-                  style={styles.addModelRow}
-                  onPress={() => {
-                    // Placeholder: navigate to add model flow
-                  }}
-                  accessibilityRole="button"
-                  accessibilityLabel="Add Model"
-                >
-                  <Text style={[styles.addModelText, { color: colors.accent }]}>
-                    Add Model
-                  </Text>
-                </Pressable>
-              </>
-            )}
-          </View>
-        </View>
-      </ScrollView>
+      </Modal>
     </Animated.View>
   );
 }
@@ -758,6 +1312,107 @@ const styles = StyleSheet.create({
   addModelText: {
     fontSize: 15,
     fontWeight: '500',
+  },
+  saveButton: {
+    paddingVertical: 14,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  saveButtonDisabled: {
+    opacity: 0.5,
+  },
+  saveButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  // Add Model Modal styles
+  modalContainer: {
+    flex: 1,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingTop: 16,
+    paddingBottom: 12,
+    paddingHorizontal: 16,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+  },
+  modalCancelText: {
+    fontSize: 17,
+    fontWeight: '400',
+    minWidth: 60,
+  },
+  modalTitle: {
+    flex: 1,
+    fontSize: 17,
+    fontWeight: '600',
+    textAlign: 'center',
+  },
+  modalHeaderSpacer: {
+    minWidth: 60,
+  },
+  modalScroll: {
+    flex: 1,
+  },
+  modalContent: {
+    padding: 16,
+    paddingBottom: 40,
+  },
+  modelLoadingRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 20,
+  },
+  modelLoadingText: {
+    fontSize: 14,
+    marginLeft: 8,
+  },
+  modelListSection: {
+    marginBottom: 24,
+  },
+  modelListHeader: {
+    fontSize: 11,
+    fontWeight: '600',
+    letterSpacing: 0.6,
+    textTransform: 'uppercase',
+    marginBottom: 8,
+    marginLeft: 4,
+  },
+  modelListItem: {
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    marginBottom: 4,
+  },
+  modelListItemText: {
+    fontSize: 14,
+    fontWeight: '400',
+  },
+  modelFormSection: {
+    marginBottom: 16,
+  },
+  modelFormLabel: {
+    fontSize: 13,
+    fontWeight: '500',
+    marginBottom: 6,
+  },
+  modelFormInput: {
+    fontSize: 15,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    borderRadius: 8,
+    borderWidth: StyleSheet.hairlineWidth,
+  },
+  modelSaveButton: {
+    paddingVertical: 14,
+    borderRadius: 10,
+    alignItems: 'center',
+    marginTop: 8,
+  },
+  modelSaveButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
   },
 });
 
