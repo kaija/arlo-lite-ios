@@ -8,6 +8,7 @@ export interface SessionRow {
   provider_id: string;
   model_id: string;
   system_prompt_id: string | null;
+  thinking_level: string | null;
   total_cost: number;
   token_count: number;
   created_at: number;
@@ -26,6 +27,7 @@ export interface UpdateSessionData {
   providerId?: string;
   modelId?: string;
   systemPromptId?: string | null;
+  thinkingLevel?: string | null;
   totalCost?: number;
   tokenCount?: number;
 }
@@ -36,6 +38,7 @@ export interface Session {
   providerId: string;
   modelId: string;
   systemPromptId: string | null;
+  thinkingLevel: string | null;
   totalCost: number;
   tokenCount: number;
   createdAt: number;
@@ -49,6 +52,7 @@ function rowToSession(row: SessionRow): Session {
     providerId: row.provider_id,
     modelId: row.model_id,
     systemPromptId: row.system_prompt_id,
+    thinkingLevel: row.thinking_level,
     totalCost: row.total_cost,
     tokenCount: row.token_count,
     createdAt: row.created_at,
@@ -86,6 +90,7 @@ export async function createSession(
     providerId: data.providerId,
     modelId: data.modelId,
     systemPromptId: data.systemPromptId ?? null,
+    thinkingLevel: null,
     totalCost: 0,
     tokenCount: 0,
     createdAt: now,
@@ -145,6 +150,10 @@ export async function updateSession(
   if (updates.systemPromptId !== undefined) {
     setClauses.push('system_prompt_id = ?');
     params.push(updates.systemPromptId);
+  }
+  if (updates.thinkingLevel !== undefined) {
+    setClauses.push('thinking_level = ?');
+    params.push(updates.thinkingLevel);
   }
   if (updates.totalCost !== undefined) {
     setClauses.push('total_cost = ?');
