@@ -99,7 +99,6 @@ jest.mock('../CodeBlock', () => ({
 jest.mock('@/components/icons', () => ({
   CopyIcon: () => 'CopyIcon',
   RegenerateIcon: () => 'RegenerateIcon',
-  EditIcon: () => 'EditIcon',
   DeleteIcon: () => 'DeleteIcon',
 }));
 
@@ -125,12 +124,11 @@ function createMessage(overrides: Partial<Message> = {}): Message {
 function renderMessageFlow(overrides: Partial<MessageFlowProps> = {}) {
   const defaultProps: MessageFlowProps = {
     message: createMessage(),
-    modelName: 'GPT-4o',
+    modelDisplayName: 'GPT-4o',
     showAvatars: true,
     isStreaming: false,
     onCopy: jest.fn(),
     onRegenerate: jest.fn(),
-    onEdit: jest.fn(),
     onDelete: jest.fn(),
     ...overrides,
   };
@@ -149,7 +147,7 @@ describe('MessageFlow', () => {
   it('renders assistant message with model name label', () => {
     const { getByText } = renderMessageFlow({
       message: createMessage({ role: 'assistant', content: 'Hi there' }),
-      modelName: 'Claude 3.5',
+      modelDisplayName: 'Claude 3.5',
     });
     expect(getByText('Claude 3.5')).toBeTruthy();
     expect(getByText('Hi there')).toBeTruthy();
@@ -199,15 +197,15 @@ describe('MessageFlow', () => {
     expect(getByLabelText('Delete message')).toBeTruthy();
   });
 
-  it('shows copy, edit, delete buttons for user messages', () => {
+  it('shows copy and delete buttons for user messages', () => {
     const { getByLabelText, queryByLabelText } = renderMessageFlow({
       message: createMessage({ role: 'user' }),
       isStreaming: false,
     });
     expect(getByLabelText('Copy message')).toBeTruthy();
-    expect(getByLabelText('Edit message')).toBeTruthy();
     expect(getByLabelText('Delete message')).toBeTruthy();
     expect(queryByLabelText('Regenerate response')).toBeNull();
+    expect(queryByLabelText('Edit message')).toBeNull();
   });
 
   it('does not render avatar when showAvatars is false', () => {

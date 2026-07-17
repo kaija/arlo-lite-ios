@@ -193,6 +193,7 @@
     "editButton": "編輯",
     "copyButton": "複製到剪貼簿",
     "regenerateButton": "重新生成回覆",
+    "modelLabel": "模型：{{model}}",
     "modelSwitcherButton": "切換模型",
     "thinkingLevelButton": "變更思考程度",
     "voiceInputButton": "語音輸入",

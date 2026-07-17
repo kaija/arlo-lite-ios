@@ -50,6 +50,27 @@ exports[`MessageFlow Snapshots renders a user message and matches snapshot (Req 
     >
       You
     </Text>
+    <Text
+      accessibilityLabel={
+        {
+          "model": "GPT-4o",
+        }
+      }
+      style={
+        [
+          {
+            "fontSize": 13,
+            "fontWeight": "400",
+          },
+          {
+            "color": "#8E8E93",
+            "marginLeft": 6,
+          },
+        ]
+      }
+    >
+      GPT-4o
+    </Text>
   </View>
   <View
     style={{}}
@@ -130,61 +151,6 @@ exports[`MessageFlow Snapshots renders a user message and matches snapshot (Req 
         }
       >
         CopyIcon
-      </View>
-    </View>
-    <View
-      style={{}}
-    >
-      <View
-        accessibilityLabel="Edit message"
-        accessibilityRole="button"
-        accessibilityState={
-          {
-            "busy": undefined,
-            "checked": undefined,
-            "disabled": undefined,
-            "expanded": undefined,
-            "selected": undefined,
-          }
-        }
-        accessibilityValue={
-          {
-            "max": undefined,
-            "min": undefined,
-            "now": undefined,
-            "text": undefined,
-          }
-        }
-        accessible={true}
-        collapsable={false}
-        focusable={true}
-        hitSlop={
-          {
-            "bottom": 8,
-            "left": 8,
-            "right": 8,
-            "top": 8,
-          }
-        }
-        onBlur={[Function]}
-        onClick={[Function]}
-        onFocus={[Function]}
-        onResponderGrant={[Function]}
-        onResponderMove={[Function]}
-        onResponderRelease={[Function]}
-        onResponderTerminate={[Function]}
-        onResponderTerminationRequest={[Function]}
-        onStartShouldSetResponder={[Function]}
-        style={
-          {
-            "alignItems": "center",
-            "justifyContent": "center",
-            "minHeight": 44,
-            "minWidth": 44,
-          }
-        }
-      >
-        EditIcon
       </View>
     </View>
     <View
@@ -296,6 +262,27 @@ exports[`MessageFlow Snapshots renders a user message with token metadata and ma
     >
       You
     </Text>
+    <Text
+      accessibilityLabel={
+        {
+          "model": "GPT-4o",
+        }
+      }
+      style={
+        [
+          {
+            "fontSize": 13,
+            "fontWeight": "400",
+          },
+          {
+            "color": "#8E8E93",
+            "marginLeft": 6,
+          },
+        ]
+      }
+    >
+      GPT-4o
+    </Text>
   </View>
   <View
     style={{}}
@@ -376,61 +363,6 @@ exports[`MessageFlow Snapshots renders a user message with token metadata and ma
         }
       >
         CopyIcon
-      </View>
-    </View>
-    <View
-      style={{}}
-    >
-      <View
-        accessibilityLabel="Edit message"
-        accessibilityRole="button"
-        accessibilityState={
-          {
-            "busy": undefined,
-            "checked": undefined,
-            "disabled": undefined,
-            "expanded": undefined,
-            "selected": undefined,
-          }
-        }
-        accessibilityValue={
-          {
-            "max": undefined,
-            "min": undefined,
-            "now": undefined,
-            "text": undefined,
-          }
-        }
-        accessible={true}
-        collapsable={false}
-        focusable={true}
-        hitSlop={
-          {
-            "bottom": 8,
-            "left": 8,
-            "right": 8,
-            "top": 8,
-          }
-        }
-        onBlur={[Function]}
-        onClick={[Function]}
-        onFocus={[Function]}
-        onResponderGrant={[Function]}
-        onResponderMove={[Function]}
-        onResponderRelease={[Function]}
-        onResponderTerminate={[Function]}
-        onResponderTerminationRequest={[Function]}
-        onStartShouldSetResponder={[Function]}
-        style={
-          {
-            "alignItems": "center",
-            "justifyContent": "center",
-            "minHeight": 44,
-            "minWidth": 44,
-          }
-        }
-      >
-        EditIcon
       </View>
     </View>
     <View
@@ -528,6 +460,11 @@ exports[`MessageFlow Snapshots renders an assistant message and matches snapshot
       }
     />
     <Text
+      accessibilityLabel={
+        {
+          "model": "Claude 3.5 Sonnet",
+        }
+      }
       style={
         [
           {
@@ -765,6 +702,11 @@ exports[`MessageFlow Snapshots renders an assistant message while streaming (no 
       }
     />
     <Text
+      accessibilityLabel={
+        {
+          "model": "GPT-4o",
+        }
+      }
       style={
         [
           {
@@ -826,6 +768,11 @@ exports[`MessageFlow Snapshots renders an assistant message with token metadata 
       }
     />
     <Text
+      accessibilityLabel={
+        {
+          "model": "GPT-4o",
+        }
+      }
       style={
         [
           {

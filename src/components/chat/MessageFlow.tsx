@@ -26,14 +26,14 @@ import { useTheme, Theme } from '@/theme';
 import { usePressAnimation } from '@/hooks/usePressAnimation';
 import { formatTokenMetadata } from '@/utils/token-formatting';
 import { CodeBlock } from './CodeBlock';
-import { CopyIcon, RegenerateIcon, EditIcon, DeleteIcon } from '@/components/icons';
+import { CopyIcon, RegenerateIcon, DeleteIcon } from '@/components/icons';
 import type { Message } from '@/database/repositories/message-repo';
 
 export interface MessageFlowProps {
   /** The message to render */
   message: Message;
-  /** Display name of the model that produced this response */
-  modelName: string;
+  /** Resolved display name of the model */
+  modelDisplayName: string;
   /** Whether to show the sender avatar */
   showAvatars: boolean;
   /** Whether the message is currently streaming */
@@ -42,8 +42,6 @@ export interface MessageFlowProps {
   onCopy: () => void;
   /** Handler to regenerate assistant response */
   onRegenerate: () => void;
-  /** Handler to edit user message */
-  onEdit: () => void;
   /** Handler to delete message */
   onDelete: () => void;
 }
@@ -64,12 +62,11 @@ const messageEntering = FadeIn.duration(300).withInitialValues({
  */
 export function MessageFlow({
   message,
-  modelName,
+  modelDisplayName,
   showAvatars,
   isStreaming,
   onCopy,
   onRegenerate,
-  onEdit,
   onDelete,
 }: MessageFlowProps) {
   const { t } = useTranslation();
@@ -80,7 +77,7 @@ export function MessageFlow({
   const isUser = message.role === 'user';
   const senderLabel = isUser
     ? t('chat.roleUser', 'You')
-    : modelName;
+    : modelDisplayName;
 
   // Cost metadata line: only render when all three fields are non-null
   const formattedMetadata =
@@ -99,14 +96,31 @@ export function MessageFlow({
       accessibilityLabel={`${senderLabel}: ${message.content}`}
       accessibilityRole="text"
     >
-      {/* Sender row: avatar + label + token metadata */}
+      {/* Sender row: avatar + label + model label + token metadata */}
       <View style={styles.senderRow}>
         {showAvatars && (
           <View style={[styles.avatar, isUser ? styles.userAvatar : styles.assistantAvatar]} />
         )}
-        <Text style={[styles.senderLabel, isUser ? styles.userLabel : styles.assistantLabel]}>
-          {senderLabel}
-        </Text>
+        {isUser ? (
+          <>
+            <Text style={[styles.senderLabel, styles.userLabel]}>
+              {senderLabel}
+            </Text>
+            <Text
+              style={[styles.modelLabel, styles.userModelLabel]}
+              accessibilityLabel={t('accessibility.modelLabel', { model: modelDisplayName })}
+            >
+              {modelDisplayName}
+            </Text>
+          </>
+        ) : (
+          <Text
+            style={[styles.senderLabel, styles.assistantLabel]}
+            accessibilityLabel={t('accessibility.modelLabel', { model: modelDisplayName })}
+          >
+            {senderLabel}
+          </Text>
+        )}
         {formattedMetadata && (
           <Text style={styles.tokenMetadata}>{formattedMetadata}</Text>
         )}
@@ -158,13 +172,6 @@ export function MessageFlow({
               icon={<RegenerateIcon size={20} color={theme.colors.textTertiary} />}
               accessibilityLabel={t('accessibility.regenerateButton', 'Regenerate response')}
               onPress={onRegenerate}
-            />
-          )}
-          {isUser && (
-            <ActionButton
-              icon={<EditIcon size={20} color={theme.colors.textTertiary} />}
-              accessibilityLabel={t('accessibility.editButton', 'Edit message')}
-              onPress={onEdit}
             />
           )}
           <ActionButton
@@ -263,6 +270,16 @@ function createStyles(theme: Theme, role: string) {
     color: theme.colors.accent,
   };
 
+  const modelLabel: TextStyle = {
+    fontSize: 13,
+    fontWeight: '400',
+  };
+
+  const userModelLabel: TextStyle = {
+    color: theme.colors.textTertiary,
+    marginLeft: 6,
+  };
+
   const tokenMetadata: TextStyle = {
     fontSize: 11,
     fontWeight: '400',
@@ -299,6 +316,8 @@ function createStyles(theme: Theme, role: string) {
     senderLabel,
     userLabel,
     assistantLabel,
+    modelLabel,
+    userModelLabel,
     tokenMetadata,
     bodyContainer,
     bodyText,

@@ -1,8 +1,10 @@
 /**
  * Tests for the MessageActions component.
  *
- * Verifies that the correct action buttons are rendered based on message role
- * and position (last assistant message).
+ * Verifies that the correct action buttons are rendered based on message role.
+ * - Assistant messages: Copy, Regenerate, Delete
+ * - User messages: Copy, Delete
+ * - No Edit button for any role
  */
 
 import React from 'react';
@@ -15,12 +17,12 @@ jest.mock('react-i18next', () => ({
     t: (key: string) => {
       const translations: Record<string, string> = {
         'chat.copy': 'Copy',
-        'chat.edit': 'Edit',
         'chat.regenerate': 'Regenerate',
+        'chat.delete': 'Delete',
         'chat.copied': 'Copied to clipboard',
         'accessibility.copyButton': 'Copy to clipboard',
-        'accessibility.editButton': 'Edit',
         'accessibility.regenerateButton': 'Regenerate response',
+        'accessibility.deleteButton': 'Delete message',
       };
       return translations[key] ?? key;
     },
@@ -71,7 +73,7 @@ function createMessage(overrides: Partial<Message> = {}): Message {
 describe('MessageActions', () => {
   const mockOnCopy = jest.fn().mockResolvedValue(undefined);
   const mockOnRegenerate = jest.fn().mockResolvedValue(undefined);
-  const mockOnEdit = jest.fn();
+  const mockOnDelete = jest.fn().mockResolvedValue(undefined);
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -82,74 +84,69 @@ describe('MessageActions', () => {
     const { getByText } = render(
       <MessageActions
         message={message}
-        isLastAssistant={false}
         onCopy={mockOnCopy}
         onRegenerate={mockOnRegenerate}
-        onEdit={mockOnEdit}
+        onDelete={mockOnDelete}
       />
     );
 
     expect(getByText('Copy')).toBeTruthy();
   });
 
-  it('renders edit button only for user messages', () => {
-    const userMessage = createMessage({ role: 'user' });
-    const { getByText } = render(
-      <MessageActions
-        message={userMessage}
-        isLastAssistant={false}
-        onCopy={mockOnCopy}
-        onRegenerate={mockOnRegenerate}
-        onEdit={mockOnEdit}
-      />
-    );
-
-    expect(getByText('Edit')).toBeTruthy();
-  });
-
-  it('does not render edit button for assistant messages', () => {
-    const assistantMessage = createMessage({ role: 'assistant' });
-    const { queryByText } = render(
-      <MessageActions
-        message={assistantMessage}
-        isLastAssistant={false}
-        onCopy={mockOnCopy}
-        onRegenerate={mockOnRegenerate}
-        onEdit={mockOnEdit}
-      />
-    );
-
-    expect(queryByText('Edit')).toBeNull();
-  });
-
-  it('renders regenerate button only when isLastAssistant is true', () => {
+  it('renders regenerate button for all assistant messages', () => {
     const message = createMessage({ role: 'assistant' });
     const { getByText } = render(
       <MessageActions
         message={message}
-        isLastAssistant={true}
         onCopy={mockOnCopy}
         onRegenerate={mockOnRegenerate}
-        onEdit={mockOnEdit}
+        onDelete={mockOnDelete}
       />
     );
 
     expect(getByText('Regenerate')).toBeTruthy();
   });
 
-  it('does not render regenerate button when isLastAssistant is false', () => {
-    const message = createMessage({ role: 'assistant' });
+  it('does not render regenerate button for user messages', () => {
+    const message = createMessage({ role: 'user' });
     const { queryByText } = render(
       <MessageActions
         message={message}
-        isLastAssistant={false}
         onCopy={mockOnCopy}
         onRegenerate={mockOnRegenerate}
-        onEdit={mockOnEdit}
+        onDelete={mockOnDelete}
       />
     );
 
     expect(queryByText('Regenerate')).toBeNull();
+  });
+
+  it('renders delete button for all messages', () => {
+    const message = createMessage({ role: 'user' });
+    const { getByText } = render(
+      <MessageActions
+        message={message}
+        onCopy={mockOnCopy}
+        onRegenerate={mockOnRegenerate}
+        onDelete={mockOnDelete}
+      />
+    );
+
+    expect(getByText('Delete')).toBeTruthy();
+  });
+
+  it('does not render any edit button', () => {
+    const userMessage = createMessage({ role: 'user' });
+    const { queryByText } = render(
+      <MessageActions
+        message={userMessage}
+        onCopy={mockOnCopy}
+        onRegenerate={mockOnRegenerate}
+        onDelete={mockOnDelete}
+      />
+    );
+
+    expect(queryByText('Edit')).toBeNull();
   });
 
   it('calls onCopy when copy button is pressed', () => {
@@ -157,10 +154,9 @@ describe('MessageActions', () => {
     const { getByText } = render(
       <MessageActions
         message={message}
-        isLastAssistant={false}
         onCopy={mockOnCopy}
         onRegenerate={mockOnRegenerate}
-        onEdit={mockOnEdit}
+        onDelete={mockOnDelete}
       />
     );
 
@@ -168,31 +164,14 @@ describe('MessageActions', () => {
     expect(mockOnCopy).toHaveBeenCalledWith(message);
   });
 
-  it('calls onEdit when edit button is pressed on user message', () => {
-    const message = createMessage({ role: 'user' });
-    const { getByText } = render(
-      <MessageActions
-        message={message}
-        isLastAssistant={false}
-        onCopy={mockOnCopy}
-        onRegenerate={mockOnRegenerate}
-        onEdit={mockOnEdit}
-      />
-    );
-
-    fireEvent.press(getByText('Edit'));
-    expect(mockOnEdit).toHaveBeenCalledWith(message);
-  });
-
   it('calls onRegenerate when regenerate button is pressed', () => {
     const message = createMessage({ role: 'assistant' });
     const { getByText } = render(
       <MessageActions
         message={message}
-        isLastAssistant={true}
         onCopy={mockOnCopy}
         onRegenerate={mockOnRegenerate}
-        onEdit={mockOnEdit}
+        onDelete={mockOnDelete}
       />
     );
 
@@ -200,19 +179,49 @@ describe('MessageActions', () => {
     expect(mockOnRegenerate).toHaveBeenCalled();
   });
 
-  it('has accessibility labels on all action buttons', () => {
+  it('calls onDelete when delete button is pressed', () => {
     const message = createMessage({ role: 'user' });
+    const { getByText } = render(
+      <MessageActions
+        message={message}
+        onCopy={mockOnCopy}
+        onRegenerate={mockOnRegenerate}
+        onDelete={mockOnDelete}
+      />
+    );
+
+    fireEvent.press(getByText('Delete'));
+    expect(mockOnDelete).toHaveBeenCalled();
+  });
+
+  it('has accessibility labels on all action buttons for assistant messages', () => {
+    const message = createMessage({ role: 'assistant' });
     const { getByLabelText } = render(
       <MessageActions
         message={message}
-        isLastAssistant={false}
         onCopy={mockOnCopy}
         onRegenerate={mockOnRegenerate}
-        onEdit={mockOnEdit}
+        onDelete={mockOnDelete}
       />
     );
 
     expect(getByLabelText('Copy to clipboard')).toBeTruthy();
-    expect(getByLabelText('Edit')).toBeTruthy();
+    expect(getByLabelText('Regenerate response')).toBeTruthy();
+    expect(getByLabelText('Delete message')).toBeTruthy();
+  });
+
+  it('has accessibility labels on all action buttons for user messages', () => {
+    const message = createMessage({ role: 'user' });
+    const { getByLabelText } = render(
+      <MessageActions
+        message={message}
+        onCopy={mockOnCopy}
+        onRegenerate={mockOnRegenerate}
+        onDelete={mockOnDelete}
+      />
+    );
+
+    expect(getByLabelText('Copy to clipboard')).toBeTruthy();
+    expect(getByLabelText('Delete message')).toBeTruthy();
   });
 });

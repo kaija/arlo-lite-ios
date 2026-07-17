@@ -416,12 +416,9 @@ exports[`InputChrome Snapshots matches snapshot in empty input state 1`] = `
         blurOnSubmit={false}
         multiline={true}
         onChangeText={[Function]}
-        onContentSizeChange={[Function]}
-        onKeyPress={[Function]}
         placeholder="Message"
         placeholderTextColor="#8E8E93"
         returnKeyType="default"
-        scrollEnabled={false}
         style={
           [
             {
@@ -429,6 +426,7 @@ exports[`InputChrome Snapshots matches snapshot in empty input state 1`] = `
               "fontSize": 15,
               "lineHeight": 20,
               "maxHeight": 120,
+              "minHeight": 36,
               "paddingBottom": 8,
               "paddingHorizontal": 14,
               "paddingTop": 8,
@@ -437,7 +435,6 @@ exports[`InputChrome Snapshots matches snapshot in empty input state 1`] = `
               "backgroundColor": "#F2F2F7",
               "borderRadius": 17,
               "color": "#1C1C1E",
-              "height": 36,
             },
           ]
         }
@@ -1038,12 +1035,9 @@ exports[`InputChrome Snapshots matches snapshot in streaming state 1`] = `
         blurOnSubmit={false}
         multiline={true}
         onChangeText={[Function]}
-        onContentSizeChange={[Function]}
-        onKeyPress={[Function]}
         placeholder="Message"
         placeholderTextColor="#8E8E93"
         returnKeyType="default"
-        scrollEnabled={false}
         style={
           [
             {
@@ -1051,6 +1045,7 @@ exports[`InputChrome Snapshots matches snapshot in streaming state 1`] = `
               "fontSize": 15,
               "lineHeight": 20,
               "maxHeight": 120,
+              "minHeight": 36,
               "paddingBottom": 8,
               "paddingHorizontal": 14,
               "paddingTop": 8,
@@ -1059,7 +1054,6 @@ exports[`InputChrome Snapshots matches snapshot in streaming state 1`] = `
               "backgroundColor": "#F2F2F7",
               "borderRadius": 17,
               "color": "#1C1C1E",
-              "height": 36,
             },
           ]
         }
@@ -1563,12 +1557,9 @@ exports[`InputChrome Snapshots matches snapshot when text input has content 1`] 
         blurOnSubmit={false}
         multiline={true}
         onChangeText={[Function]}
-        onContentSizeChange={[Function]}
-        onKeyPress={[Function]}
         placeholder="Message"
         placeholderTextColor="#8E8E93"
         returnKeyType="default"
-        scrollEnabled={false}
         style={
           [
             {
@@ -1576,6 +1567,7 @@ exports[`InputChrome Snapshots matches snapshot when text input has content 1`] 
               "fontSize": 15,
               "lineHeight": 20,
               "maxHeight": 120,
+              "minHeight": 36,
               "paddingBottom": 8,
               "paddingHorizontal": 14,
               "paddingTop": 8,
@@ -1584,7 +1576,6 @@ exports[`InputChrome Snapshots matches snapshot when text input has content 1`] 
               "backgroundColor": "#F2F2F7",
               "borderRadius": 17,
               "color": "#1C1C1E",
-              "height": 36,
             },
           ]
         }

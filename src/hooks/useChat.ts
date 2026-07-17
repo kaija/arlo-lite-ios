@@ -39,6 +39,8 @@ export interface UseChatResult {
   sendMessage: (text: string, attachments?: ContentPart[]) => Promise<void>;
   /** Resend the current session context to generate a new assistant response (no new user message added) */
   resendContext: () => Promise<void>;
+  /** Regenerate from a specific assistant message: delete it + subsequent, then resend context */
+  regenerateFrom: (messageId: string) => Promise<void>;
   /** Abort the current streaming response */
   stopGeneration: () => void;
   /** Whether a send/stream is currently in progress */
@@ -529,6 +531,38 @@ export function useChat(): UseChatResult {
   );
 
   /**
+   * Regenerate from a specific assistant message: delete it and all subsequent
+   * messages, then resend the remaining context to get a new completion from
+   * the currently active model.
+   */
+  const regenerateFrom = useCallback(
+    async (messageId: string) => {
+      if (!activeSessionId) return;
+
+      setError(null);
+
+      try {
+        await useSessionStore
+          .getState()
+          .deleteMessageAndSubsequent(activeSessionId, messageId);
+
+        await resendContext();
+      } catch (err: unknown) {
+        if (err instanceof ProviderError) {
+          setError(providerErrorToChatError(err));
+        } else {
+          const caughtError = err instanceof Error ? err : new Error(String(err));
+          setError({
+            message: caughtError.message || 'Regeneration failed',
+            isRetryable: true,
+          });
+        }
+      }
+    },
+    [activeSessionId, resendContext]
+  );
+
+  /**
    * Abort the current streaming response and discard partial content.
    */
   const stopGeneration = useCallback(() => {
@@ -552,6 +586,7 @@ export function useChat(): UseChatResult {
   return {
     sendMessage,
     resendContext,
+    regenerateFrom,
     stopGeneration,
     isStreaming,
     streamContent,

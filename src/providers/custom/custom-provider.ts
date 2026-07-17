@@ -200,7 +200,6 @@ export class CustomProvider implements IProvider {
         model: request.model,
         messages,
         stream: true,
-        stream_options: { include_usage: true },
       };
 
       if (request.maxTokens !== undefined) {

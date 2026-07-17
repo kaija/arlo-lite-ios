@@ -104,7 +104,6 @@ jest.mock('../CodeBlock', () => ({
 jest.mock('@/components/icons', () => ({
   CopyIcon: () => 'CopyIcon',
   RegenerateIcon: () => 'RegenerateIcon',
-  EditIcon: () => 'EditIcon',
   DeleteIcon: () => 'DeleteIcon',
 }));
 
@@ -132,12 +131,11 @@ function createMessage(overrides: Partial<Message> = {}): Message {
 function renderMessageFlow(overrides: Partial<MessageFlowProps> = {}) {
   const defaultProps: MessageFlowProps = {
     message: createMessage(),
-    modelName: 'GPT-4o',
+    modelDisplayName: 'GPT-4o',
     showAvatars: true,
     isStreaming: false,
     onCopy: jest.fn(),
     onRegenerate: jest.fn(),
-    onEdit: jest.fn(),
     onDelete: jest.fn(),
     ...overrides,
   };
@@ -164,7 +162,7 @@ describe('MessageFlow Snapshots', () => {
         role: 'assistant',
         content: 'The meaning of life is a philosophical question that has been debated for centuries.',
       }),
-      modelName: 'Claude 3.5 Sonnet',
+      modelDisplayName: 'Claude 3.5 Sonnet',
     });
 
     expect(toJSON()).toMatchSnapshot();
@@ -192,7 +190,7 @@ describe('MessageFlow Snapshots', () => {
         completionTokens: 3200,
         cost: 0.047,
       }),
-      modelName: 'GPT-4o',
+      modelDisplayName: 'GPT-4o',
     });
 
     expect(toJSON()).toMatchSnapshot();
@@ -204,7 +202,7 @@ describe('MessageFlow Snapshots', () => {
         role: 'assistant',
         content: 'Generating response...',
       }),
-      modelName: 'GPT-4o',
+      modelDisplayName: 'GPT-4o',
       isStreaming: true,
     });
 

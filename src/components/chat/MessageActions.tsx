@@ -3,8 +3,8 @@
  *
  * Actions available per message type:
  * - Copy: available on all messages (copies full text to clipboard)
- * - Regenerate: available only on the last assistant message
- * - Edit: available on user messages
+ * - Regenerate: available on all assistant messages
+ * - Delete: available on all messages
  */
 
 import React, { useState, useCallback } from 'react';
@@ -24,26 +24,23 @@ import type { Message } from '@/database/repositories/message-repo';
 export interface MessageActionsProps {
   /** The message this action row belongs to */
   message: Message;
-  /** Whether this is the last assistant message (enables regenerate) */
-  isLastAssistant: boolean;
   /** Handler to copy the message content */
   onCopy: (message: Message) => Promise<void>;
-  /** Handler to regenerate the last assistant response */
+  /** Handler to regenerate the assistant response */
   onRegenerate: () => Promise<void>;
-  /** Handler to edit a user message */
-  onEdit: (message: Message) => void;
+  /** Handler to delete the message (and subsequent messages if applicable) */
+  onDelete: () => Promise<void>;
 }
 
 /**
  * Row of contextual action buttons for a message.
- * Displays copy on all messages, edit on user messages, and regenerate on the last assistant.
+ * Displays copy and delete on all messages, and regenerate on assistant messages.
  */
 export function MessageActions({
   message,
-  isLastAssistant,
   onCopy,
   onRegenerate,
-  onEdit,
+  onDelete,
 }: MessageActionsProps) {
   const { t } = useTranslation();
   const theme = useTheme();
@@ -60,9 +57,9 @@ export function MessageActions({
     await onRegenerate();
   }, [onRegenerate]);
 
-  const handleEdit = useCallback(() => {
-    onEdit(message);
-  }, [message, onEdit]);
+  const handleDelete = useCallback(async () => {
+    await onDelete();
+  }, [onDelete]);
 
   return (
     <View style={styles.container}>
@@ -79,21 +76,8 @@ export function MessageActions({
         </Text>
       </TouchableOpacity>
 
-      {/* Edit action — user messages only */}
-      {message.role === 'user' && (
-        <TouchableOpacity
-          onPress={handleEdit}
-          style={styles.actionButton}
-          accessibilityLabel={t('accessibility.editButton')}
-          accessibilityRole="button"
-          hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
-        >
-          <Text style={styles.actionText}>{t('chat.edit')}</Text>
-        </TouchableOpacity>
-      )}
-
-      {/* Regenerate action — last assistant message only */}
-      {isLastAssistant && (
+      {/* Regenerate action — assistant messages only */}
+      {message.role === 'assistant' && (
         <TouchableOpacity
           onPress={handleRegenerate}
           style={styles.actionButton}
@@ -104,6 +88,17 @@ export function MessageActions({
           <Text style={styles.actionText}>{t('chat.regenerate')}</Text>
         </TouchableOpacity>
       )}
+
+      {/* Delete action — always available */}
+      <TouchableOpacity
+        onPress={handleDelete}
+        style={styles.actionButton}
+        accessibilityLabel={t('accessibility.deleteButton')}
+        accessibilityRole="button"
+        hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
+      >
+        <Text style={styles.actionText}>{t('chat.delete')}</Text>
+      </TouchableOpacity>
     </View>
   );
 }

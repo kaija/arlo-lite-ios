@@ -193,6 +193,7 @@
     "editButton": "Edit",
     "copyButton": "Copy to clipboard",
     "regenerateButton": "Regenerate response",
+    "modelLabel": "Model: {{model}}",
     "modelSwitcherButton": "Switch model",
     "thinkingLevelButton": "Change thinking level",
     "voiceInputButton": "Voice input",

@@ -42,6 +42,7 @@ import { RenameDialog } from '@/components/overlays/RenameDialog';
 import { SettingsScreen } from '@/components/overlays/SettingsScreen';
 import { ProviderDetailScreen } from '@/components/overlays/ProviderDetailScreen';
 import { ScrollFAB } from '@/components/chat/ScrollFAB';
+import { resolveModelName } from '@/utils/resolve-model-name';
 
 import type { Message } from '@/database/repositories/message-repo';
 
@@ -157,7 +158,7 @@ export function ChatShell({ children }: ChatShellProps) {
   // ─── Chat Hook ──────────────────────────────────────────────────────
 
   const { sendMessage: rawSendMessage, stopGeneration, tokenRate, error, retry, clearError } = useChat();
-  const { copyMessage, regenerate, editMessage } = useMessageActions();
+  const { copyMessage, regenerateFrom } = useMessageActions();
 
   // ─── FlatList Ref ───────────────────────────────────────────────────
 
@@ -393,16 +394,15 @@ export function ChatShell({ children }: ChatShellProps) {
     ({ item }: { item: Message }) => (
       <MessageFlow
         message={item}
-        modelName={activeModel?.displayName ?? 'Assistant'}
+        modelDisplayName={resolveModelName(item.modelId, models)}
         showAvatars={true}
         isStreaming={false}
         onCopy={() => copyMessage(item)}
-        onRegenerate={() => regenerate()}
-        onEdit={() => editMessage(item)}
+        onRegenerate={() => regenerateFrom(item.id)}
         onDelete={() => handleDeleteMessage(item.id)}
       />
     ),
-    [activeModel, copyMessage, regenerate, editMessage, handleDeleteMessage],
+    [models, copyMessage, regenerateFrom, handleDeleteMessage],
   );
 
   // ─── Render Footer (Streaming) ─────────────────────────────────────

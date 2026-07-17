@@ -97,8 +97,8 @@ jest.mock('@/hooks/useChat', () => ({
 jest.mock('@/hooks/useMessageActions', () => ({
   useMessageActions: () => ({
     copyMessage: jest.fn(),
-    regenerate: jest.fn(),
-    editMessage: jest.fn(),
+    regenerateFrom: jest.fn(),
+    deleteMessage: jest.fn(),
   }),
 }));
 

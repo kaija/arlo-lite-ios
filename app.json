@@ -15,7 +15,12 @@
     "scheme": "arlolite",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.arlolite.app"
+      "bundleIdentifier": "com.arlolite.app",
+      "infoPlist": {
+        "NSAppTransportSecurity": {
+          "NSAllowsArbitraryLoads": true
+        }
+      }
     },
     "android": {
       "adaptiveIcon": {

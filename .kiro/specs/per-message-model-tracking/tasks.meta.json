@@ -1,0 +1,425 @@
+{
+  "pbtResults": {
+    "1.3 Write property test for `resolveModelName`": {
+      "status": "passed",
+      "lastRunTimestamp": 1784277174521
+    },
+    "2.3 Write property tests for action button sets": {
+      "status": "passed",
+      "lastRunTimestamp": 1784277544021
+    },
+    "3.5 Write property test for action visibility vs streaming state": {
+      "status": "passed",
+      "lastRunTimestamp": 1784277658617
+    },
+    "5.2 Write property test for regeneration truncation": {
+      "status": "passed",
+      "lastRunTimestamp": 1784277779893
+    },
+    "5.3 Write property test for in-memory/database consistency": {
+      "status": "passed",
+      "lastRunTimestamp": 1784277802079
+    }
+  },
+  "executionHistory": {
+    "1.1 Create `src/utils/resolve-model-name.ts` with the `resolveModelName` pure function": [
+      {
+        "executionId": "7cfe1031-61bb-497b-95aa-ec4eecb7abfb",
+        "chatSessionId": "sess_d34b8a63-f174-4ed0-b477-f6039546dbb8",
+        "timestamp": 1784277002040
+      },
+      {
+        "executionId": "7cfe1031-61bb-497b-95aa-ec4eecb7abfb",
+        "chatSessionId": "sess_d34b8a63-f174-4ed0-b477-f6039546dbb8",
+        "timestamp": 1784277012404
+      },
+      {
+        "executionId": "7cfe1031-61bb-497b-95aa-ec4eecb7abfb",
+        "chatSessionId": "sess_d34b8a63-f174-4ed0-b477-f6039546dbb8",
+        "timestamp": 1784277093928
+      }
+    ],
+    "1.2 Add new i18n keys to `src/i18n/locales/en.json` and `src/i18n/locales/zh-TW.json`": [
+      {
+        "executionId": "7cfe1031-61bb-497b-95aa-ec4eecb7abfb",
+        "chatSessionId": "sess_d34b8a63-f174-4ed0-b477-f6039546dbb8",
+        "timestamp": 1784277002118
+      },
+      {
+        "executionId": "7cfe1031-61bb-497b-95aa-ec4eecb7abfb",
+        "chatSessionId": "sess_d34b8a63-f174-4ed0-b477-f6039546dbb8",
+        "timestamp": 1784277013374
+      },
+      {
+        "executionId": "7cfe1031-61bb-497b-95aa-ec4eecb7abfb",
+        "chatSessionId": "sess_d34b8a63-f174-4ed0-b477-f6039546dbb8",
+        "timestamp": 1784277094953
+      }
+    ],
+    "1.3 Write property test for `resolveModelName`": [
+      {
+        "executionId": "7cfe1031-61bb-497b-95aa-ec4eecb7abfb",
+        "chatSessionId": "sess_d34b8a63-f174-4ed0-b477-f6039546dbb8",
+        "timestamp": 1784277002156
+      },
+      {
+        "executionId": "7cfe1031-61bb-497b-95aa-ec4eecb7abfb",
+        "chatSessionId": "sess_d34b8a63-f174-4ed0-b477-f6039546dbb8",
+        "timestamp": 1784277104187
+      },
+      {
+        "executionId": "7cfe1031-61bb-497b-95aa-ec4eecb7abfb",
+        "chatSessionId": "sess_d34b8a63-f174-4ed0-b477-f6039546dbb8",
+        "timestamp": 1784277187153
+      }
+    ],
+    "2.1 Update `MessageActionsProps` interface in `src/components/chat/MessageActions.tsx`": [
+      {
+        "executionId": "7cfe1031-61bb-497b-95aa-ec4eecb7abfb",
+        "chatSessionId": "sess_d34b8a63-f174-4ed0-b477-f6039546dbb8",
+        "timestamp": 1784277002197
+      },
+      {
+        "executionId": "7cfe1031-61bb-497b-95aa-ec4eecb7abfb",
+        "chatSessionId": "sess_d34b8a63-f174-4ed0-b477-f6039546dbb8",
+        "timestamp": 1784277105076
+      },
+      {
+        "executionId": "7cfe1031-61bb-497b-95aa-ec4eecb7abfb",
+        "chatSessionId": "sess_d34b8a63-f174-4ed0-b477-f6039546dbb8",
+        "timestamp": 1784277188085
+      }
+    ],
+    "2.2 Update `MessageActions` render logic": [
+      {
+        "executionId": "7cfe1031-61bb-497b-95aa-ec4eecb7abfb",
+        "chatSessionId": "sess_d34b8a63-f174-4ed0-b477-f6039546dbb8",
+        "timestamp": 1784277002236
+      },
+      {
+        "executionId": "7cfe1031-61bb-497b-95aa-ec4eecb7abfb",
+        "chatSessionId": "sess_d34b8a63-f174-4ed0-b477-f6039546dbb8",
+        "timestamp": 1784277197653
+      },
+      {
+        "executionId": "7cfe1031-61bb-497b-95aa-ec4eecb7abfb",
+        "chatSessionId": "sess_d34b8a63-f174-4ed0-b477-f6039546dbb8",
+        "timestamp": 1784277404553
+      }
+    ],
+    "2.3 Write property tests for action button sets": [
+      {
+        "executionId": "7cfe1031-61bb-497b-95aa-ec4eecb7abfb",
+        "chatSessionId": "sess_d34b8a63-f174-4ed0-b477-f6039546dbb8",
+        "timestamp": 1784277002275
+      },
+      {
+        "executionId": "7cfe1031-61bb-497b-95aa-ec4eecb7abfb",
+        "chatSessionId": "sess_d34b8a63-f174-4ed0-b477-f6039546dbb8",
+        "timestamp": 1784277409898
+      },
+      {
+        "executionId": "7cfe1031-61bb-497b-95aa-ec4eecb7abfb",
+        "chatSessionId": "sess_d34b8a63-f174-4ed0-b477-f6039546dbb8",
+        "timestamp": 1784277557569
+      }
+    ],
+    "3.1 Update `MessageFlowProps` in `src/components/chat/MessageFlow.tsx`": [
+      {
+        "executionId": "7cfe1031-61bb-497b-95aa-ec4eecb7abfb",
+        "chatSessionId": "sess_d34b8a63-f174-4ed0-b477-f6039546dbb8",
+        "timestamp": 1784277002337
+      },
+      {
+        "executionId": "7cfe1031-61bb-497b-95aa-ec4eecb7abfb",
+        "chatSessionId": "sess_d34b8a63-f174-4ed0-b477-f6039546dbb8",
+        "timestamp": 1784277198486
+      },
+      {
+        "executionId": "7cfe1031-61bb-497b-95aa-ec4eecb7abfb",
+        "chatSessionId": "sess_d34b8a63-f174-4ed0-b477-f6039546dbb8",
+        "timestamp": 1784277405249
+      }
+    ],
+    "3.2 Add model label display in the sender row": [
+      {
+        "executionId": "7cfe1031-61bb-497b-95aa-ec4eecb7abfb",
+        "chatSessionId": "sess_d34b8a63-f174-4ed0-b477-f6039546dbb8",
+        "timestamp": 1784277002374
+      },
+      {
+        "executionId": "7cfe1031-61bb-497b-95aa-ec4eecb7abfb",
+        "chatSessionId": "sess_d34b8a63-f174-4ed0-b477-f6039546dbb8",
+        "timestamp": 1784277410683
+      },
+      {
+        "executionId": "7cfe1031-61bb-497b-95aa-ec4eecb7abfb",
+        "chatSessionId": "sess_d34b8a63-f174-4ed0-b477-f6039546dbb8",
+        "timestamp": 1784277558586
+      }
+    ],
+    "3.3 Remove the EditIcon action button rendering and `EditIcon` import": [
+      {
+        "executionId": "7cfe1031-61bb-497b-95aa-ec4eecb7abfb",
+        "chatSessionId": "sess_d34b8a63-f174-4ed0-b477-f6039546dbb8",
+        "timestamp": 1784277002405
+      },
+      {
+        "executionId": "7cfe1031-61bb-497b-95aa-ec4eecb7abfb",
+        "chatSessionId": "sess_d34b8a63-f174-4ed0-b477-f6039546dbb8",
+        "timestamp": 1784277411508
+      },
+      {
+        "executionId": "7cfe1031-61bb-497b-95aa-ec4eecb7abfb",
+        "chatSessionId": "sess_d34b8a63-f174-4ed0-b477-f6039546dbb8",
+        "timestamp": 1784277559489
+      }
+    ],
+    "3.4 Ensure Regenerate button shows on all assistant messages (not gated by position)": [
+      {
+        "executionId": "7cfe1031-61bb-497b-95aa-ec4eecb7abfb",
+        "chatSessionId": "sess_d34b8a63-f174-4ed0-b477-f6039546dbb8",
+        "timestamp": 1784277002439
+      },
+      {
+        "executionId": "7cfe1031-61bb-497b-95aa-ec4eecb7abfb",
+        "chatSessionId": "sess_d34b8a63-f174-4ed0-b477-f6039546dbb8",
+        "timestamp": 1784277412389
+      },
+      {
+        "executionId": "7cfe1031-61bb-497b-95aa-ec4eecb7abfb",
+        "chatSessionId": "sess_d34b8a63-f174-4ed0-b477-f6039546dbb8",
+        "timestamp": 1784277560437
+      }
+    ],
+    "3.5 Write property test for action visibility vs streaming state": [
+      {
+        "executionId": "7cfe1031-61bb-497b-95aa-ec4eecb7abfb",
+        "chatSessionId": "sess_d34b8a63-f174-4ed0-b477-f6039546dbb8",
+        "timestamp": 1784277002472
+      },
+      {
+        "executionId": "7cfe1031-61bb-497b-95aa-ec4eecb7abfb",
+        "chatSessionId": "sess_d34b8a63-f174-4ed0-b477-f6039546dbb8",
+        "timestamp": 1784277570217
+      },
+      {
+        "executionId": "7cfe1031-61bb-497b-95aa-ec4eecb7abfb",
+        "chatSessionId": "sess_d34b8a63-f174-4ed0-b477-f6039546dbb8",
+        "timestamp": 1784277671001
+      }
+    ],
+    "4. Checkpoint - Ensure all tests pass": [
+      {
+        "executionId": "7cfe1031-61bb-497b-95aa-ec4eecb7abfb",
+        "chatSessionId": "sess_d34b8a63-f174-4ed0-b477-f6039546dbb8",
+        "timestamp": 1784277002506
+      },
+      {
+        "executionId": "7cfe1031-61bb-497b-95aa-ec4eecb7abfb",
+        "chatSessionId": "sess_d34b8a63-f174-4ed0-b477-f6039546dbb8",
+        "timestamp": 1784278157419
+      },
+      {
+        "executionId": "7cfe1031-61bb-497b-95aa-ec4eecb7abfb",
+        "chatSessionId": "sess_d34b8a63-f174-4ed0-b477-f6039546dbb8",
+        "timestamp": 1784278369875
+      }
+    ],
+    "5.1 Add `deleteMessageAndSubsequent` to `SessionStore` interface and implementation in `src/stores/session-store.ts`": [
+      {
+        "executionId": "7cfe1031-61bb-497b-95aa-ec4eecb7abfb",
+        "chatSessionId": "sess_d34b8a63-f174-4ed0-b477-f6039546dbb8",
+        "timestamp": 1784277002563
+      },
+      {
+        "executionId": "7cfe1031-61bb-497b-95aa-ec4eecb7abfb",
+        "chatSessionId": "sess_d34b8a63-f174-4ed0-b477-f6039546dbb8",
+        "timestamp": 1784277571280
+      },
+      {
+        "executionId": "7cfe1031-61bb-497b-95aa-ec4eecb7abfb",
+        "chatSessionId": "sess_d34b8a63-f174-4ed0-b477-f6039546dbb8",
+        "timestamp": 1784277672034
+      }
+    ],
+    "5.2 Write property test for regeneration truncation": [
+      {
+        "executionId": "7cfe1031-61bb-497b-95aa-ec4eecb7abfb",
+        "chatSessionId": "sess_d34b8a63-f174-4ed0-b477-f6039546dbb8",
+        "timestamp": 1784277002604
+      },
+      {
+        "executionId": "7cfe1031-61bb-497b-95aa-ec4eecb7abfb",
+        "chatSessionId": "sess_d34b8a63-f174-4ed0-b477-f6039546dbb8",
+        "timestamp": 1784277677383
+      },
+      {
+        "executionId": "7cfe1031-61bb-497b-95aa-ec4eecb7abfb",
+        "chatSessionId": "sess_d34b8a63-f174-4ed0-b477-f6039546dbb8",
+        "timestamp": 1784277816831
+      }
+    ],
+    "5.3 Write property test for in-memory/database consistency": [
+      {
+        "executionId": "7cfe1031-61bb-497b-95aa-ec4eecb7abfb",
+        "chatSessionId": "sess_d34b8a63-f174-4ed0-b477-f6039546dbb8",
+        "timestamp": 1784277002643
+      },
+      {
+        "executionId": "7cfe1031-61bb-497b-95aa-ec4eecb7abfb",
+        "chatSessionId": "sess_d34b8a63-f174-4ed0-b477-f6039546dbb8",
+        "timestamp": 1784277678296
+      },
+      {
+        "executionId": "7cfe1031-61bb-497b-95aa-ec4eecb7abfb",
+        "chatSessionId": "sess_d34b8a63-f174-4ed0-b477-f6039546dbb8",
+        "timestamp": 1784277818653
+      }
+    ],
+    "6.1 Add `regenerateFrom` to `UseChatResult` interface and implement in `src/hooks/useChat.ts`": [
+      {
+        "executionId": "7cfe1031-61bb-497b-95aa-ec4eecb7abfb",
+        "chatSessionId": "sess_d34b8a63-f174-4ed0-b477-f6039546dbb8",
+        "timestamp": 1784277002674
+      },
+      {
+        "executionId": "7cfe1031-61bb-497b-95aa-ec4eecb7abfb",
+        "chatSessionId": "sess_d34b8a63-f174-4ed0-b477-f6039546dbb8",
+        "timestamp": 1784277679180
+      },
+      {
+        "executionId": "7cfe1031-61bb-497b-95aa-ec4eecb7abfb",
+        "chatSessionId": "sess_d34b8a63-f174-4ed0-b477-f6039546dbb8",
+        "timestamp": 1784277818911
+      }
+    ],
+    "6.2 Update `useMessageActions` hook in `src/hooks/useMessageActions.ts`": [
+      {
+        "executionId": "7cfe1031-61bb-497b-95aa-ec4eecb7abfb",
+        "chatSessionId": "sess_d34b8a63-f174-4ed0-b477-f6039546dbb8",
+        "timestamp": 1784277002707
+      },
+      {
+        "executionId": "7cfe1031-61bb-497b-95aa-ec4eecb7abfb",
+        "chatSessionId": "sess_d34b8a63-f174-4ed0-b477-f6039546dbb8",
+        "timestamp": 1784277829097
+      },
+      {
+        "executionId": "7cfe1031-61bb-497b-95aa-ec4eecb7abfb",
+        "chatSessionId": "sess_d34b8a63-f174-4ed0-b477-f6039546dbb8",
+        "timestamp": 1784278022786
+      }
+    ],
+    "6.3 Write unit tests for `regenerateFrom` flow": [
+      {
+        "executionId": "7cfe1031-61bb-497b-95aa-ec4eecb7abfb",
+        "chatSessionId": "sess_d34b8a63-f174-4ed0-b477-f6039546dbb8",
+        "timestamp": 1784277002741
+      },
+      {
+        "executionId": "7cfe1031-61bb-497b-95aa-ec4eecb7abfb",
+        "chatSessionId": "sess_d34b8a63-f174-4ed0-b477-f6039546dbb8",
+        "timestamp": 1784277829952
+      },
+      {
+        "executionId": "7cfe1031-61bb-497b-95aa-ec4eecb7abfb",
+        "chatSessionId": "sess_d34b8a63-f174-4ed0-b477-f6039546dbb8",
+        "timestamp": 1784278023583
+      }
+    ],
+    "7.1 Update the chat screen / message list renderer to pass new props": [
+      {
+        "executionId": "7cfe1031-61bb-497b-95aa-ec4eecb7abfb",
+        "chatSessionId": "sess_d34b8a63-f174-4ed0-b477-f6039546dbb8",
+        "timestamp": 1784277002774
+      },
+      {
+        "executionId": "7cfe1031-61bb-497b-95aa-ec4eecb7abfb",
+        "chatSessionId": "sess_d34b8a63-f174-4ed0-b477-f6039546dbb8",
+        "timestamp": 1784278029062
+      },
+      {
+        "executionId": "7cfe1031-61bb-497b-95aa-ec4eecb7abfb",
+        "chatSessionId": "sess_d34b8a63-f174-4ed0-b477-f6039546dbb8",
+        "timestamp": 1784278151087
+      }
+    ],
+    "7.2 Update `MessageActions` usage sites to match new props": [
+      {
+        "executionId": "7cfe1031-61bb-497b-95aa-ec4eecb7abfb",
+        "chatSessionId": "sess_d34b8a63-f174-4ed0-b477-f6039546dbb8",
+        "timestamp": 1784277002807
+      },
+      {
+        "executionId": "7cfe1031-61bb-497b-95aa-ec4eecb7abfb",
+        "chatSessionId": "sess_d34b8a63-f174-4ed0-b477-f6039546dbb8",
+        "timestamp": 1784278029881
+      },
+      {
+        "executionId": "7cfe1031-61bb-497b-95aa-ec4eecb7abfb",
+        "chatSessionId": "sess_d34b8a63-f174-4ed0-b477-f6039546dbb8",
+        "timestamp": 1784278151865
+      }
+    ],
+    "8. Final checkpoint - Ensure all tests pass": [
+      {
+        "executionId": "7cfe1031-61bb-497b-95aa-ec4eecb7abfb",
+        "chatSessionId": "sess_d34b8a63-f174-4ed0-b477-f6039546dbb8",
+        "timestamp": 1784277002847
+      },
+      {
+        "executionId": "7cfe1031-61bb-497b-95aa-ec4eecb7abfb",
+        "chatSessionId": "sess_d34b8a63-f174-4ed0-b477-f6039546dbb8",
+        "timestamp": 1784278374844
+      },
+      {
+        "executionId": "7cfe1031-61bb-497b-95aa-ec4eecb7abfb",
+        "chatSessionId": "sess_d34b8a63-f174-4ed0-b477-f6039546dbb8",
+        "timestamp": 1784278444074
+      }
+    ],
+    "1. Create `resolveModelName` utility and update i18n keys": [
+      {
+        "executionId": "7cfe1031-61bb-497b-95aa-ec4eecb7abfb",
+        "chatSessionId": "sess_d34b8a63-f174-4ed0-b477-f6039546dbb8",
+        "timestamp": 1784277187186
+      }
+    ],
+    "2. Update `MessageActions` component — remove Edit, enable Regenerate on all assistant messages": [
+      {
+        "executionId": "7cfe1031-61bb-497b-95aa-ec4eecb7abfb",
+        "chatSessionId": "sess_d34b8a63-f174-4ed0-b477-f6039546dbb8",
+        "timestamp": 1784277557615
+      }
+    ],
+    "3. Update `MessageFlow` component — add model label, remove edit, wire new actions": [
+      {
+        "executionId": "7cfe1031-61bb-497b-95aa-ec4eecb7abfb",
+        "chatSessionId": "sess_d34b8a63-f174-4ed0-b477-f6039546dbb8",
+        "timestamp": 1784277671032
+      }
+    ],
+    "5. Add `deleteMessageAndSubsequent` action to `SessionStore`": [
+      {
+        "executionId": "7cfe1031-61bb-497b-95aa-ec4eecb7abfb",
+        "chatSessionId": "sess_d34b8a63-f174-4ed0-b477-f6039546dbb8",
+        "timestamp": 1784277818716
+      }
+    ],
+    "6. Add `regenerateFrom` method to `useChat` hook": [
+      {
+        "executionId": "7cfe1031-61bb-497b-95aa-ec4eecb7abfb",
+        "chatSessionId": "sess_d34b8a63-f174-4ed0-b477-f6039546dbb8",
+        "timestamp": 1784278023612
+      }
+    ],
+    "7. Wire updated components in the chat screen": [
+      {
+        "executionId": "7cfe1031-61bb-497b-95aa-ec4eecb7abfb",
+        "chatSessionId": "sess_d34b8a63-f174-4ed0-b477-f6039546dbb8",
+        "timestamp": 1784278151914
+      }
+    ]
+  }
+}

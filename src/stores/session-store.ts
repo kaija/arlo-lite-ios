@@ -67,6 +67,9 @@ export interface SessionStore {
   /** Edit a message at a given ID and discard all subsequent messages */
   editMessage: (sessionId: string, messageId: string, newContent: string) => Promise<void>;
 
+  /** Delete a message and all subsequent messages in the session (used by RegenerateFlow) */
+  deleteMessageAndSubsequent: (sessionId: string, messageId: string) => Promise<void>;
+
   /** Update a session with partial data */
   updateSession: (id: string, data: { providerId?: string; modelId?: string; thinkingLevel?: string | null }) => Promise<void>;
 
@@ -244,6 +247,34 @@ export const useSessionStore = create<SessionStore>((set, get) => ({
         },
       };
     });
+  },
+
+  deleteMessageAndSubsequent: async (sessionId: string, messageId: string) => {
+    const { db, messages } = get();
+    if (!db) {
+      throw new Error('Database not initialized.');
+    }
+
+    const sessionMessages = messages[sessionId] ?? [];
+    const target = sessionMessages.find((m) => m.id === messageId);
+    if (!target) return;
+
+    // Delete target and all messages after it from DB
+    await db.runAsync(
+      'DELETE FROM messages WHERE session_id = ? AND created_at >= ?',
+      sessionId,
+      target.createdAt
+    );
+
+    // Update in-memory state
+    set((state) => ({
+      messages: {
+        ...state.messages,
+        [sessionId]: (state.messages[sessionId] ?? []).filter(
+          (m) => m.createdAt < target.createdAt
+        ),
+      },
+    }));
   },
 
   updateSession: async (id: string, data: { providerId?: string; modelId?: string; thinkingLevel?: string | null }) => {
