@@ -33,6 +33,8 @@ export interface ChatActions {
   appendStreamContent: (text: string) => void;
   /** Append text to the current thinking content */
   appendThinkingContent: (text: string) => void;
+  /** Append text and thinking content in a single atomic store update */
+  flushStreamBuffer: (textDelta: string, thinkingDelta: string) => void;
   /** Reset stream content and thinking content to empty strings */
   clearStream: () => void;
   /** Update the thinking/reasoning effort level */
@@ -63,6 +65,13 @@ export const useChatStore = create<ChatStore>((set) => ({
 
   appendThinkingContent: (text: string) => {
     set((state) => ({ thinkingContent: state.thinkingContent + text }));
+  },
+
+  flushStreamBuffer: (textDelta: string, thinkingDelta: string) => {
+    set((state) => ({
+      streamContent: state.streamContent + textDelta,
+      thinkingContent: state.thinkingContent + thinkingDelta,
+    }));
   },
 
   clearStream: () => {

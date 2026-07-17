@@ -92,6 +92,97 @@ describe('chat-store', () => {
     });
   });
 
+  describe('flushStreamBuffer', () => {
+    it('should append text and thinking content in a single call', () => {
+      useChatStore.getState().flushStreamBuffer('Hello', 'Thinking...');
+      expect(useChatStore.getState().streamContent).toBe('Hello');
+      expect(useChatStore.getState().thinkingContent).toBe('Thinking...');
+    });
+
+    it('should update both streamContent and thinkingContent atomically in one set()', () => {
+      // Subscribe and track how many state change notifications we receive
+      const snapshots: Array<{ streamContent: string; thinkingContent: string }> = [];
+      const unsub = useChatStore.subscribe((state) => {
+        snapshots.push({
+          streamContent: state.streamContent,
+          thinkingContent: state.thinkingContent,
+        });
+      });
+
+      useChatStore.getState().flushStreamBuffer('text chunk', 'thinking chunk');
+
+      unsub();
+
+      // Atomic: single notification with both fields updated together
+      expect(snapshots).toHaveLength(1);
+      expect(snapshots[0].streamContent).toBe('text chunk');
+      expect(snapshots[0].thinkingContent).toBe('thinking chunk');
+    });
+
+    it('should not alter existing content when both deltas are empty strings', () => {
+      // Set up existing content
+      useChatStore.getState().flushStreamBuffer('existing text', 'existing thinking');
+
+      // Flush with empty strings
+      useChatStore.getState().flushStreamBuffer('', '');
+
+      // Content remains unchanged
+      expect(useChatStore.getState().streamContent).toBe('existing text');
+      expect(useChatStore.getState().thinkingContent).toBe('existing thinking');
+    });
+
+    it('should not alter streamContent when textDelta is empty', () => {
+      useChatStore.getState().flushStreamBuffer('preserved', '');
+      useChatStore.getState().flushStreamBuffer('', 'new thinking');
+
+      expect(useChatStore.getState().streamContent).toBe('preserved');
+      expect(useChatStore.getState().thinkingContent).toBe('new thinking');
+    });
+
+    it('should not alter thinkingContent when thinkingDelta is empty', () => {
+      useChatStore.getState().flushStreamBuffer('', 'preserved');
+      useChatStore.getState().flushStreamBuffer('new text', '');
+
+      expect(useChatStore.getState().streamContent).toBe('new text');
+      expect(useChatStore.getState().thinkingContent).toBe('preserved');
+    });
+
+    it('should concatenate content correctly across multiple sequential flushes', () => {
+      useChatStore.getState().flushStreamBuffer('Hello', 'Step 1.');
+      useChatStore.getState().flushStreamBuffer(' world', ' Step 2.');
+      useChatStore.getState().flushStreamBuffer('!', ' Done.');
+
+      expect(useChatStore.getState().streamContent).toBe('Hello world!');
+      expect(useChatStore.getState().thinkingContent).toBe('Step 1. Step 2. Done.');
+    });
+
+    it('should append incrementally across multiple flushes', () => {
+      useChatStore.getState().flushStreamBuffer('Hello', 'Step 1.');
+      useChatStore.getState().flushStreamBuffer(' world', ' Step 2.');
+      expect(useChatStore.getState().streamContent).toBe('Hello world');
+      expect(useChatStore.getState().thinkingContent).toBe('Step 1. Step 2.');
+    });
+
+    it('should handle empty text delta with non-empty thinking delta', () => {
+      useChatStore.getState().flushStreamBuffer('', 'Only thinking');
+      expect(useChatStore.getState().streamContent).toBe('');
+      expect(useChatStore.getState().thinkingContent).toBe('Only thinking');
+    });
+
+    it('should handle non-empty text delta with empty thinking delta', () => {
+      useChatStore.getState().flushStreamBuffer('Only text', '');
+      expect(useChatStore.getState().streamContent).toBe('Only text');
+      expect(useChatStore.getState().thinkingContent).toBe('');
+    });
+
+    it('should handle both deltas empty', () => {
+      useChatStore.getState().flushStreamBuffer('Initial', 'Init think');
+      useChatStore.getState().flushStreamBuffer('', '');
+      expect(useChatStore.getState().streamContent).toBe('Initial');
+      expect(useChatStore.getState().thinkingContent).toBe('Init think');
+    });
+  });
+
   describe('clearStream', () => {
     it('should reset streamContent to empty string', () => {
       useChatStore.getState().appendStreamContent('Some content');

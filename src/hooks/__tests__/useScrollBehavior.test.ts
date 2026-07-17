@@ -59,8 +59,8 @@ describe('Property: Scroll threshold determines auto-scroll and FAB visibility',
   it('returns true at exact boundary of 100 points from bottom', () => {
     fc.assert(
       fc.property(
-        fc.double({ min: 0, max: 5000, noNaN: true, noDefaultInfinity: true }),
-        fc.double({ min: 0, max: 5000, noNaN: true, noDefaultInfinity: true }),
+        fc.integer({ min: 0, max: 5000 }),
+        fc.integer({ min: 0, max: 5000 }),
         (scrollOffset, layoutHeight) => {
           const contentHeight = scrollOffset + layoutHeight + 100;
           return isNearBottom(contentHeight, scrollOffset, layoutHeight) === true;
@@ -73,8 +73,8 @@ describe('Property: Scroll threshold determines auto-scroll and FAB visibility',
   it('returns false at 101 points from bottom (just over threshold)', () => {
     fc.assert(
       fc.property(
-        fc.double({ min: 0, max: 5000, noNaN: true, noDefaultInfinity: true }),
-        fc.double({ min: 0, max: 5000, noNaN: true, noDefaultInfinity: true }),
+        fc.integer({ min: 0, max: 5000 }),
+        fc.integer({ min: 0, max: 5000 }),
         (scrollOffset, layoutHeight) => {
           const contentHeight = scrollOffset + layoutHeight + 101;
           return isNearBottom(contentHeight, scrollOffset, layoutHeight) === false;

@@ -1,0 +1,302 @@
+{
+  "pbtResults": {
+    "2.7 Write property test: Combined Flush Content Correctness": {
+      "status": "passed",
+      "lastRunTimestamp": 1784280422363
+    },
+    "2.9 Write property test: Empty Buffer Skip": {
+      "status": "passed",
+      "lastRunTimestamp": 1784280477730
+    },
+    "2.8 Write property test: Terminal Flush Completeness": {
+      "status": "passed",
+      "lastRunTimestamp": 1784280488133
+    },
+    "2.6 Write property test: Flush Frequency Bound": {
+      "status": "passed",
+      "lastRunTimestamp": 1784280497819
+    },
+    "4.1 Write integration test for abort behavior with partial content persistence": {
+      "status": "passed",
+      "lastRunTimestamp": 1784280616677
+    }
+  },
+  "executionHistory": {
+    "1.1 Add `flushStreamBuffer` to `ChatActions` interface and implement it in `chat-store.ts`": [
+      {
+        "executionId": "5b824d18-13c1-4dc4-aa60-785de08c3600",
+        "chatSessionId": "sess_94fc9fd0-521d-4f96-8234-34a65dca4601",
+        "timestamp": 1784279922233
+      },
+      {
+        "executionId": "5b824d18-13c1-4dc4-aa60-785de08c3600",
+        "chatSessionId": "sess_94fc9fd0-521d-4f96-8234-34a65dca4601",
+        "timestamp": 1784279931291
+      },
+      {
+        "executionId": "5b824d18-13c1-4dc4-aa60-785de08c3600",
+        "chatSessionId": "sess_94fc9fd0-521d-4f96-8234-34a65dca4601",
+        "timestamp": 1784280008820
+      }
+    ],
+    "1.2 Write unit tests for `flushStreamBuffer` action": [
+      {
+        "executionId": "5b824d18-13c1-4dc4-aa60-785de08c3600",
+        "chatSessionId": "sess_94fc9fd0-521d-4f96-8234-34a65dca4601",
+        "timestamp": 1784279922291
+      },
+      {
+        "executionId": "5b824d18-13c1-4dc4-aa60-785de08c3600",
+        "chatSessionId": "sess_94fc9fd0-521d-4f96-8234-34a65dca4601",
+        "timestamp": 1784280017374
+      },
+      {
+        "executionId": "5b824d18-13c1-4dc4-aa60-785de08c3600",
+        "chatSessionId": "sess_94fc9fd0-521d-4f96-8234-34a65dca4601",
+        "timestamp": 1784280105325
+      }
+    ],
+    "2.1 Add buffer refs, interval ref, and `FLUSH_INTERVAL_MS` constant": [
+      {
+        "executionId": "5b824d18-13c1-4dc4-aa60-785de08c3600",
+        "chatSessionId": "sess_94fc9fd0-521d-4f96-8234-34a65dca4601",
+        "timestamp": 1784279922325
+      },
+      {
+        "executionId": "5b824d18-13c1-4dc4-aa60-785de08c3600",
+        "chatSessionId": "sess_94fc9fd0-521d-4f96-8234-34a65dca4601",
+        "timestamp": 1784280018275
+      },
+      {
+        "executionId": "5b824d18-13c1-4dc4-aa60-785de08c3600",
+        "chatSessionId": "sess_94fc9fd0-521d-4f96-8234-34a65dca4601",
+        "timestamp": 1784280106164
+      }
+    ],
+    "2.2 Implement `flushBuffer`, `startBatcher`, and `stopBatcher` functions": [
+      {
+        "executionId": "5b824d18-13c1-4dc4-aa60-785de08c3600",
+        "chatSessionId": "sess_94fc9fd0-521d-4f96-8234-34a65dca4601",
+        "timestamp": 1784279922358
+      },
+      {
+        "executionId": "5b824d18-13c1-4dc4-aa60-785de08c3600",
+        "chatSessionId": "sess_94fc9fd0-521d-4f96-8234-34a65dca4601",
+        "timestamp": 1784280114991
+      },
+      {
+        "executionId": "5b824d18-13c1-4dc4-aa60-785de08c3600",
+        "chatSessionId": "sess_94fc9fd0-521d-4f96-8234-34a65dca4601",
+        "timestamp": 1784280188038
+      }
+    ],
+    "2.3 Modify `handleStreaming` to use the batcher instead of per-chunk store calls": [
+      {
+        "executionId": "5b824d18-13c1-4dc4-aa60-785de08c3600",
+        "chatSessionId": "sess_94fc9fd0-521d-4f96-8234-34a65dca4601",
+        "timestamp": 1784279922392
+      },
+      {
+        "executionId": "5b824d18-13c1-4dc4-aa60-785de08c3600",
+        "chatSessionId": "sess_94fc9fd0-521d-4f96-8234-34a65dca4601",
+        "timestamp": 1784280192797
+      },
+      {
+        "executionId": "5b824d18-13c1-4dc4-aa60-785de08c3600",
+        "chatSessionId": "sess_94fc9fd0-521d-4f96-8234-34a65dca4601",
+        "timestamp": 1784280298657
+      }
+    ],
+    "2.4 Modify `stopGeneration` to flush and persist partial content on abort": [
+      {
+        "executionId": "5b824d18-13c1-4dc4-aa60-785de08c3600",
+        "chatSessionId": "sess_94fc9fd0-521d-4f96-8234-34a65dca4601",
+        "timestamp": 1784279922454
+      },
+      {
+        "executionId": "5b824d18-13c1-4dc4-aa60-785de08c3600",
+        "chatSessionId": "sess_94fc9fd0-521d-4f96-8234-34a65dca4601",
+        "timestamp": 1784280193639
+      },
+      {
+        "executionId": "5b824d18-13c1-4dc4-aa60-785de08c3600",
+        "chatSessionId": "sess_94fc9fd0-521d-4f96-8234-34a65dca4601",
+        "timestamp": 1784280299468
+      }
+    ],
+    "2.5 Add `useEffect` cleanup for unmount during active stream": [
+      {
+        "executionId": "5b824d18-13c1-4dc4-aa60-785de08c3600",
+        "chatSessionId": "sess_94fc9fd0-521d-4f96-8234-34a65dca4601",
+        "timestamp": 1784279922492
+      },
+      {
+        "executionId": "5b824d18-13c1-4dc4-aa60-785de08c3600",
+        "chatSessionId": "sess_94fc9fd0-521d-4f96-8234-34a65dca4601",
+        "timestamp": 1784280194530
+      },
+      {
+        "executionId": "5b824d18-13c1-4dc4-aa60-785de08c3600",
+        "chatSessionId": "sess_94fc9fd0-521d-4f96-8234-34a65dca4601",
+        "timestamp": 1784280300354
+      }
+    ],
+    "2.6 Write property test: Flush Frequency Bound": [
+      {
+        "executionId": "5b824d18-13c1-4dc4-aa60-785de08c3600",
+        "chatSessionId": "sess_94fc9fd0-521d-4f96-8234-34a65dca4601",
+        "timestamp": 1784279922537
+      },
+      {
+        "executionId": "5b824d18-13c1-4dc4-aa60-785de08c3600",
+        "chatSessionId": "sess_94fc9fd0-521d-4f96-8234-34a65dca4601",
+        "timestamp": 1784280309796
+      },
+      {
+        "executionId": "5b824d18-13c1-4dc4-aa60-785de08c3600",
+        "chatSessionId": "sess_94fc9fd0-521d-4f96-8234-34a65dca4601",
+        "timestamp": 1784280513254
+      }
+    ],
+    "2.7 Write property test: Combined Flush Content Correctness": [
+      {
+        "executionId": "5b824d18-13c1-4dc4-aa60-785de08c3600",
+        "chatSessionId": "sess_94fc9fd0-521d-4f96-8234-34a65dca4601",
+        "timestamp": 1784279922574
+      },
+      {
+        "executionId": "5b824d18-13c1-4dc4-aa60-785de08c3600",
+        "chatSessionId": "sess_94fc9fd0-521d-4f96-8234-34a65dca4601",
+        "timestamp": 1784280310430
+      },
+      {
+        "executionId": "5b824d18-13c1-4dc4-aa60-785de08c3600",
+        "chatSessionId": "sess_94fc9fd0-521d-4f96-8234-34a65dca4601",
+        "timestamp": 1784280514169
+      }
+    ],
+    "2.8 Write property test: Terminal Flush Completeness": [
+      {
+        "executionId": "5b824d18-13c1-4dc4-aa60-785de08c3600",
+        "chatSessionId": "sess_94fc9fd0-521d-4f96-8234-34a65dca4601",
+        "timestamp": 1784279922609
+      },
+      {
+        "executionId": "5b824d18-13c1-4dc4-aa60-785de08c3600",
+        "chatSessionId": "sess_94fc9fd0-521d-4f96-8234-34a65dca4601",
+        "timestamp": 1784280311240
+      },
+      {
+        "executionId": "5b824d18-13c1-4dc4-aa60-785de08c3600",
+        "chatSessionId": "sess_94fc9fd0-521d-4f96-8234-34a65dca4601",
+        "timestamp": 1784280514990
+      }
+    ],
+    "2.9 Write property test: Empty Buffer Skip": [
+      {
+        "executionId": "5b824d18-13c1-4dc4-aa60-785de08c3600",
+        "chatSessionId": "sess_94fc9fd0-521d-4f96-8234-34a65dca4601",
+        "timestamp": 1784279922642
+      },
+      {
+        "executionId": "5b824d18-13c1-4dc4-aa60-785de08c3600",
+        "chatSessionId": "sess_94fc9fd0-521d-4f96-8234-34a65dca4601",
+        "timestamp": 1784280312072
+      },
+      {
+        "executionId": "5b824d18-13c1-4dc4-aa60-785de08c3600",
+        "chatSessionId": "sess_94fc9fd0-521d-4f96-8234-34a65dca4601",
+        "timestamp": 1784280515789
+      }
+    ],
+    "3. Checkpoint - Verify implementation": [
+      {
+        "executionId": "5b824d18-13c1-4dc4-aa60-785de08c3600",
+        "chatSessionId": "sess_94fc9fd0-521d-4f96-8234-34a65dca4601",
+        "timestamp": 1784279922675
+      },
+      {
+        "executionId": "5b824d18-13c1-4dc4-aa60-785de08c3600",
+        "chatSessionId": "sess_94fc9fd0-521d-4f96-8234-34a65dca4601",
+        "timestamp": 1784280652904
+      },
+      {
+        "executionId": "5b824d18-13c1-4dc4-aa60-785de08c3600",
+        "chatSessionId": "sess_94fc9fd0-521d-4f96-8234-34a65dca4601",
+        "timestamp": 1784280946549
+      }
+    ],
+    "4.1 Write integration test for abort behavior with partial content persistence": [
+      {
+        "executionId": "5b824d18-13c1-4dc4-aa60-785de08c3600",
+        "chatSessionId": "sess_94fc9fd0-521d-4f96-8234-34a65dca4601",
+        "timestamp": 1784279922708
+      },
+      {
+        "executionId": "5b824d18-13c1-4dc4-aa60-785de08c3600",
+        "chatSessionId": "sess_94fc9fd0-521d-4f96-8234-34a65dca4601",
+        "timestamp": 1784280526640
+      },
+      {
+        "executionId": "5b824d18-13c1-4dc4-aa60-785de08c3600",
+        "chatSessionId": "sess_94fc9fd0-521d-4f96-8234-34a65dca4601",
+        "timestamp": 1784280643211
+      }
+    ],
+    "4.2 Write integration test for cleanup on unmount": [
+      {
+        "executionId": "5b824d18-13c1-4dc4-aa60-785de08c3600",
+        "chatSessionId": "sess_94fc9fd0-521d-4f96-8234-34a65dca4601",
+        "timestamp": 1784279922741
+      },
+      {
+        "executionId": "5b824d18-13c1-4dc4-aa60-785de08c3600",
+        "chatSessionId": "sess_94fc9fd0-521d-4f96-8234-34a65dca4601",
+        "timestamp": 1784280527411
+      },
+      {
+        "executionId": "5b824d18-13c1-4dc4-aa60-785de08c3600",
+        "chatSessionId": "sess_94fc9fd0-521d-4f96-8234-34a65dca4601",
+        "timestamp": 1784280642376
+      }
+    ],
+    "5. Final checkpoint - Ensure all tests pass": [
+      {
+        "executionId": "5b824d18-13c1-4dc4-aa60-785de08c3600",
+        "chatSessionId": "sess_94fc9fd0-521d-4f96-8234-34a65dca4601",
+        "timestamp": 1784279922794
+      },
+      {
+        "executionId": "5b824d18-13c1-4dc4-aa60-785de08c3600",
+        "chatSessionId": "sess_94fc9fd0-521d-4f96-8234-34a65dca4601",
+        "timestamp": 1784280951088
+      },
+      {
+        "executionId": "5b824d18-13c1-4dc4-aa60-785de08c3600",
+        "chatSessionId": "sess_94fc9fd0-521d-4f96-8234-34a65dca4601",
+        "timestamp": 1784281011588
+      }
+    ],
+    "1. Add `flushStreamBuffer` action to Chat Store": [
+      {
+        "executionId": "5b824d18-13c1-4dc4-aa60-785de08c3600",
+        "chatSessionId": "sess_94fc9fd0-521d-4f96-8234-34a65dca4601",
+        "timestamp": 1784280105363
+      }
+    ],
+    "2. Implement Stream Batcher in `useChat.ts`": [
+      {
+        "executionId": "5b824d18-13c1-4dc4-aa60-785de08c3600",
+        "chatSessionId": "sess_94fc9fd0-521d-4f96-8234-34a65dca4601",
+        "timestamp": 1784280515822
+      }
+    ],
+    "4. Integration validation": [
+      {
+        "executionId": "5b824d18-13c1-4dc4-aa60-785de08c3600",
+        "chatSessionId": "sess_94fc9fd0-521d-4f96-8234-34a65dca4601",
+        "timestamp": 1784280643257
+      }
+    ]
+  }
+}
