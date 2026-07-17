@@ -3,13 +3,14 @@ import type { SQLiteDatabase } from 'expo-sqlite';
 import { migrateV1 } from './migrations/v1';
 import { migrateV2 } from './migrations/v2';
 import { migrateV3 } from './migrations/v3';
+import { migrateV4 } from './migrations/v4';
 
 const DATABASE_NAME = 'arlo-lite.db';
 
 /**
  * Current schema version. Increment when adding new migrations.
  */
-const CURRENT_VERSION = 3;
+const CURRENT_VERSION = 4;
 
 /**
  * Migration registry — maps schema version to its migration function.
@@ -19,6 +20,7 @@ const migrations: Record<number, (db: SQLiteDatabase) => Promise<void>> = {
   1: migrateV1,
   2: migrateV2,
   3: migrateV3,
+  4: migrateV4,
 };
 
 /**

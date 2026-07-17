@@ -1,4 +1,5 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
+import type { CustomReasoningMode } from '@/domain/thinking-mapper';
 import { generateId } from '@/utils/uuid';
 import { getCurrentTimestamp } from '@/utils/date';
 
@@ -23,6 +24,8 @@ export interface ProviderRow {
   api_mode: OpenAIApiMode | null;
   streaming_enabled: number;
   generation_params: string;
+  reasoning_mode: string | null;
+  thinking_kwargs: string | null;
   created_at: number;
   updated_at: number;
 }
@@ -34,6 +37,8 @@ export interface CreateProviderData {
   apiMode?: OpenAIApiMode;
   streamingEnabled?: boolean;
   generationParams?: GenerationParams;
+  reasoningMode?: CustomReasoningMode | null;
+  thinkingKwargs?: Record<string, unknown> | null;
 }
 
 export interface UpdateProviderData {
@@ -42,6 +47,8 @@ export interface UpdateProviderData {
   apiMode?: OpenAIApiMode | null;
   streamingEnabled?: boolean;
   generationParams?: GenerationParams;
+  reasoningMode?: CustomReasoningMode | null;
+  thinkingKwargs?: Record<string, unknown> | null;
 }
 
 export interface Provider {
@@ -52,6 +59,8 @@ export interface Provider {
   apiMode: OpenAIApiMode | null;
   streamingEnabled: boolean;
   generationParams: GenerationParams;
+  reasoningMode: CustomReasoningMode | null;
+  thinkingKwargs: Record<string, unknown> | null;
   createdAt: number;
   updatedAt: number;
 }
@@ -72,6 +81,12 @@ function rowToProvider(row: ProviderRow): Provider {
     apiMode: row.api_mode,
     streamingEnabled: row.streaming_enabled === 1,
     generationParams,
+    reasoningMode: (row.reasoning_mode as CustomReasoningMode | null) ?? null,
+    thinkingKwargs: (() => {
+      if (!row.thinking_kwargs) return null;
+      try { return JSON.parse(row.thinking_kwargs); }
+      catch { return null; }
+    })(),
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -89,10 +104,12 @@ export async function createProvider(
   const streamingEnabled = data.streamingEnabled !== false ? 1 : 0;
   const generationParams = data.generationParams ?? { ...DEFAULT_GENERATION_PARAMS };
   const generationParamsJson = JSON.stringify(generationParams);
+  const reasoningMode = data.reasoningMode ?? null;
+  const thinkingKwargsJson = data.thinkingKwargs ? JSON.stringify(data.thinkingKwargs) : null;
 
   await db.runAsync(
-    `INSERT INTO providers (id, type, name, base_url, api_mode, streaming_enabled, generation_params, created_at, updated_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    `INSERT INTO providers (id, type, name, base_url, api_mode, streaming_enabled, generation_params, reasoning_mode, thinking_kwargs, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     id,
     data.type,
     data.name,
@@ -100,6 +117,8 @@ export async function createProvider(
     data.apiMode ?? null,
     streamingEnabled,
     generationParamsJson,
+    reasoningMode,
+    thinkingKwargsJson,
     now,
     now
   );
@@ -112,6 +131,8 @@ export async function createProvider(
     apiMode: data.apiMode ?? null,
     streamingEnabled: streamingEnabled === 1,
     generationParams,
+    reasoningMode: data.reasoningMode ?? null,
+    thinkingKwargs: data.thinkingKwargs ?? null,
     createdAt: now,
     updatedAt: now,
   };
@@ -171,6 +192,14 @@ export async function updateProvider(
   if (updates.generationParams !== undefined) {
     setClauses.push('generation_params = ?');
     params.push(JSON.stringify(updates.generationParams));
+  }
+  if (updates.reasoningMode !== undefined) {
+    setClauses.push('reasoning_mode = ?');
+    params.push(updates.reasoningMode);
+  }
+  if (updates.thinkingKwargs !== undefined) {
+    setClauses.push('thinking_kwargs = ?');
+    params.push(updates.thinkingKwargs ? JSON.stringify(updates.thinkingKwargs) : null);
   }
 
   if (setClauses.length === 0) {

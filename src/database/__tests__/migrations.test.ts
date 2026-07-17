@@ -1,4 +1,5 @@
 import { migrateV1 } from '../migrations/v1';
+import { migrateV4 } from '../migrations/v4';
 
 const mockExecAsync = jest.fn<Promise<void>, [string]>();
 
@@ -74,5 +75,46 @@ describe('migrations/v1', () => {
     const sql = mockExecAsync.mock.calls[0][0] as string;
 
     expect(sql).toContain('REFERENCES sessions(id) ON DELETE CASCADE');
+  });
+});
+
+describe('migrations/v4', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('adds reasoning_mode and thinking_kwargs columns without errors', async () => {
+    await migrateV4(mockDb);
+
+    expect(mockExecAsync).toHaveBeenCalledTimes(2);
+    expect(mockExecAsync.mock.calls[0][0]).toContain(
+      'ALTER TABLE providers ADD COLUMN reasoning_mode TEXT DEFAULT NULL'
+    );
+    expect(mockExecAsync.mock.calls[1][0]).toContain(
+      'ALTER TABLE providers ADD COLUMN thinking_kwargs TEXT DEFAULT NULL'
+    );
+  });
+
+  it('uses DEFAULT NULL for both new columns', async () => {
+    await migrateV4(mockDb);
+
+    const firstSql = mockExecAsync.mock.calls[0][0] as string;
+    const secondSql = mockExecAsync.mock.calls[1][0] as string;
+
+    expect(firstSql).toContain('DEFAULT NULL');
+    expect(secondSql).toContain('DEFAULT NULL');
+  });
+
+  it('thinking_kwargs JSON round-trips correctly via serialization', () => {
+    const original = { enable_thinking: true };
+    const serialized = JSON.stringify(original);
+    const deserialized = JSON.parse(serialized);
+
+    expect(deserialized).toEqual(original);
+    expect(deserialized.enable_thinking).toBe(true);
+
+    // Complex kwargs also round-trip
+    const complex = { enable_thinking: true, budget_tokens: 4096 };
+    expect(JSON.parse(JSON.stringify(complex))).toEqual(complex);
   });
 });

@@ -80,7 +80,16 @@
     "connectionFailed": "連線失敗",
     "connectionTimeout": "連線逾時，請檢查您的網路連線。",
     "empty": "尚未設定提供者",
-    "addModels": "新增模型"
+    "addModels": "新增模型",
+    "reasoningMode": "推理模式",
+    "reasoningModeAuto": "自動",
+    "reasoningModeOpenAI": "Effort",
+    "reasoningModeChatTemplate": "Kwargs",
+    "reasoningModeNone": "關閉",
+    "reasoningModeDescription": "向後端傳達思考力度的方式",
+    "thinkingKwargs": "模板參數（JSON）",
+    "thinkingKwargsPlaceholder": "{\"enable_thinking\": true}",
+    "thinkingKwargsError": "JSON 格式無效"
   },
 
   "models": {

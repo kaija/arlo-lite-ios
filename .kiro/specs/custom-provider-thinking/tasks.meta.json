@@ -1,0 +1,300 @@
+{
+  "pbtResults": {
+    "5.1 Write unit tests for `mapThinkingLevelCustom`": {
+      "status": "passed",
+      "lastRunTimestamp": 1784293255342
+    }
+  },
+  "executionHistory": {
+    "1.1 Add `CustomReasoningMode` type and `CustomThinkingParams` interface to `src/domain/thinking-mapper.ts`": [
+      {
+        "executionId": "ff7bc286-0977-40db-aed9-4ceaddb9b687",
+        "chatSessionId": "sess_534f58fd-2939-4031-a87f-d89551c99f48",
+        "timestamp": 1784292369910
+      },
+      {
+        "executionId": "ff7bc286-0977-40db-aed9-4ceaddb9b687",
+        "chatSessionId": "sess_534f58fd-2939-4031-a87f-d89551c99f48",
+        "timestamp": 1784292386305
+      },
+      {
+        "executionId": "ff7bc286-0977-40db-aed9-4ceaddb9b687",
+        "chatSessionId": "sess_534f58fd-2939-4031-a87f-d89551c99f48",
+        "timestamp": 1784292485342
+      }
+    ],
+    "1.2 Implement `mapThinkingLevelCustom` function in `src/domain/thinking-mapper.ts`": [
+      {
+        "executionId": "ff7bc286-0977-40db-aed9-4ceaddb9b687",
+        "chatSessionId": "sess_534f58fd-2939-4031-a87f-d89551c99f48",
+        "timestamp": 1784292369956
+      },
+      {
+        "executionId": "ff7bc286-0977-40db-aed9-4ceaddb9b687",
+        "chatSessionId": "sess_534f58fd-2939-4031-a87f-d89551c99f48",
+        "timestamp": 1784292387188
+      },
+      {
+        "executionId": "ff7bc286-0977-40db-aed9-4ceaddb9b687",
+        "chatSessionId": "sess_534f58fd-2939-4031-a87f-d89551c99f48",
+        "timestamp": 1784292486301
+      }
+    ],
+    "1.3 Update `mapThinkingLevel` router function": [
+      {
+        "executionId": "ff7bc286-0977-40db-aed9-4ceaddb9b687",
+        "chatSessionId": "sess_534f58fd-2939-4031-a87f-d89551c99f48",
+        "timestamp": 1784292369990
+      },
+      {
+        "executionId": "ff7bc286-0977-40db-aed9-4ceaddb9b687",
+        "chatSessionId": "sess_534f58fd-2939-4031-a87f-d89551c99f48",
+        "timestamp": 1784292513988
+      },
+      {
+        "executionId": "ff7bc286-0977-40db-aed9-4ceaddb9b687",
+        "chatSessionId": "sess_534f58fd-2939-4031-a87f-d89551c99f48",
+        "timestamp": 1784292642271
+      }
+    ],
+    "2.1 Add `reasoningMode` and `thinkingKwargs` to `ProviderConfig` in `src/providers/types.ts`": [
+      {
+        "executionId": "ff7bc286-0977-40db-aed9-4ceaddb9b687",
+        "chatSessionId": "sess_534f58fd-2939-4031-a87f-d89551c99f48",
+        "timestamp": 1784292370030
+      },
+      {
+        "executionId": "ff7bc286-0977-40db-aed9-4ceaddb9b687",
+        "chatSessionId": "sess_534f58fd-2939-4031-a87f-d89551c99f48",
+        "timestamp": 1784292388171
+      },
+      {
+        "executionId": "ff7bc286-0977-40db-aed9-4ceaddb9b687",
+        "chatSessionId": "sess_534f58fd-2939-4031-a87f-d89551c99f48",
+        "timestamp": 1784292487312
+      }
+    ],
+    "2.2 Create database migration `src/database/migrations/004_reasoning_mode.ts`": [
+      {
+        "executionId": "ff7bc286-0977-40db-aed9-4ceaddb9b687",
+        "chatSessionId": "sess_534f58fd-2939-4031-a87f-d89551c99f48",
+        "timestamp": 1784292370103
+      },
+      {
+        "executionId": "ff7bc286-0977-40db-aed9-4ceaddb9b687",
+        "chatSessionId": "sess_534f58fd-2939-4031-a87f-d89551c99f48",
+        "timestamp": 1784292514561
+      },
+      {
+        "executionId": "ff7bc286-0977-40db-aed9-4ceaddb9b687",
+        "chatSessionId": "sess_534f58fd-2939-4031-a87f-d89551c99f48",
+        "timestamp": 1784292643383
+      }
+    ],
+    "2.3 Update provider repository to read/write new columns": [
+      {
+        "executionId": "ff7bc286-0977-40db-aed9-4ceaddb9b687",
+        "chatSessionId": "sess_534f58fd-2939-4031-a87f-d89551c99f48",
+        "timestamp": 1784292370140
+      },
+      {
+        "executionId": "ff7bc286-0977-40db-aed9-4ceaddb9b687",
+        "chatSessionId": "sess_534f58fd-2939-4031-a87f-d89551c99f48",
+        "timestamp": 1784292515402
+      },
+      {
+        "executionId": "ff7bc286-0977-40db-aed9-4ceaddb9b687",
+        "chatSessionId": "sess_534f58fd-2939-4031-a87f-d89551c99f48",
+        "timestamp": 1784292644466
+      }
+    ],
+    "3.1 Replace `mapThinkingLevelOpenAI` with `mapThinkingLevelCustom` in `src/providers/custom/custom-provider.ts`": [
+      {
+        "executionId": "ff7bc286-0977-40db-aed9-4ceaddb9b687",
+        "chatSessionId": "sess_534f58fd-2939-4031-a87f-d89551c99f48",
+        "timestamp": 1784292370172
+      },
+      {
+        "executionId": "ff7bc286-0977-40db-aed9-4ceaddb9b687",
+        "chatSessionId": "sess_534f58fd-2939-4031-a87f-d89551c99f48",
+        "timestamp": 1784292654610
+      },
+      {
+        "executionId": "ff7bc286-0977-40db-aed9-4ceaddb9b687",
+        "chatSessionId": "sess_534f58fd-2939-4031-a87f-d89551c99f48",
+        "timestamp": 1784292731772
+      }
+    ],
+    "3.2 Update request params merging in both `complete()` and `streamCompletion()`": [
+      {
+        "executionId": "ff7bc286-0977-40db-aed9-4ceaddb9b687",
+        "chatSessionId": "sess_534f58fd-2939-4031-a87f-d89551c99f48",
+        "timestamp": 1784292370205
+      },
+      {
+        "executionId": "ff7bc286-0977-40db-aed9-4ceaddb9b687",
+        "chatSessionId": "sess_534f58fd-2939-4031-a87f-d89551c99f48",
+        "timestamp": 1784292655493
+      },
+      {
+        "executionId": "ff7bc286-0977-40db-aed9-4ceaddb9b687",
+        "chatSessionId": "sess_534f58fd-2939-4031-a87f-d89551c99f48",
+        "timestamp": 1784292732643
+      }
+    ],
+    "4.1 Add Reasoning Mode picker to Custom provider settings form": [
+      {
+        "executionId": "ff7bc286-0977-40db-aed9-4ceaddb9b687",
+        "chatSessionId": "sess_534f58fd-2939-4031-a87f-d89551c99f48",
+        "timestamp": 1784292370238
+      },
+      {
+        "executionId": "ff7bc286-0977-40db-aed9-4ceaddb9b687",
+        "chatSessionId": "sess_534f58fd-2939-4031-a87f-d89551c99f48",
+        "timestamp": 1784292781888
+      },
+      {
+        "executionId": "ff7bc286-0977-40db-aed9-4ceaddb9b687",
+        "chatSessionId": "sess_534f58fd-2939-4031-a87f-d89551c99f48",
+        "timestamp": 1784293097593
+      }
+    ],
+    "4.2 Add optional thinkingKwargs JSON input field": [
+      {
+        "executionId": "ff7bc286-0977-40db-aed9-4ceaddb9b687",
+        "chatSessionId": "sess_534f58fd-2939-4031-a87f-d89551c99f48",
+        "timestamp": 1784292370272
+      },
+      {
+        "executionId": "ff7bc286-0977-40db-aed9-4ceaddb9b687",
+        "chatSessionId": "sess_534f58fd-2939-4031-a87f-d89551c99f48",
+        "timestamp": 1784292782976
+      },
+      {
+        "executionId": "ff7bc286-0977-40db-aed9-4ceaddb9b687",
+        "chatSessionId": "sess_534f58fd-2939-4031-a87f-d89551c99f48",
+        "timestamp": 1784293098423
+      }
+    ],
+    "4.3 Add i18n keys for reasoning mode UI": [
+      {
+        "executionId": "ff7bc286-0977-40db-aed9-4ceaddb9b687",
+        "chatSessionId": "sess_534f58fd-2939-4031-a87f-d89551c99f48",
+        "timestamp": 1784292370321
+      },
+      {
+        "executionId": "ff7bc286-0977-40db-aed9-4ceaddb9b687",
+        "chatSessionId": "sess_534f58fd-2939-4031-a87f-d89551c99f48",
+        "timestamp": 1784292783919
+      },
+      {
+        "executionId": "ff7bc286-0977-40db-aed9-4ceaddb9b687",
+        "chatSessionId": "sess_534f58fd-2939-4031-a87f-d89551c99f48",
+        "timestamp": 1784293099145
+      }
+    ],
+    "5.1 Write unit tests for `mapThinkingLevelCustom`": [
+      {
+        "executionId": "ff7bc286-0977-40db-aed9-4ceaddb9b687",
+        "chatSessionId": "sess_534f58fd-2939-4031-a87f-d89551c99f48",
+        "timestamp": 1784292370372
+      },
+      {
+        "executionId": "ff7bc286-0977-40db-aed9-4ceaddb9b687",
+        "chatSessionId": "sess_534f58fd-2939-4031-a87f-d89551c99f48",
+        "timestamp": 1784293105956
+      },
+      {
+        "executionId": "ff7bc286-0977-40db-aed9-4ceaddb9b687",
+        "chatSessionId": "sess_534f58fd-2939-4031-a87f-d89551c99f48",
+        "timestamp": 1784293315235
+      }
+    ],
+    "5.2 Write integration test for CustomProvider request building": [
+      {
+        "executionId": "ff7bc286-0977-40db-aed9-4ceaddb9b687",
+        "chatSessionId": "sess_534f58fd-2939-4031-a87f-d89551c99f48",
+        "timestamp": 1784292370406
+      },
+      {
+        "executionId": "ff7bc286-0977-40db-aed9-4ceaddb9b687",
+        "chatSessionId": "sess_534f58fd-2939-4031-a87f-d89551c99f48",
+        "timestamp": 1784293106736
+      },
+      {
+        "executionId": "ff7bc286-0977-40db-aed9-4ceaddb9b687",
+        "chatSessionId": "sess_534f58fd-2939-4031-a87f-d89551c99f48",
+        "timestamp": 1784293316020
+      }
+    ],
+    "5.3 Write migration test": [
+      {
+        "executionId": "ff7bc286-0977-40db-aed9-4ceaddb9b687",
+        "chatSessionId": "sess_534f58fd-2939-4031-a87f-d89551c99f48",
+        "timestamp": 1784292370439
+      },
+      {
+        "executionId": "ff7bc286-0977-40db-aed9-4ceaddb9b687",
+        "chatSessionId": "sess_534f58fd-2939-4031-a87f-d89551c99f48",
+        "timestamp": 1784293107467
+      },
+      {
+        "executionId": "ff7bc286-0977-40db-aed9-4ceaddb9b687",
+        "chatSessionId": "sess_534f58fd-2939-4031-a87f-d89551c99f48",
+        "timestamp": 1784293316979
+      }
+    ],
+    "5.4 Manual smoke test against live llama-server": [
+      {
+        "executionId": "ff7bc286-0977-40db-aed9-4ceaddb9b687",
+        "chatSessionId": "sess_534f58fd-2939-4031-a87f-d89551c99f48",
+        "timestamp": 1784292370487
+      },
+      {
+        "executionId": "ff7bc286-0977-40db-aed9-4ceaddb9b687",
+        "chatSessionId": "sess_534f58fd-2939-4031-a87f-d89551c99f48",
+        "timestamp": 1784293108233
+      },
+      {
+        "executionId": "ff7bc286-0977-40db-aed9-4ceaddb9b687",
+        "chatSessionId": "sess_534f58fd-2939-4031-a87f-d89551c99f48",
+        "timestamp": 1784293137878
+      }
+    ],
+    "1. Extend thinking-mapper with Custom provider logic": [
+      {
+        "executionId": "ff7bc286-0977-40db-aed9-4ceaddb9b687",
+        "chatSessionId": "sess_534f58fd-2939-4031-a87f-d89551c99f48",
+        "timestamp": 1784292642335
+      }
+    ],
+    "2. Extend data model and database": [
+      {
+        "executionId": "ff7bc286-0977-40db-aed9-4ceaddb9b687",
+        "chatSessionId": "sess_534f58fd-2939-4031-a87f-d89551c99f48",
+        "timestamp": 1784292644510
+      }
+    ],
+    "3. Update Custom provider adapter": [
+      {
+        "executionId": "ff7bc286-0977-40db-aed9-4ceaddb9b687",
+        "chatSessionId": "sess_534f58fd-2939-4031-a87f-d89551c99f48",
+        "timestamp": 1784292732686
+      }
+    ],
+    "4. Add provider settings UI for reasoning mode": [
+      {
+        "executionId": "ff7bc286-0977-40db-aed9-4ceaddb9b687",
+        "chatSessionId": "sess_534f58fd-2939-4031-a87f-d89551c99f48",
+        "timestamp": 1784293099175
+      }
+    ],
+    "5. Verification and testing": [
+      {
+        "executionId": "ff7bc286-0977-40db-aed9-4ceaddb9b687",
+        "chatSessionId": "sess_534f58fd-2939-4031-a87f-d89551c99f48",
+        "timestamp": 1784293317020
+      }
+    ]
+  }
+}

@@ -21,7 +21,7 @@ import type {
   TokenUsage,
 } from '../types';
 import { ProviderError } from '../errors';
-import { mapThinkingLevelOpenAI } from '../../domain/thinking-mapper';
+import { mapThinkingLevelCustom } from '../../domain/thinking-mapper';
 
 /**
  * Classify an OpenAI SDK error into a ProviderError.
@@ -107,7 +107,11 @@ export class CustomProvider implements IProvider {
     apiKey: string,
   ): Promise<CompletionResponse> {
     const client = this.getClient(apiKey, config.baseUrl);
-    const thinkingParams = mapThinkingLevelOpenAI(request.thinkingLevel);
+    const thinkingParams = mapThinkingLevelCustom(
+      request.thinkingLevel,
+      config.reasoningMode ?? 'auto',
+      config.thinkingKwargs,
+    );
 
     try {
       const messages = request.messages.map((msg) => ({
@@ -131,8 +135,11 @@ export class CustomProvider implements IProvider {
         params.max_tokens = request.maxTokens;
       }
 
-      if (request.thinkingLevel !== 'off' && thinkingParams.reasoning_effort) {
+      if (thinkingParams.reasoning_effort) {
         params.reasoning_effort = thinkingParams.reasoning_effort;
+      }
+      if (thinkingParams.chat_template_kwargs) {
+        params.chat_template_kwargs = thinkingParams.chat_template_kwargs;
       }
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -182,7 +189,11 @@ export class CustomProvider implements IProvider {
     }
 
     const client = this.getClient(apiKey, config.baseUrl);
-    const thinkingParams = mapThinkingLevelOpenAI(request.thinkingLevel);
+    const thinkingParams = mapThinkingLevelCustom(
+      request.thinkingLevel,
+      config.reasoningMode ?? 'auto',
+      config.thinkingKwargs,
+    );
 
     try {
       const messages = request.messages.map((msg) => ({
@@ -206,8 +217,11 @@ export class CustomProvider implements IProvider {
         params.max_tokens = request.maxTokens;
       }
 
-      if (request.thinkingLevel !== 'off' && thinkingParams.reasoning_effort) {
+      if (thinkingParams.reasoning_effort) {
         params.reasoning_effort = thinkingParams.reasoning_effort;
+      }
+      if (thinkingParams.chat_template_kwargs) {
+        params.chat_template_kwargs = thinkingParams.chat_template_kwargs;
       }
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any

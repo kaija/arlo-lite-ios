@@ -18,7 +18,6 @@ import {
   Animated,
   Dimensions,
   Easing,
-  FlatList,
   Modal,
   Pressable,
   ScrollView,
@@ -33,6 +32,7 @@ import Reanimated, {
   useAnimatedStyle,
 } from 'react-native-reanimated';
 import { GestureDetector } from 'react-native-gesture-handler';
+import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '@/theme';
 import { SETTINGS_SLIDE_DURATION, DIALOG_EASING } from '@/theme/animations';
@@ -45,6 +45,8 @@ import { getProvider } from '@/providers/registry';
 import { ProviderError } from '@/providers/errors';
 import type { OpenAIApiMode, ProviderType } from '@/database/repositories/provider-repo';
 import type { ProviderConfig } from '@/providers/types';
+import { inferSupportsReasoning } from '@/utils/model-capabilities';
+import type { CustomReasoningMode } from '@/domain/thinking-mapper';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -212,6 +214,7 @@ export function ProviderDetailScreen({
   onClose,
 }: ProviderDetailScreenProps) {
   const { colors, borderRadii, spacing } = useTheme();
+  const { t } = useTranslation();
 
   // Determine if we're in "add new" mode (empty providerId)
   const isAddMode = providerId === '';
@@ -290,11 +293,19 @@ export function ProviderDetailScreen({
   const [newApiKey, setNewApiKey] = useState('');
   const [isSaving, setIsSaving] = useState(false);
 
+  // Reasoning mode state (for both add and edit modes)
+  const [reasoningMode, setReasoningMode] = useState<CustomReasoningMode>('auto');
+  const [thinkingKwargsText, setThinkingKwargsText] = useState('');
+  const [thinkingKwargsError, setThinkingKwargsError] = useState<string | null>(null);
+
   useEffect(() => {
     if (provider) {
       setBaseUrl(provider.baseUrl);
       setStreamingEnabled(provider.streamingEnabled);
       setApiMode(provider.apiMode ?? 'responses');
+      setReasoningMode(provider.reasoningMode ?? 'auto');
+      setThinkingKwargsText(provider.thinkingKwargs ? JSON.stringify(provider.thinkingKwargs, null, 2) : '');
+      setThinkingKwargsError(null);
     } else if (isAddMode) {
       setBaseUrl(DEFAULT_PROVIDER_URLS.openai);
       setStreamingEnabled(true);
@@ -302,6 +313,9 @@ export function ProviderDetailScreen({
       setNewName('');
       setNewType('openai');
       setNewApiKey('');
+      setReasoningMode('auto');
+      setThinkingKwargsText('');
+      setThinkingKwargsError(null);
     }
   }, [provider, isAddMode]);
 
@@ -336,6 +350,36 @@ export function ProviderDetailScreen({
     },
     [providerId, isAddMode, updateProvider]
   );
+
+  const handleReasoningModeChange = useCallback(
+    (mode: CustomReasoningMode) => {
+      setReasoningMode(mode);
+      if (providerId && !isAddMode) {
+        updateProvider(providerId, { reasoningMode: mode });
+      }
+    },
+    [providerId, isAddMode, updateProvider]
+  );
+
+  const handleThinkingKwargsBlur = useCallback(() => {
+    const text = thinkingKwargsText.trim();
+    if (!text) {
+      setThinkingKwargsError(null);
+      if (providerId && !isAddMode) {
+        updateProvider(providerId, { thinkingKwargs: null });
+      }
+      return;
+    }
+    try {
+      const parsed = JSON.parse(text);
+      setThinkingKwargsError(null);
+      if (providerId && !isAddMode) {
+        updateProvider(providerId, { thinkingKwargs: parsed });
+      }
+    } catch {
+      setThinkingKwargsError(t('providers.thinkingKwargsError'));
+    }
+  }, [thinkingKwargsText, providerId, isAddMode, updateProvider, t]);
 
   const handleDeleteModel = useCallback(
     (modelId: string) => {
@@ -414,12 +458,14 @@ export function ProviderDetailScreen({
   const [editingModel, setEditingModel] = useState<ModelConfig | null>(null);
   const [editModelId, setEditModelId] = useState('');
   const [editModelDisplayName, setEditModelDisplayName] = useState('');
+  const [editModelSupportsReasoning, setEditModelSupportsReasoning] = useState(false);
   const [isEditModelSaving, setIsEditModelSaving] = useState(false);
 
   const handleOpenEditModel = useCallback((model: ModelConfig) => {
     setEditingModel(model);
     setEditModelId(model.modelId);
     setEditModelDisplayName(model.displayName);
+    setEditModelSupportsReasoning(model.supportsReasoning);
     setIsEditModelModalVisible(true);
   }, []);
 
@@ -441,9 +487,10 @@ export function ProviderDetailScreen({
       const { db } = useProviderStore.getState();
       if (!db) throw new Error('Database not initialized.');
       await db.runAsync(
-        `UPDATE models SET model_id = ?, display_name = ? WHERE id = ?`,
+        `UPDATE models SET model_id = ?, display_name = ?, supports_reasoning = ? WHERE id = ?`,
         trimmedId,
         editModelDisplayName.trim() || trimmedId,
+        editModelSupportsReasoning ? 1 : 0,
         editingModel.id,
       );
       // Refresh models in store
@@ -458,7 +505,7 @@ export function ProviderDetailScreen({
     } finally {
       setIsEditModelSaving(false);
     }
-  }, [editingModel, isEditModelSaving, editModelId, editModelDisplayName]);
+  }, [editingModel, isEditModelSaving, editModelId, editModelDisplayName, editModelSupportsReasoning]);
 
   // ─── Add Model Modal State ─────────────────────────────────────────
 
@@ -539,7 +586,7 @@ export function ProviderDetailScreen({
         outputPrice: null,
         cachedInputPrice: null,
         cachedOutputPrice: null,
-        supportsReasoning: false,
+        supportsReasoning: inferSupportsReasoning(provider.type, trimmedId),
         supportsImageInput: false,
         supportsImageGeneration: false,
         supportsFileInput: false,
@@ -572,6 +619,17 @@ export function ProviderDetailScreen({
   const handleSaveNewProvider = useCallback(async () => {
     if (!newName.trim() || !newApiKey.trim() || !baseUrl.trim() || isSaving) return;
 
+    // Parse thinkingKwargs if present
+    let parsedKwargs: Record<string, unknown> | null = null;
+    if (thinkingKwargsText.trim()) {
+      try {
+        parsedKwargs = JSON.parse(thinkingKwargsText.trim());
+      } catch {
+        setThinkingKwargsError(t('providers.thinkingKwargsError'));
+        return;
+      }
+    }
+
     setIsSaving(true);
     try {
       await addProvider(
@@ -581,6 +639,8 @@ export function ProviderDetailScreen({
           baseUrl: baseUrl.trim(),
           apiMode: newType === 'openai' ? apiMode : undefined,
           streamingEnabled,
+          reasoningMode: newType === 'custom' ? reasoningMode : undefined,
+          thinkingKwargs: newType === 'custom' ? parsedKwargs : undefined,
         },
         newApiKey.trim(),
       );
@@ -593,7 +653,7 @@ export function ProviderDetailScreen({
     } finally {
       setIsSaving(false);
     }
-  }, [newName, newApiKey, baseUrl, isSaving, newType, apiMode, streamingEnabled, addProvider, onClose]);
+  }, [newName, newApiKey, baseUrl, isSaving, newType, apiMode, streamingEnabled, reasoningMode, thinkingKwargsText, t, addProvider, onClose]);
 
   // Validate add-mode form
   const isFormValid = !!(newName.trim() && newApiKey.trim() && baseUrl.trim());
@@ -895,6 +955,99 @@ export function ProviderDetailScreen({
               </View>
             </View>
 
+            {/* Reasoning Mode (Custom only) */}
+            {newType === 'custom' && (
+              <View style={styles.section}>
+                <Text style={[styles.sectionHeader, { color: colors.textTertiary }]}>
+                  {t('providers.reasoningMode').toUpperCase()}
+                </Text>
+                <View
+                  style={[
+                    styles.sectionCard,
+                    { backgroundColor: colors.surface, borderRadius: borderRadii.groupedList },
+                  ]}
+                >
+                  <View style={styles.apiTypeSelector}>
+                    {([
+                      { value: 'auto' as const, label: t('providers.reasoningModeAuto') },
+                      { value: 'openai-reasoning-effort' as const, label: t('providers.reasoningModeOpenAI') },
+                      { value: 'chat-template-kwargs' as const, label: t('providers.reasoningModeChatTemplate') },
+                      { value: 'none' as const, label: t('providers.reasoningModeNone') },
+                    ] as const).map((option, index, arr) => (
+                      <Pressable
+                        key={option.value}
+                        style={[
+                          styles.apiTypeOption,
+                          {
+                            backgroundColor:
+                              reasoningMode === option.value ? colors.accent : colors.surfaceSecondary,
+                            borderTopLeftRadius: index === 0 ? 8 : 0,
+                            borderBottomLeftRadius: index === 0 ? 8 : 0,
+                            borderTopRightRadius: index === arr.length - 1 ? 8 : 0,
+                            borderBottomRightRadius: index === arr.length - 1 ? 8 : 0,
+                          },
+                        ]}
+                        onPress={() => setReasoningMode(option.value)}
+                        accessibilityRole="radio"
+                        accessibilityState={{ selected: reasoningMode === option.value }}
+                        accessibilityLabel={option.label}
+                      >
+                        <Text
+                          style={[
+                            styles.apiTypeText,
+                            {
+                              color: reasoningMode === option.value ? colors.accentText : colors.text,
+                            },
+                          ]}
+                        >
+                          {option.label}
+                        </Text>
+                      </Pressable>
+                    ))}
+                  </View>
+                  <Text style={[styles.keychainNote, { color: colors.textTertiary }]}>
+                    {t('providers.reasoningModeDescription')}
+                  </Text>
+
+                  {/* thinkingKwargs input (visible when mode is auto or chat-template-kwargs) */}
+                  {(reasoningMode === 'auto' || reasoningMode === 'chat-template-kwargs') && (
+                    <>
+                      <View style={[styles.separator, { backgroundColor: colors.border }]} />
+                      <View style={styles.configRow}>
+                        <Text style={[styles.configLabel, { color: colors.text }]}>
+                          {t('providers.thinkingKwargs')}
+                        </Text>
+                        <TextInput
+                          style={[
+                            styles.configInput,
+                            {
+                              color: colors.text,
+                              backgroundColor: colors.inputBackground,
+                              borderColor: thinkingKwargsError ? '#FF3B30' : colors.border,
+                            },
+                          ]}
+                          value={thinkingKwargsText}
+                          onChangeText={setThinkingKwargsText}
+                          onBlur={handleThinkingKwargsBlur}
+                          placeholder={t('providers.thinkingKwargsPlaceholder')}
+                          placeholderTextColor={colors.textTertiary}
+                          accessibilityLabel="Template kwargs JSON"
+                          autoCapitalize="none"
+                          autoCorrect={false}
+                          multiline
+                        />
+                        {thinkingKwargsError && (
+                          <Text style={{ color: '#FF3B30', fontSize: 12, marginTop: 4 }}>
+                            {thinkingKwargsError}
+                          </Text>
+                        )}
+                      </View>
+                    </>
+                  )}
+                </View>
+              </View>
+            )}
+
             {/* Save Button */}
             <View style={styles.section}>
               <Pressable
@@ -1163,6 +1316,99 @@ export function ProviderDetailScreen({
               </View>
             </View>
 
+            {/* Reasoning Mode (Custom only) */}
+            {provider?.type === 'custom' && (
+              <View style={styles.section}>
+                <Text style={[styles.sectionHeader, { color: colors.textTertiary }]}>
+                  {t('providers.reasoningMode').toUpperCase()}
+                </Text>
+                <View
+                  style={[
+                    styles.sectionCard,
+                    { backgroundColor: colors.surface, borderRadius: borderRadii.groupedList },
+                  ]}
+                >
+                  <View style={styles.apiTypeSelector}>
+                    {([
+                      { value: 'auto' as const, label: t('providers.reasoningModeAuto') },
+                      { value: 'openai-reasoning-effort' as const, label: t('providers.reasoningModeOpenAI') },
+                      { value: 'chat-template-kwargs' as const, label: t('providers.reasoningModeChatTemplate') },
+                      { value: 'none' as const, label: t('providers.reasoningModeNone') },
+                    ] as const).map((option, index, arr) => (
+                      <Pressable
+                        key={option.value}
+                        style={[
+                          styles.apiTypeOption,
+                          {
+                            backgroundColor:
+                              reasoningMode === option.value ? colors.accent : colors.surfaceSecondary,
+                            borderTopLeftRadius: index === 0 ? 8 : 0,
+                            borderBottomLeftRadius: index === 0 ? 8 : 0,
+                            borderTopRightRadius: index === arr.length - 1 ? 8 : 0,
+                            borderBottomRightRadius: index === arr.length - 1 ? 8 : 0,
+                          },
+                        ]}
+                        onPress={() => handleReasoningModeChange(option.value)}
+                        accessibilityRole="radio"
+                        accessibilityState={{ selected: reasoningMode === option.value }}
+                        accessibilityLabel={option.label}
+                      >
+                        <Text
+                          style={[
+                            styles.apiTypeText,
+                            {
+                              color: reasoningMode === option.value ? colors.accentText : colors.text,
+                            },
+                          ]}
+                        >
+                          {option.label}
+                        </Text>
+                      </Pressable>
+                    ))}
+                  </View>
+                  <Text style={[styles.keychainNote, { color: colors.textTertiary }]}>
+                    {t('providers.reasoningModeDescription')}
+                  </Text>
+
+                  {/* thinkingKwargs input (visible when mode is auto or chat-template-kwargs) */}
+                  {(reasoningMode === 'auto' || reasoningMode === 'chat-template-kwargs') && (
+                    <>
+                      <View style={[styles.separator, { backgroundColor: colors.border }]} />
+                      <View style={styles.configRow}>
+                        <Text style={[styles.configLabel, { color: colors.text }]}>
+                          {t('providers.thinkingKwargs')}
+                        </Text>
+                        <TextInput
+                          style={[
+                            styles.configInput,
+                            {
+                              color: colors.text,
+                              backgroundColor: colors.inputBackground,
+                              borderColor: thinkingKwargsError ? '#FF3B30' : colors.border,
+                            },
+                          ]}
+                          value={thinkingKwargsText}
+                          onChangeText={setThinkingKwargsText}
+                          onBlur={handleThinkingKwargsBlur}
+                          placeholder={t('providers.thinkingKwargsPlaceholder')}
+                          placeholderTextColor={colors.textTertiary}
+                          accessibilityLabel="Template kwargs JSON"
+                          autoCapitalize="none"
+                          autoCorrect={false}
+                          multiline
+                        />
+                        {thinkingKwargsError && (
+                          <Text style={{ color: '#FF3B30', fontSize: 12, marginTop: 4 }}>
+                            {thinkingKwargsError}
+                          </Text>
+                        )}
+                      </View>
+                    </>
+                  )}
+                </View>
+              </View>
+            )}
+
             {/* Models Section */}
             <View style={styles.section}>
               <Text style={[styles.sectionHeader, { color: colors.textTertiary }]}>
@@ -1301,12 +1547,22 @@ export function ProviderDetailScreen({
                   autoCorrect={false}
                   clearButtonMode="while-editing"
                 />
-                <View style={[styles.modelListContainer, { borderColor: colors.border }]}>
-                  <FlatList
-                    data={filteredModels}
-                    keyExtractor={(item) => item}
-                    renderItem={({ item: modelId }) => (
+                <ScrollView
+                  style={[styles.modelListContainer, { borderColor: colors.border }]}
+                  nestedScrollEnabled
+                  showsVerticalScrollIndicator={true}
+                  keyboardShouldPersistTaps="handled"
+                >
+                  {filteredModels.length === 0 ? (
+                    <View style={styles.modelListEmpty}>
+                      <Text style={[styles.modelListEmptyText, { color: colors.textTertiary }]}>
+                        No models match "{modelSearchQuery}"
+                      </Text>
+                    </View>
+                  ) : (
+                    filteredModels.map((modelId) => (
                       <Pressable
+                        key={modelId}
                         style={[styles.modelListItem, { backgroundColor: colors.surface }]}
                         onPress={() => handleSelectModel(modelId)}
                         accessibilityRole="button"
@@ -1316,18 +1572,9 @@ export function ProviderDetailScreen({
                           {modelId}
                         </Text>
                       </Pressable>
-                    )}
-                    keyboardShouldPersistTaps="handled"
-                    showsVerticalScrollIndicator={true}
-                    ListEmptyComponent={
-                      <View style={styles.modelListEmpty}>
-                        <Text style={[styles.modelListEmptyText, { color: colors.textTertiary }]}>
-                          No models match "{modelSearchQuery}"
-                        </Text>
-                      </View>
-                    }
-                  />
-                </View>
+                    ))
+                  )}
+                </ScrollView>
               </View>
             )}
 
@@ -1470,6 +1717,20 @@ export function ProviderDetailScreen({
                 autoCapitalize="words"
                 autoCorrect={false}
               />
+            </View>
+
+            <View style={styles.modelFormSection}>
+              <View style={styles.toggleRow}>
+                <Text style={[styles.modelFormLabel, { color: colors.textSecondary, marginBottom: 0 }]}>
+                  Supports Reasoning
+                </Text>
+                <Switch
+                  value={editModelSupportsReasoning}
+                  onValueChange={setEditModelSupportsReasoning}
+                  trackColor={{ false: colors.border, true: colors.accent }}
+                  accessibilityLabel="Supports Reasoning"
+                />
+              </View>
             </View>
 
             {/* Save Button */}
@@ -1787,6 +2048,12 @@ const styles = StyleSheet.create({
   modelSaveButtonText: {
     fontSize: 16,
     fontWeight: '600',
+  },
+  toggleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    minHeight: 44,
   },
   editKeyActions: {
     flexDirection: 'row',

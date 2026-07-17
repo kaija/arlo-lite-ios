@@ -57,9 +57,10 @@ import { render, fireEvent } from '@testing-library/react-native';
 import { ThinkingDisclosure } from '../ThinkingDisclosure';
 
 describe('ThinkingDisclosure', () => {
-  it('is exported as a function component', () => {
+  it('is exported as a valid React component', () => {
     expect(ThinkingDisclosure).toBeDefined();
-    expect(typeof ThinkingDisclosure).toBe('function');
+    // React.memo wraps the component; verify it's a valid memo component
+    expect((ThinkingDisclosure as any).$$typeof).toBeDefined();
   });
 
   it('returns null when content is empty (requirement 4.7)', () => {

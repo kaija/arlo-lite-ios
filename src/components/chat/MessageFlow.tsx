@@ -8,7 +8,7 @@
  * Requirements: 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   View,
   Text,
@@ -26,7 +26,9 @@ import { useTheme, Theme } from '@/theme';
 import { usePressAnimation } from '@/hooks/usePressAnimation';
 import { formatTokenMetadata } from '@/utils/token-formatting';
 import { CodeBlock } from './CodeBlock';
+import { ThinkingDisclosure } from '@/components/chat/ThinkingDisclosure';
 import { CopyIcon, RegenerateIcon, DeleteIcon } from '@/components/icons';
+import { useSettingsStore } from '@/stores/settings-store';
 import type { Message } from '@/database/repositories/message-repo';
 
 export interface MessageFlowProps {
@@ -75,6 +77,9 @@ export function MessageFlow({
   const markdownStyles = createMarkdownStyles(theme);
 
   const isUser = message.role === 'user';
+  const thinkingExpandedByDefault = useSettingsStore((s) => s.thinkingExpandedByDefault);
+  const [thinkingExpanded, setThinkingExpanded] = useState(thinkingExpandedByDefault);
+  const toggleThinking = useCallback(() => setThinkingExpanded((prev) => !prev), []);
   const senderLabel = isUser
     ? t('chat.roleUser', 'You')
     : modelDisplayName;
@@ -125,6 +130,16 @@ export function MessageFlow({
           <Text style={styles.tokenMetadata}>{formattedMetadata}</Text>
         )}
       </View>
+
+      {/* Thinking disclosure for historical messages */}
+      {!isUser && message.thinkingContent && message.thinkingContent.length > 0 && (
+        <ThinkingDisclosure
+          content={message.thinkingContent}
+          isExpanded={thinkingExpanded}
+          onToggle={toggleThinking}
+          isActive={false}
+        />
+      )}
 
       {/* Message body */}
       <View style={styles.bodyContainer}>

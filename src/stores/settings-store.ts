@@ -20,12 +20,14 @@ export interface SettingsState {
   locale: string;
   defaultSystemPromptId: string | null;
   systemPrompts: SystemPrompt[];
+  thinkingExpandedByDefault: boolean;
 }
 
 export interface SettingsActions {
   setTheme: (theme: ThemeMode) => void;
   setLocale: (locale: string) => void;
   setDefaultSystemPromptId: (id: string | null) => void;
+  setThinkingExpandedByDefault: (value: boolean) => void;
   loadSystemPrompts: (db: SQLiteDatabase) => Promise<void>;
   addSystemPrompt: (db: SQLiteDatabase, data: CreateSystemPromptData) => Promise<SystemPrompt>;
   updateSystemPrompt: (db: SQLiteDatabase, id: string, updates: UpdateSystemPromptData) => Promise<void>;
@@ -54,6 +56,7 @@ export const useSettingsStore = create<SettingsStore>()(
       locale: getDeviceLocale(),
       defaultSystemPromptId: null,
       systemPrompts: [],
+      thinkingExpandedByDefault: false,
 
       // Actions
       setTheme: (theme: ThemeMode) => {
@@ -66,6 +69,10 @@ export const useSettingsStore = create<SettingsStore>()(
 
       setDefaultSystemPromptId: (id: string | null) => {
         set({ defaultSystemPromptId: id });
+      },
+
+      setThinkingExpandedByDefault: (value: boolean) => {
+        set({ thinkingExpandedByDefault: value });
       },
 
       loadSystemPrompts: async (db: SQLiteDatabase) => {
@@ -109,6 +116,7 @@ export const useSettingsStore = create<SettingsStore>()(
         theme: state.theme,
         locale: state.locale,
         defaultSystemPromptId: state.defaultSystemPromptId,
+        thinkingExpandedByDefault: state.thinkingExpandedByDefault,
       }),
     }
   )

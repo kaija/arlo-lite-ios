@@ -341,13 +341,22 @@ export function ChatShell({ children }: ChatShellProps) {
   const handleModelSelect = useCallback(
     (providerId: string, modelId: string) => {
       switchModel(providerId, modelId);
+
+      // Reset thinking level if the new model doesn't support reasoning (Req 1.4)
+      const newModel = models.find(
+        (m) => m.providerId === providerId && m.modelId === modelId,
+      );
+      if (!newModel?.supportsReasoning) {
+        setThinkingLevel('off');
+      }
+
       // Persist model selection to the active session
       if (activeSessionId) {
         updateSession(activeSessionId, { providerId, modelId });
       }
       closeModelPicker();
     },
-    [switchModel, activeSessionId, updateSession, closeModelPicker],
+    [switchModel, models, setThinkingLevel, activeSessionId, updateSession, closeModelPicker],
   );
 
   // ─── Thinking Level Cycle ───────────────────────────────────────────
@@ -409,7 +418,7 @@ export function ChatShell({ children }: ChatShellProps) {
 
   const renderFooter = useCallback(() => {
     const streamingFooter =
-      isStreaming && streamContent ? (
+      isStreaming ? (
         <StreamingMessage
           content={streamContent}
           thinkingContent={thinkingContent}

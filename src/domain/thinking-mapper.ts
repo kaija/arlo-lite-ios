@@ -10,6 +10,26 @@
 import type { ThinkingLevel } from '../stores/chat-store';
 
 /**
+ * Reasoning mode for Custom providers — determines wire-format mechanism.
+ */
+export type CustomReasoningMode =
+  | 'auto'
+  | 'openai-reasoning-effort'
+  | 'chat-template-kwargs'
+  | 'none';
+
+/**
+ * Result of mapping ThinkingLevel for a Custom provider.
+ * Contains the fields to merge into the request body.
+ */
+export interface CustomThinkingParams {
+  /** OpenAI-standard reasoning_effort field, or undefined to omit. */
+  reasoning_effort?: string;
+  /** llama-server chat_template_kwargs object, or undefined to omit. */
+  chat_template_kwargs?: Record<string, unknown>;
+}
+
+/**
  * Map ThinkingLevel to OpenAI reasoning_effort parameter.
  *
  * - off: omit param entirely (empty object)
@@ -60,9 +80,114 @@ export function mapThinkingLevelAnthropic(level: ThinkingLevel): Record<string, 
 }
 
 /**
+ * Map ThinkingLevel to the reasoning_effort string value.
+ * Returns undefined for 'off' (field should be omitted).
+ */
+function mapReasoningEffortValue(level: ThinkingLevel): string | undefined {
+  switch (level) {
+    case 'off':
+      return undefined;
+    case 'minimal':
+    case 'low':
+      return 'low';
+    case 'medium':
+      return 'medium';
+    case 'high':
+    case 'xhigh':
+      return 'high';
+  }
+}
+
+/**
+ * Build the chat_template_kwargs object.
+ *
+ * If custom thinkingKwargs are provided, use them when enabling thinking,
+ * and negate boolean values when disabling. If negation semantics are unclear
+ * (non-boolean values present), return undefined to omit the field entirely.
+ * Otherwise use the Qwen-standard {"enable_thinking": true/false} default.
+ */
+function buildChatTemplateKwargs(
+  enableThinking: boolean,
+  thinkingKwargs?: Record<string, unknown> | null,
+): Record<string, unknown> | undefined {
+  if (!thinkingKwargs) {
+    // Default: Qwen-family format
+    return { enable_thinking: enableThinking };
+  }
+
+  if (enableThinking) {
+    // Use kwargs as-is when thinking is enabled
+    return { ...thinkingKwargs };
+  }
+
+  // For 'off': only negate if all values are boolean; otherwise omit entirely
+  const allBoolean = Object.values(thinkingKwargs).every(
+    (v) => typeof v === 'boolean',
+  );
+  if (allBoolean) {
+    const negated: Record<string, unknown> = {};
+    for (const [key, value] of Object.entries(thinkingKwargs)) {
+      negated[key] = !(value as boolean);
+    }
+    return negated;
+  }
+
+  // Non-boolean kwargs: omit chat_template_kwargs when thinking is off
+  return undefined;
+}
+
+/**
+ * Map ThinkingLevel to Custom provider parameters based on reasoning mode.
+ *
+ * @param level - The abstract thinking level from the UI
+ * @param mode - The configured reasoning mode for this provider instance
+ * @param thinkingKwargs - Optional custom kwargs (overrides default enable_thinking)
+ * @returns Object with fields to spread into the request body
+ */
+export function mapThinkingLevelCustom(
+  level: ThinkingLevel,
+  mode: CustomReasoningMode = 'auto',
+  thinkingKwargs?: Record<string, unknown> | null,
+): CustomThinkingParams {
+  if (mode === 'none') return {};
+
+  const enableThinking = level !== 'off';
+  const reasoningEffort = mapReasoningEffortValue(level);
+  const kwargs = buildChatTemplateKwargs(enableThinking, thinkingKwargs);
+
+  switch (mode) {
+    case 'openai-reasoning-effort':
+      return enableThinking && reasoningEffort
+        ? { reasoning_effort: reasoningEffort }
+        : {};
+
+    case 'chat-template-kwargs':
+      return kwargs !== undefined ? { chat_template_kwargs: kwargs } : {};
+
+    case 'auto':
+    default: {
+      const result: CustomThinkingParams = {};
+
+      if (enableThinking && reasoningEffort) {
+        result.reasoning_effort = reasoningEffort;
+      }
+
+      // Auto mode always includes chat_template_kwargs (Property 1).
+      // If buildChatTemplateKwargs returns undefined (non-boolean negation case),
+      // fall back to the default {enable_thinking: false}.
+      result.chat_template_kwargs =
+        kwargs !== undefined ? kwargs : { enable_thinking: false };
+
+      return result;
+    }
+  }
+}
+
+/**
  * Route to the appropriate mapper based on provider type.
  *
- * Custom providers use OpenAI-compatible format.
+ * Custom providers use mapThinkingLevelCustom with 'auto' mode by default,
+ * which sends both reasoning_effort and chat_template_kwargs.
  */
 export function mapThinkingLevel(
   providerType: 'openai' | 'anthropic' | 'custom',
@@ -70,8 +195,9 @@ export function mapThinkingLevel(
 ): Record<string, unknown> {
   switch (providerType) {
     case 'openai':
-    case 'custom':
       return mapThinkingLevelOpenAI(level);
+    case 'custom':
+      return mapThinkingLevelCustom(level, 'auto');
     case 'anthropic':
       return mapThinkingLevelAnthropic(level);
   }

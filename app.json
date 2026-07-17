@@ -18,7 +18,8 @@
       "bundleIdentifier": "com.arlolite.app",
       "infoPlist": {
         "NSAppTransportSecurity": {
-          "NSAllowsArbitraryLoads": true
+          "NSAllowsArbitraryLoads": true,
+          "NSAllowsLocalNetworking": true
         }
       }
     },

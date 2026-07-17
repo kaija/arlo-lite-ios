@@ -80,7 +80,16 @@
     "connectionFailed": "Connection failed",
     "connectionTimeout": "Connection timed out. Please check your network.",
     "empty": "No providers configured",
-    "addModels": "Add models"
+    "addModels": "Add models",
+    "reasoningMode": "Reasoning Mode",
+    "reasoningModeAuto": "Auto",
+    "reasoningModeOpenAI": "Effort",
+    "reasoningModeChatTemplate": "Kwargs",
+    "reasoningModeNone": "None",
+    "reasoningModeDescription": "How thinking effort is communicated to the backend",
+    "thinkingKwargs": "Template kwargs (JSON)",
+    "thinkingKwargsPlaceholder": "{\"enable_thinking\": true}",
+    "thinkingKwargsError": "Invalid JSON"
   },
 
   "models": {
@@ -206,7 +215,9 @@
     "themeSelector": "Theme selection",
     "expandError": "Expand error details",
     "collapseThinking": "Collapse thinking content",
-    "expandThinking": "Expand thinking content"
+    "expandThinking": "Expand thinking content",
+    "modelThinking": "Model is thinking",
+    "generatingResponse": "Generating response"
   },
 
   "voiceDictation": {

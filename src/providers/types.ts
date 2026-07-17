@@ -6,6 +6,8 @@
  * regardless of the underlying API differences.
  */
 
+import { CustomReasoningMode } from '@/domain/thinking-mapper';
+
 /** Supported provider types. */
 export type ProviderType = 'openai' | 'anthropic' | 'custom';
 
@@ -36,6 +38,23 @@ export interface ProviderConfig {
   createdAt: number;
   /** Unix timestamp (ms) when this provider was last updated. */
   updatedAt: number;
+
+  /**
+   * How thinking effort is communicated to the backend.
+   * Only applicable for 'custom' provider type.
+   * null/undefined = 'auto' (send both mechanisms).
+   */
+  reasoningMode?: CustomReasoningMode | null;
+
+  /**
+   * Custom chat_template_kwargs to send when thinking is enabled.
+   * Only used when reasoningMode includes chat-template-kwargs.
+   * null/undefined = use default {"enable_thinking": true/false}.
+   *
+   * Example for gpt-oss models: {"reasoning_effort": "high"}
+   * Example for Qwen models: {"enable_thinking": true}
+   */
+  thinkingKwargs?: Record<string, unknown> | null;
 }
 
 /**

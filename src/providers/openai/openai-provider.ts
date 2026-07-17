@@ -84,7 +84,7 @@ export class OpenAIProvider implements IProvider {
       // Default: Responses API
       return await this.completeResponses(client, request, thinkingParams);
     } catch (error) {
-      throw classifyOpenAIError(error);
+      throw classifyOpenAIError(error, client.baseURL);
     }
   }
 
@@ -121,7 +121,7 @@ export class OpenAIProvider implements IProvider {
         yield { type: 'done', content: '' };
         return;
       }
-      const classified = classifyOpenAIError(error);
+      const classified = classifyOpenAIError(error, client.baseURL);
       yield { type: 'error', content: `${classified.category}: ${classified.message}` };
       yield { type: 'done', content: '' };
     }
@@ -143,7 +143,7 @@ export class OpenAIProvider implements IProvider {
       }
       return modelIds.sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
     } catch (error) {
-      throw classifyOpenAIError(error);
+      throw classifyOpenAIError(error, client.baseURL);
     }
   }
 
@@ -355,7 +355,21 @@ export class OpenAIProvider implements IProvider {
       params.reasoning = { effort: thinkingParams.reasoning_effort };
     }
 
-    console.log('[OpenAI Responses API Stream] Request params:', JSON.stringify(params, null, 2));
+    console.log(`[OpenAI Responses API Stream] URL: ${client.baseURL}/responses`, '\nRequest params:', JSON.stringify(params, null, 2));
+
+    // Debug: test raw connectivity with both fetch implementations
+    try {
+      const testResp = await globalThis.fetch(`${client.baseURL}/models`, { method: 'GET' });
+      console.log('[OpenAI Debug] globalThis.fetch /models status:', testResp.status);
+    } catch (fetchErr) {
+      console.warn('[OpenAI Debug] globalThis.fetch /models failed:', (fetchErr as Error).message);
+    }
+    try {
+      const testResp2 = await fetch(`${client.baseURL}/models`, { method: 'GET' });
+      console.log('[OpenAI Debug] expo/fetch /models status:', testResp2.status);
+    } catch (fetchErr) {
+      console.warn('[OpenAI Debug] expo/fetch /models failed:', (fetchErr as Error).message);
+    }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const stream = await client.responses.create(
@@ -612,12 +626,13 @@ function parseResponsesUsage(usage: unknown): TokenUsage {
  * - 500-599 → server
  * - Network/timeout → network
  */
-function classifyOpenAIError(error: unknown): ProviderError {
+function classifyOpenAIError(error: unknown, baseUrl?: string): ProviderError {
   if (error instanceof APIError) {
     const status = error.status;
 
     // Log full error details for debugging
     console.warn('[OpenAI API Error]', {
+      url: baseUrl,
       status,
       message: error.message,
       code: (error as Record<string, unknown>).code,

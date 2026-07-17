@@ -20,6 +20,8 @@ export interface ThinkingDisclosureProps {
   isExpanded: boolean;
   /** Callback fired when the user toggles the expanded/collapsed state. */
   onToggle: () => void;
+  /** Whether the thinking phase is still active (controls blinking animation). Defaults to true. */
+  isActive?: boolean;
 }
 
 /** Blink animation half-cycle duration in ms. */
@@ -37,10 +39,11 @@ const LABEL_BLINK_DURATION = 600;
  *
  * Requirements: 4.4, 4.5, 4.7
  */
-export function ThinkingDisclosure({
+function ThinkingDisclosureInner({
   content,
   isExpanded,
   onToggle,
+  isActive = true,
 }: ThinkingDisclosureProps) {
   const { t } = useTranslation();
   const theme = useTheme();
@@ -50,25 +53,34 @@ export function ThinkingDisclosure({
   const labelOpacity = useSharedValue(1);
 
   useEffect(() => {
-    labelOpacity.value = withRepeat(
-      withSequence(
-        withTiming(0.3, {
-          duration: LABEL_BLINK_DURATION,
-          easing: Easing.inOut(Easing.ease),
-        }),
-        withTiming(1, {
-          duration: LABEL_BLINK_DURATION,
-          easing: Easing.inOut(Easing.ease),
-        }),
-      ),
-      -1,
-      false,
-    );
+    if (isActive) {
+      labelOpacity.value = withRepeat(
+        withSequence(
+          withTiming(0.3, {
+            duration: LABEL_BLINK_DURATION,
+            easing: Easing.inOut(Easing.ease),
+          }),
+          withTiming(1, {
+            duration: LABEL_BLINK_DURATION,
+            easing: Easing.inOut(Easing.ease),
+          }),
+        ),
+        -1,
+        false,
+      );
+    } else {
+      // Wind down: cancel blink and animate to full opacity over 300ms
+      cancelAnimation(labelOpacity);
+      labelOpacity.value = withTiming(1, {
+        duration: 300,
+        easing: Easing.inOut(Easing.ease),
+      });
+    }
 
     return () => {
       cancelAnimation(labelOpacity);
     };
-  }, [labelOpacity]);
+  }, [isActive, labelOpacity]);
 
   const labelAnimatedStyle = useAnimatedStyle(() => ({
     opacity: labelOpacity.value,
@@ -96,7 +108,10 @@ export function ThinkingDisclosure({
         <Text style={[styles.chevron, isExpanded && styles.chevronExpanded]}>
           {'›'}
         </Text>
-        <Animated.Text style={[styles.label, labelAnimatedStyle]}>
+        <Animated.Text
+          style={[styles.label, labelAnimatedStyle]}
+          accessibilityLabel={t('chat.thinking', { defaultValue: 'Thinking' })}
+        >
           {t('chat.thinking', { defaultValue: 'Thinking' })}
         </Animated.Text>
       </Pressable>
@@ -112,6 +127,24 @@ export function ThinkingDisclosure({
   );
 }
 
+/**
+ * Memoized ThinkingDisclosure that avoids unnecessary re-renders when collapsed.
+ * During streaming, `content` updates every ~32ms; when collapsed, those updates
+ * don't change visible output, so we skip re-render to keep the Pressable responsive.
+ */
+export const ThinkingDisclosure = React.memo(ThinkingDisclosureInner, (prevProps, nextProps) => {
+  // If collapsed and staying collapsed, skip re-render when only content changes
+  if (!prevProps.isExpanded && !nextProps.isExpanded) {
+    // Only re-render if isActive or onToggle changed, or content went from empty to non-empty
+    if (prevProps.isActive === nextProps.isActive &&
+        prevProps.onToggle === nextProps.onToggle &&
+        prevProps.content.length > 0 && nextProps.content.length > 0) {
+      return true; // props are "equal" — skip re-render
+    }
+  }
+  return false; // props changed — re-render
+});
+
 // ─── Styles ───────────────────────────────────────────────────────────────────
 
 function createThinkingDisclosureStyles(theme: Theme) {
@@ -122,7 +155,8 @@ function createThinkingDisclosureStyles(theme: Theme) {
   const toggleRow: ViewStyle = {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 4,
+    paddingVertical: 10,
+    minHeight: 44,
   };
 
   const chevron: TextStyle = {

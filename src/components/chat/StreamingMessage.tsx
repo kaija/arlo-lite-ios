@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, StyleSheet, ViewStyle, TextStyle } from 'react-native';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { View, Text, StyleSheet, ViewStyle, TextStyle, AccessibilityInfo } from 'react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -14,6 +14,8 @@ import { useTranslation } from 'react-i18next';
 import { useTheme, Theme } from '@/theme';
 import { EqualiserAnimation } from '@/components/input/EqualiserAnimation';
 import { ThinkingDisclosure } from '@/components/chat/ThinkingDisclosure';
+import { deriveStreamingPhase, StreamingPhase } from '@/domain/streaming-phase';
+import { useSettingsStore } from '@/stores/settings-store';
 
 export interface StreamingMessageProps {
   /** The streamed content so far. */
@@ -54,10 +56,10 @@ const STALL_THRESHOLD_SECONDS = 3;
  * - Streaming content text with a blinking accent-colored cursor
  * - Equaliser animation indicating active generation
  *
- * The blinking cursor, token rate display, and equaliser are removed within
- * 300ms when streaming completes (parent should unmount or pass empty content).
+ * Uses `deriveStreamingPhase` to determine the current phase and render
+ * phase-appropriate UI with smooth transitions between states.
  *
- * Requirements: 4.1, 4.2, 4.6, 4.8
+ * Requirements: 4.1, 4.2, 4.3, 6.1, 6.2, 6.3, 7.1, 7.2
  */
 export function StreamingMessage({
   content,
@@ -71,11 +73,41 @@ export function StreamingMessage({
   const theme = useTheme();
   const styles = createStyles(theme);
 
-  const [thinkingExpanded, setThinkingExpanded] = useState(false);
+  const thinkingExpandedByDefault = useSettingsStore((s) => s.thinkingExpandedByDefault);
+  const [thinkingExpanded, setThinkingExpanded] = useState(thinkingExpandedByDefault);
   const [isStalled, setIsStalled] = useState(false);
 
+  // Derive the current streaming phase from props
+  const phase = deriveStreamingPhase({
+    isStreaming: true, // This component is only rendered during streaming
+    thinkingContent,
+    streamContent: content,
+  });
+
+  // Track previous phase for VoiceOver announcements (Task 2.5)
+  const prevPhaseRef = useRef<StreamingPhase>(phase);
+
+  useEffect(() => {
+    const prevPhase = prevPhaseRef.current;
+
+    if (prevPhase !== phase) {
+      // Announce phase transitions for VoiceOver
+      if (phase === 'thinking-active') {
+        AccessibilityInfo.announceForAccessibility(
+          t('accessibility.modelThinking', { defaultValue: 'Model is thinking' }),
+        );
+      } else if (phase === 'text-streaming') {
+        AccessibilityInfo.announceForAccessibility(
+          t('accessibility.generatingResponse', { defaultValue: 'Generating response' }),
+        );
+      }
+
+      prevPhaseRef.current = phase;
+    }
+  }, [phase, t]);
+
   // Track how long the token rate has been zero to detect stall
-  const stallTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+  const stallTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     if (tokenRate > 0) {
@@ -101,29 +133,34 @@ export function StreamingMessage({
     };
   }, [tokenRate]);
 
-  // Blinking cursor animation
-  const cursorOpacity = useSharedValue(1);
+  // Blinking cursor animation — only active during text-streaming phase
+  const cursorOpacity = useSharedValue(phase === 'text-streaming' ? 1 : 0);
 
   useEffect(() => {
-    cursorOpacity.value = withRepeat(
-      withSequence(
-        withTiming(0, {
-          duration: CURSOR_BLINK_DURATION,
-          easing: Easing.inOut(Easing.ease),
-        }),
-        withTiming(1, {
-          duration: CURSOR_BLINK_DURATION,
-          easing: Easing.inOut(Easing.ease),
-        }),
-      ),
-      -1, // infinite
-      false,
-    );
+    if (phase === 'text-streaming') {
+      cursorOpacity.value = withRepeat(
+        withSequence(
+          withTiming(0, {
+            duration: CURSOR_BLINK_DURATION,
+            easing: Easing.inOut(Easing.ease),
+          }),
+          withTiming(1, {
+            duration: CURSOR_BLINK_DURATION,
+            easing: Easing.inOut(Easing.ease),
+          }),
+        ),
+        -1, // infinite
+        false,
+      );
+    } else {
+      cancelAnimation(cursorOpacity);
+      cursorOpacity.value = 0;
+    }
 
     return () => {
       cancelAnimation(cursorOpacity);
     };
-  }, [cursorOpacity]);
+  }, [phase, cursorOpacity]);
 
   const cursorAnimatedStyle = useAnimatedStyle(() => ({
     opacity: cursorOpacity.value,
@@ -172,35 +209,48 @@ export function StreamingMessage({
             >
               {formattedRate}
             </Text>
-            <EqualiserAnimation isActive={true} />
+            <EqualiserAnimation isActive={phase !== 'text-streaming'} />
           </View>
         </View>
       </View>
 
-      {/* Thinking disclosure */}
-      {isThinking && thinkingContent.length > 0 && (
+      {/* Thinking disclosure — single instance kept alive across phase transition */}
+      {(phase === 'thinking-active' || phase === 'text-streaming') && thinkingContent.length > 0 && (
         <ThinkingDisclosure
           content={thinkingContent}
           isExpanded={thinkingExpanded}
           onToggle={toggleThinking}
+          isActive={phase === 'thinking-active'}
         />
       )}
 
-      {/* Streaming content with blinking cursor */}
+      {/* Content row */}
       <View style={styles.contentRow}>
         {showAvatars && <View style={styles.avatarSpacer} />}
         <View style={styles.contentContainer}>
-          {content.length > 0 && (
+          {/* thinking-pending: show pulsing "Thinking" label */}
+          {phase === 'thinking-pending' && (
+            <Text style={styles.thinkingPendingLabel}>
+              {t('chat.thinking', { defaultValue: 'Thinking...' })}
+            </Text>
+          )}
+
+          {/* text-streaming: show content text with blinking cursor */}
+          {phase === 'text-streaming' && content.length > 0 && (
             <Text style={styles.contentText} selectable>
               {content}
             </Text>
           )}
-          <Animated.View
-            style={[styles.cursor, cursorAnimatedStyle]}
-            accessibilityLabel={t('accessibility.streamingCursor', {
-              defaultValue: 'Generating response',
-            })}
-          />
+
+          {/* Blinking cursor — only visible during text-streaming */}
+          {phase === 'text-streaming' && (
+            <Animated.View
+              style={[styles.cursor, cursorAnimatedStyle]}
+              accessibilityLabel={t('accessibility.streamingCursor', {
+                defaultValue: 'Generating response',
+              })}
+            />
+          )}
         </View>
       </View>
     </View>
@@ -279,6 +329,13 @@ function createStyles(theme: Theme) {
     color: theme.colors.text,
   };
 
+  const thinkingPendingLabel: TextStyle = {
+    fontSize: 14,
+    fontWeight: '500',
+    color: theme.colors.textSecondary,
+    fontStyle: 'italic',
+  };
+
   const cursor: ViewStyle = {
     width: CURSOR_WIDTH,
     height: CURSOR_HEIGHT,
@@ -301,8 +358,7 @@ function createStyles(theme: Theme) {
     avatarSpacer,
     contentContainer,
     contentText,
+    thinkingPendingLabel,
     cursor,
   });
 }
-
-

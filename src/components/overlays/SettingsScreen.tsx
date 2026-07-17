@@ -29,6 +29,7 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
+  Switch,
   Text,
   TextInput,
   View,
@@ -193,6 +194,10 @@ export function SettingsScreen({ visible, onClose }: SettingsScreenProps) {
   const defaultSystemPromptId = useSettingsStore((s) => s.defaultSystemPromptId);
   const setDefaultSystemPromptId = useSettingsStore((s) => s.setDefaultSystemPromptId);
   const addSystemPromptAction = useSettingsStore((s) => s.addSystemPrompt);
+
+  // Settings store — thinking expanded
+  const thinkingExpandedByDefault = useSettingsStore((s) => s.thinkingExpandedByDefault);
+  const setThinkingExpandedByDefault = useSettingsStore((s) => s.setThinkingExpandedByDefault);
 
   // Map store prompts to display format with isDefault flag
   const systemPrompts = useMemo(() => {
@@ -474,6 +479,34 @@ export function SettingsScreen({ visible, onClose }: SettingsScreenProps) {
                   onPress={handleParamPress}
                   isLast
                 />
+              </View>
+            </View>
+
+            {/* Chat Section */}
+            <View style={styles.section}>
+              <Text style={[styles.sectionHeader, { color: colors.textTertiary }]}>
+                CHAT
+              </Text>
+              <View
+                style={[
+                  styles.groupedList,
+                  {
+                    backgroundColor: colors.surface,
+                    borderRadius: borderRadii.groupedList,
+                  },
+                ]}
+              >
+                <View style={styles.settingToggleRow}>
+                  <Text style={[styles.paramLabel, { color: colors.text }]}>
+                    Thinking Expanded by Default
+                  </Text>
+                  <Switch
+                    value={thinkingExpandedByDefault}
+                    onValueChange={setThinkingExpandedByDefault}
+                    trackColor={{ false: colors.border, true: colors.accent }}
+                    accessibilityLabel="Thinking expanded by default"
+                  />
+                </View>
               </View>
             </View>
           </>
@@ -1074,6 +1107,14 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '400',
     marginRight: 6,
+  },
+  settingToggleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    minHeight: 44,
   },
 
   // Edit parameter modal
