@@ -149,8 +149,6 @@ web-build/
 expo-env.d.ts
 
 # iOS/Android build artifacts
-ios/
-android/
 
 # Metro bundler
 .metro-health-check*
