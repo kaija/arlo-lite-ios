@@ -55,6 +55,22 @@ target 'ArloLite' do
       :ccache_enabled => podfile_properties['apple.ccacheEnabled'] == 'true',
     )
 
+    # Fix fmt consteval build failure on Xcode 26.4+ (Apple Clang 21).
+    # fmt 9.1.0 defines FMT_CONSTEVAL as consteval when __cpp_consteval is
+    # available, but Apple Clang 21 enforces stricter rules that break it.
+    # Patch the header to force FMT_CONSTEVAL to empty for all consumers.
+    fmt_core = File.join(installer.sandbox.root.to_s, 'fmt', 'include', 'fmt', 'core.h')
+    if File.exist?(fmt_core)
+      content = File.read(fmt_core)
+      if content.include?('#    define FMT_CONSTEVAL consteval')
+        File.chmod(0644, fmt_core)
+        content.gsub!('#    define FMT_CONSTEVAL consteval', '#    define FMT_CONSTEVAL')
+        content.gsub!('#    define FMT_HAS_CONSTEVAL', '// #    define FMT_HAS_CONSTEVAL')
+        File.write(fmt_core, content)
+        Pod::UI.puts "Patched fmt/core.h: disabled FMT_CONSTEVAL for Xcode 26.4+ compatibility"
+      end
+    end
+
     # This is necessary for Xcode 14, because it signs resource bundles by default
     # when building for devices.
     installer.target_installation_results.pod_target_installation_results

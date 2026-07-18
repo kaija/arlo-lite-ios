@@ -43,17 +43,3 @@ fi
 # Install CocoaPods dependencies
 cd ios
 pod install
-
-# Patch fmt for Xcode 26.4+ / Apple Clang 21 (consteval strictness)
-# fmt 9.1.0 (bundled via RCT-Folly) defines FMT_CONSTEVAL as consteval, which
-# Apple Clang 21 enforces more strictly, causing compile errors.
-# Disable consteval usage so format strings are validated at runtime instead.
-FMT_CORE="Pods/fmt/include/fmt/core.h"
-if [ -f "$FMT_CORE" ]; then
-  if grep -q '#    define FMT_CONSTEVAL consteval' "$FMT_CORE"; then
-    sed -i '' 's/#    define FMT_CONSTEVAL consteval/#    define FMT_CONSTEVAL/' "$FMT_CORE"
-    echo "Patched fmt/core.h: disabled FMT_CONSTEVAL for Xcode 26.4+ compatibility"
-  else
-    echo "fmt/core.h already patched or has different structure"
-  fi
-fi
