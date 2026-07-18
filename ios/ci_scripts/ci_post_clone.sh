@@ -40,6 +40,11 @@ else:
   fi
 fi
 
+# Point Xcode's script phases at the CI node binary.
+# Xcode build phases run with a minimal PATH that excludes Homebrew, so
+# "$(command -v node)" in .xcode.env resolves to nothing during archive.
+echo "export NODE_BINARY=$(command -v node)" > ios/.xcode.env.local
+
 # Install CocoaPods dependencies
 cd ios
 pod install
