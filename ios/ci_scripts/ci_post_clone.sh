@@ -10,6 +10,36 @@ brew install node
 # Install project dependencies
 npm install
 
+# Patch expo-localization for Xcode 26+ (Calendar.Identifier exhaustive switch)
+# iOS 26 SDK added new cases to Calendar.Identifier enum, requiring @unknown default.
+LOCALIZATION_FILE="node_modules/expo-localization/ios/LocalizationModule.swift"
+if [ -f "$LOCALIZATION_FILE" ]; then
+  if ! grep -q '@unknown default' "$LOCALIZATION_FILE"; then
+    # Insert '@unknown default: return "gregory"' before the switch's closing brace
+    # Find the last 'return' in the calendar switch and add @unknown default after it
+    python3 -c "
+import re
+with open('$LOCALIZATION_FILE', 'r') as f:
+    content = f.read()
+
+# Match the pattern: last case in the switch (iso8601 or any last case) followed by closing brace
+# Add @unknown default before the closing brace of the switch in getUnicodeCalendarIdentifier
+pattern = r'(case \.iso8601:\s*\n\s*return \"iso8601\")\s*\n(\s*\})'
+replacement = r'\1\n    @unknown default:\n      return \"gregory\"\n\2'
+patched = re.sub(pattern, replacement, content)
+
+if patched != content:
+    with open('$LOCALIZATION_FILE', 'w') as f:
+        f.write(patched)
+    print('Patched expo-localization for Xcode 26 compatibility')
+else:
+    print('Pattern not found, file may already be patched or have different structure')
+"
+  else
+    echo "expo-localization already has @unknown default, no patch needed"
+  fi
+fi
+
 # Install CocoaPods dependencies
 cd ios
 pod install
