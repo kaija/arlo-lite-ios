@@ -17,6 +17,7 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.arlolite.app",
       "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false,
         "NSAppTransportSecurity": {
           "NSAllowsArbitraryLoads": true,
           "NSAllowsLocalNetworking": true
