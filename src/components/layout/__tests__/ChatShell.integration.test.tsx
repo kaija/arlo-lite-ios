@@ -146,6 +146,7 @@ function IntegrationHarness({ onSend, onStop }: IntegrationHarnessProps) {
         onSend={handleSend}
         onStop={handleStop}
         onAttach={() => {}}
+        onContextRingPress={() => {}}
       />
 
       {isStreaming && (

@@ -41,8 +41,10 @@ import { ModelPicker } from '@/components/overlays/ModelPicker';
 import { RenameDialog } from '@/components/overlays/RenameDialog';
 import { SettingsScreen } from '@/components/overlays/SettingsScreen';
 import { ProviderDetailScreen } from '@/components/overlays/ProviderDetailScreen';
+import { ContextUsagePopup } from '@/components/overlays/ContextUsagePopup';
 import { ScrollFAB } from '@/components/chat/ScrollFAB';
 import { resolveModelName } from '@/utils/resolve-model-name';
+import { computeTokenBreakdown, DEFAULT_CONTEXT_WINDOW } from '@/domain/context-tracker';
 
 import type { Message } from '@/database/repositories/message-repo';
 
@@ -392,14 +394,23 @@ export function ChatShell({ children }: ChatShellProps) {
 
   // ─── Context Usage ──────────────────────────────────────────────────
 
-  // Calculate approximate context usage percentage
-  const contextUsagePercent = useCallback(() => {
-    if (!activeModel?.contextWindow) return 0;
-    // Rough token count: sum of message content lengths / 4 (avg chars per token)
-    const totalChars = messages.reduce((sum, m) => sum + (m.content?.length ?? 0), 0);
-    const approxTokens = Math.ceil(totalChars / 4);
-    return Math.min(Math.round((approxTokens / activeModel.contextWindow) * 100), 100);
-  }, [messages, activeModel])();
+  const contextWindow = activeModel?.contextWindow ?? DEFAULT_CONTEXT_WINDOW;
+
+  // Compute token breakdown from messages
+  const tokenBreakdown = useMemo(
+    () => computeTokenBreakdown(messages),
+    [messages],
+  );
+
+  // Usage percentage for the ring indicator
+  const contextUsagePercent = contextWindow > 0
+    ? Math.min(Math.round((tokenBreakdown.totalTokens / contextWindow) * 100), 100)
+    : 0;
+
+  // Context usage popup visibility
+  const [contextPopupVisible, setContextPopupVisible] = useState(false);
+  const openContextPopup = useCallback(() => setContextPopupVisible(true), []);
+  const closeContextPopup = useCallback(() => setContextPopupVisible(false), []);
 
   // ─── Active Session Title ───────────────────────────────────────────
 
@@ -560,11 +571,22 @@ export function ChatShell({ children }: ChatShellProps) {
               onAttach={() => {
                 // Attachment functionality handled by separate flow
               }}
+              onContextRingPress={openContextPopup}
             />
 
             {/* Optional children */}
             {children}
           </Animated.View>
+
+          {/* Overlay Layer: Context Usage Popup (z=6) */}
+          {contextPopupVisible && (
+            <ContextUsagePopup
+              visible={contextPopupVisible}
+              breakdown={tokenBreakdown}
+              contextWindow={contextWindow}
+              onDismiss={closeContextPopup}
+            />
+          )}
 
           {/* Overlay Layer: Model Picker (z=7) */}
           {modelPickerVisible && (

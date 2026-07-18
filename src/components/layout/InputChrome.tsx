@@ -68,6 +68,8 @@ export interface InputChromeProps {
   onStop: () => void;
   /** Called when the attachment/paperclip button is tapped */
   onAttach: () => void;
+  /** Called when the context ring is tapped to show usage breakdown */
+  onContextRingPress: () => void;
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -90,6 +92,7 @@ export function InputChrome({
   onSend,
   onStop,
   onAttach,
+  onContextRingPress,
 }: InputChromeProps) {
   const { colors, borderRadii, isDark } = useTheme();
 
@@ -138,7 +141,13 @@ export function InputChrome({
             />
           )}
 
-          <ContextRing percentage={contextUsagePercent} />
+          <Pressable
+            onPress={onContextRingPress}
+            accessibilityRole="button"
+            accessibilityLabel="Show context usage breakdown"
+          >
+            <ContextRing percentage={contextUsagePercent} />
+          </Pressable>
 
           {/* Equaliser animation shown during streaming */}
           {isStreaming && <EqualiserAnimation isActive={isStreaming} />}

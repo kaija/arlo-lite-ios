@@ -81,6 +81,7 @@ const defaultProps = {
   onSend: jest.fn(),
   onStop: jest.fn(),
   onAttach: jest.fn(),
+  onContextRingPress: jest.fn(),
 };
 
 describe('InputChrome', () => {
