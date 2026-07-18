@@ -6,6 +6,7 @@ import Animated, {
   withSpring,
 } from 'react-native-reanimated';
 import Svg, { Path, Rect } from 'react-native-svg';
+import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '@/theme';
 
@@ -56,6 +57,7 @@ export function SendStopButton({
   onStop,
 }: SendStopButtonProps) {
   const { colors } = useTheme();
+  const { t } = useTranslation();
   const scale = useSharedValue(1);
   const opacity = useSharedValue(1);
 
@@ -100,10 +102,8 @@ export function SendStopButton({
         accessibilityRole="button"
         accessibilityLabel={
           state === 'stop'
-            ? 'Stop generation'
-            : state === 'send'
-              ? 'Send message'
-              : 'Send message, disabled'
+            ? t('accessibility.stopButton')
+            : t('accessibility.sendButton')
         }
         accessibilityState={{ disabled: isDisabled }}
         style={[

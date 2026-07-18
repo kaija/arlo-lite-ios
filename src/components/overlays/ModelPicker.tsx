@@ -24,6 +24,7 @@ import Animated, {
   withTiming,
   Easing,
 } from 'react-native-reanimated';
+import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '@/theme';
 import { MODEL_PICKER_FADE_DURATION, DIALOG_EASING } from '@/theme/animations';
@@ -79,6 +80,7 @@ export function ModelPicker({
   onDismiss,
 }: ModelPickerProps) {
   const { colors, borderRadii, typography } = useTheme();
+  const { t } = useTranslation();
 
   // Animation shared values
   const opacity = useSharedValue(visible ? 1 : 0);
@@ -143,7 +145,7 @@ export function ModelPicker({
         style={StyleSheet.absoluteFill}
         onPress={onDismiss}
         accessibilityRole="button"
-        accessibilityLabel="Dismiss model picker"
+        accessibilityLabel={t('accessibility.dismissModelPicker')}
       >
         <Animated.View
           style={[styles.scrim, scrimAnimatedStyle]}
@@ -162,7 +164,7 @@ export function ModelPicker({
           cardAnimatedStyle,
         ]}
         accessibilityRole="menu"
-        accessibilityLabel="Model picker"
+        accessibilityLabel={t('modelSwitcher.title')}
       >
         {models.length === 0 ? (
           // Empty state
@@ -173,7 +175,7 @@ export function ModelPicker({
                 { color: colors.textSecondary },
               ]}
             >
-              No models configured
+              {t('models.empty')}
             </Text>
             <Text
               style={[
@@ -181,7 +183,7 @@ export function ModelPicker({
                 { color: colors.textTertiary },
               ]}
             >
-              Add a provider and model in Settings
+              {t('models.emptyHint')}
             </Text>
           </View>
         ) : (

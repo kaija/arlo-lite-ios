@@ -8,6 +8,7 @@ import Animated, {
   withSpring,
 } from 'react-native-reanimated';
 import Svg, { Path } from 'react-native-svg';
+import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '@/theme';
 
@@ -46,14 +47,15 @@ export function NavigationChrome({
   onSettingsOpen,
 }: NavigationChromeProps) {
   const { colors } = useTheme();
+  const { t } = useTranslation();
   const insets = useSafeAreaInsets();
 
   const barContent = (
     <View style={styles.contentRow}>
       <NavButton
         onPress={onSidebarToggle}
-        accessibilityLabel="Toggle sidebar"
-        accessibilityHint="Double tap to open or close the session sidebar"
+        accessibilityLabel={t('accessibility.toggleSidebar')}
+        accessibilityHint={t('accessibility.toggleSidebarHint')}
         icon={<HamburgerIcon color={colors.accent} />}
       />
       <View style={styles.titleContainer}>
@@ -67,8 +69,8 @@ export function NavigationChrome({
       </View>
       <NavButton
         onPress={onSettingsOpen}
-        accessibilityLabel="Open settings"
-        accessibilityHint="Double tap to open the settings screen"
+        accessibilityLabel={t('accessibility.settingsButton')}
+        accessibilityHint={t('accessibility.settingsButtonHint')}
         icon={<GearIcon color={colors.accent} />}
       />
     </View>

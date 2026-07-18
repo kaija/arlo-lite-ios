@@ -1,7 +1,6 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { getLocales } from 'expo-localization';
 
 import type { SystemPrompt } from '@/database/repositories/system-prompt-repo';
 import {
@@ -12,6 +11,7 @@ import {
 } from '@/database/repositories/system-prompt-repo';
 import type { CreateSystemPromptData, UpdateSystemPromptData } from '@/database/repositories/system-prompt-repo';
 import type { SQLiteDatabase } from 'expo-sqlite';
+import { changeAppLanguage, detectDeviceLocale } from '@/i18n/index';
 
 export type ThemeMode = 'light' | 'dark' | 'system';
 
@@ -38,11 +38,12 @@ export type SettingsStore = SettingsState & SettingsActions;
 
 /**
  * Detect the device locale for the default value.
+ * Returns a supported locale tag (e.g. 'en' or 'zh-TW') rather than
+ * the raw device tag (e.g. 'zh-Hant-TW') to ensure i18n compatibility.
  */
 function getDeviceLocale(): string {
   try {
-    const locales = getLocales();
-    return locales[0]?.languageTag ?? 'en';
+    return detectDeviceLocale();
   } catch {
     return 'en';
   }
@@ -65,6 +66,8 @@ export const useSettingsStore = create<SettingsStore>()(
 
       setLocale: (locale: string) => {
         set({ locale });
+        // Immediately switch the i18n runtime language
+        changeAppLanguage(locale);
       },
 
       setDefaultSystemPromptId: (id: string | null) => {
@@ -118,6 +121,17 @@ export const useSettingsStore = create<SettingsStore>()(
         defaultSystemPromptId: state.defaultSystemPromptId,
         thinkingExpandedByDefault: state.thinkingExpandedByDefault,
       }),
+      // Normalize stale locale values (e.g. 'zh-Hant-TW' → 'zh-TW') on rehydrate
+      onRehydrateStorage: () => (state) => {
+        if (state && state.locale) {
+          const normalized = detectDeviceLocale();
+          // If persisted locale isn't a clean supported locale, normalize it
+          if (state.locale !== 'en' && state.locale !== 'zh-TW') {
+            state.locale = normalized;
+            changeAppLanguage(normalized);
+          }
+        }
+      },
     }
   )
 );

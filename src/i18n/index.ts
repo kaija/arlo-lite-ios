@@ -62,25 +62,31 @@ function detectDeviceLocale(): SupportedLocale {
 }
 
 /**
- * Initialize i18next with device locale detection.
- * Registers only the detected locale and the fallback (if different).
+ * Human-readable display names for each supported locale.
+ * Used in the language switcher UI.
  */
-function initI18n(): typeof i18n {
-  const detectedLocale = detectDeviceLocale();
+const LOCALE_DISPLAY_NAMES: Record<SupportedLocale, string> = {
+  en: 'English',
+  'zh-TW': '繁體中文',
+};
 
-  const resources: Record<string, { translation: Record<string, unknown> }> = {
-    [detectedLocale]: { translation: localeResources[detectedLocale] },
-  };
+/**
+ * Initialize i18next with device locale detection.
+ * Registers ALL supported locales so runtime switching works seamlessly.
+ */
+function initI18n(overrideLocale?: string): typeof i18n {
+  const initialLocale = overrideLocale
+    ? normalizeLocale(overrideLocale)
+    : detectDeviceLocale();
 
-  // Ensure fallback resources are always available
-  if (detectedLocale !== FALLBACK_LOCALE) {
-    resources[FALLBACK_LOCALE] = {
-      translation: localeResources[FALLBACK_LOCALE],
-    };
+  // Register all locale resources so changeLanguage works without reloading
+  const resources: Record<string, { translation: Record<string, unknown> }> = {};
+  for (const locale of SUPPORTED_LOCALES) {
+    resources[locale] = { translation: localeResources[locale] };
   }
 
   i18n.use(initReactI18next).init({
-    lng: detectedLocale,
+    lng: initialLocale,
     fallbackLng: FALLBACK_LOCALE,
     resources,
     interpolation: {
@@ -94,6 +100,51 @@ function initI18n(): typeof i18n {
   return i18n;
 }
 
-export { initI18n, detectDeviceLocale, SUPPORTED_LOCALES, FALLBACK_LOCALE };
+/**
+ * Check if a locale string is one of our supported locales.
+ */
+function isSupported(locale?: string): locale is SupportedLocale {
+  return !!locale && (SUPPORTED_LOCALES as readonly string[]).includes(locale);
+}
+
+/**
+ * Normalize a locale string to a supported locale.
+ * Handles variants like 'zh-Hant-TW' → 'zh-TW', 'en-US' → 'en'.
+ */
+function normalizeLocale(locale: string): SupportedLocale {
+  // Direct match
+  if (isSupported(locale)) return locale;
+
+  // Try language-region (e.g. 'zh-TW' from 'zh-Hant-TW')
+  const parts = locale.split('-');
+  if (parts[0] === 'zh') return 'zh-TW';
+  if (parts[0] === 'en') return 'en';
+
+  // Check language+region combo
+  if (parts.length >= 2) {
+    const langRegion = `${parts[0]}-${parts[parts.length - 1]}`;
+    if (isSupported(langRegion)) return langRegion;
+  }
+
+  return FALLBACK_LOCALE;
+}
+
+/**
+ * Change the active language at runtime.
+ * Accepts any locale string — normalizes to a supported locale before switching.
+ */
+async function changeAppLanguage(locale: string): Promise<void> {
+  const target = normalizeLocale(locale);
+  await i18n.changeLanguage(target);
+}
+
+export {
+  initI18n,
+  detectDeviceLocale,
+  changeAppLanguage,
+  SUPPORTED_LOCALES,
+  FALLBACK_LOCALE,
+  LOCALE_DISPLAY_NAMES,
+};
 export type { SupportedLocale };
 export default i18n;

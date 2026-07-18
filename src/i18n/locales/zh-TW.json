@@ -41,11 +41,17 @@
   "sessions": {
     "title": "對話",
     "empty": "尚無對話",
+    "emptyHint": "點按撰寫按鈕以開始新對話",
     "newSession": "新對話",
+    "newSessionHint": "建立新的對話",
     "rename": "重新命名",
+    "renameInputLabel": "對話標題",
+    "renameInputHint": "輸入此對話的新名稱",
     "delete": "刪除",
     "deleteConfirm": "確定要刪除此對話嗎？此操作無法復原。",
-    "deleteTitle": "刪除對話"
+    "deleteTitle": "刪除對話",
+    "footerHint": "向左滑動以刪除 · 長按以重新命名",
+    "activeSession": "目前對話"
   },
 
   "providers": {
@@ -116,7 +122,11 @@
     "reasoningModeKwargsDesc": "僅傳送 chat_template_kwargs（適用於 llama.cpp、vLLM 等使用 Jinja 模板的後端）",
     "reasoningModeNoneDesc": "不傳送任何思考參數（模型不支援思考時使用）",
     "selectProvider": "選擇提供者",
-    "apiKeyOptionalPlaceholder": "選填 — 本機伺服器可留空"
+    "apiKeyOptionalPlaceholder": "選填 — 本機伺服器可留空",
+    "modelCount_one": "{{count}} 個模型",
+    "modelCount_other": "{{count}} 個模型",
+    "openDetailsHint": "開啟提供者詳情",
+    "connectionStatus": "連線狀態：{{status}}"
   },
 
   "models": {
@@ -140,6 +150,7 @@
     "selectFromList": "從 API 選取",
     "manualEntry": "手動輸入",
     "empty": "尚未新增模型",
+    "emptyHint": "請至設定中新增提供者與模型",
     "save": "儲存",
     "fromCache": "從快取載入",
     "noModelsAvailable": "沒有可用模型。請手動輸入模型 ID。",
@@ -159,7 +170,8 @@
     "low": "低",
     "medium": "中",
     "high": "高",
-    "xhigh": "極高"
+    "xhigh": "極高",
+    "cycleHint": "點按以切換思考程度"
   },
 
   "systemPrompts": {
@@ -188,10 +200,17 @@
     "themeDark": "深色",
     "themeSystem": "跟隨系統",
     "language": "語言",
+    "languageHint": "點選以切換語言",
     "providers": "服務提供者",
     "systemPrompts": "系統提示詞",
     "backup": "備份與同步",
-    "about": "關於"
+    "about": "關於",
+    "generationParameters": "生成參數",
+    "maxTokens": "最大 Token 數",
+    "maxTokensDescription": "回覆中生成的最大 token 數量。",
+    "thinkingExpandedByDefault": "預設展開思考內容",
+    "emptySubtitle": "新增提供者以開始與 AI 模型對話",
+    "addPromptDescription": "為提示詞命名並提供系統指令內容。"
   },
 
   "about": {
@@ -224,6 +243,7 @@
     "stopButton": "停止生成回覆",
     "newChatButton": "開始新對話",
     "settingsButton": "開啟設定",
+    "settingsButtonHint": "點兩下以開啟設定畫面",
     "backButton": "返回",
     "deleteButton": "刪除",
     "editButton": "編輯",
@@ -235,6 +255,9 @@
     "voiceInputButton": "語音輸入",
     "attachImageButton": "附加圖片",
     "attachFileButton": "附加檔案",
+    "attachFileHint": "點兩下以附加檔案或圖片",
+    "messageInput": "訊息輸入",
+    "messageInputHint": "在此輸入您的訊息",
     "contextUsageIndicator": "上下文使用量：百分之{{percentage}}",
     "sessionItem": "對話：{{title}}，最後修改 {{date}}",
     "providerItem": "提供者：{{name}}，類型 {{type}}",
@@ -244,7 +267,12 @@
     "collapseThinking": "收合思考內容",
     "expandThinking": "展開思考內容",
     "modelThinking": "模型正在思考",
-    "generatingResponse": "正在生成回覆"
+    "generatingResponse": "正在生成回覆",
+    "toggleSidebar": "切換側欄",
+    "toggleSidebarHint": "點兩下以開啟或關閉對話側欄",
+    "dismissModelPicker": "關閉模型選擇器",
+    "dismissContextUsage": "關閉上下文使用量",
+    "dismissRenameDialog": "關閉重新命名對話框"
   },
 
   "voiceDictation": {
@@ -277,5 +305,13 @@
     "done": "完成",
     "loading": "載入中...",
     "offline": "離線"
+  },
+
+  "contextUsage": {
+    "title": "上下文視窗使用量詳情",
+    "contextWindow": "上下文視窗",
+    "systemPrompt": "系統提示詞",
+    "userMessages": "使用者訊息",
+    "assistantOutput": "助理輸出"
   }
 }

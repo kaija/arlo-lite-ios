@@ -4,7 +4,7 @@ import { Slot } from 'expo-router';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import i18n from 'i18next';
 
-import { initI18n } from '@/i18n/index';
+import { initI18n, changeAppLanguage } from '@/i18n/index';
 import { initDatabase } from '@/database/database';
 import { ThemeProvider } from '@/theme';
 import { ToastProvider } from '@/components/overlays/ToastProvider';
@@ -13,10 +13,12 @@ import { useSessionStore } from '@/stores/session-store';
 import { useSettingsStore } from '@/stores/settings-store';
 import { useChatStore } from '@/stores/chat-store';
 
-// Initialize i18n synchronously at module load (safe to call multiple times)
+// Initialize i18n synchronously at module load (safe to call multiple times).
+// If a persisted locale exists in the settings store, use it as the override.
 try {
   if (!i18n.isInitialized) {
-    initI18n();
+    const persistedLocale = useSettingsStore.getState().locale;
+    initI18n(persistedLocale);
   }
 } catch (e) {
   console.warn('[RootLayout] i18n init warning:', e);
@@ -50,6 +52,12 @@ export default function RootLayout() {
           useSessionStore.getState().loadSessions(),
           useSettingsStore.getState().loadSystemPrompts(db),
         ]);
+
+        // Sync i18n language with persisted user preference
+        const persistedLocale = useSettingsStore.getState().locale;
+        if (persistedLocale && i18n.language !== persistedLocale) {
+          await changeAppLanguage(persistedLocale);
+        }
 
         // Auto-create a session if none exist and a provider+model are configured
         const sessions = useSessionStore.getState().sessions;

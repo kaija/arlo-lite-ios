@@ -23,6 +23,7 @@ import Animated, {
   withTiming,
   Easing,
 } from 'react-native-reanimated';
+import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '@/theme';
 import { RENAME_DIALOG_DURATION, DIALOG_EASING } from '@/theme/animations';
@@ -66,6 +67,7 @@ export function RenameDialog({
   onCancel,
 }: RenameDialogProps) {
   const { colors } = useTheme();
+  const { t } = useTranslation();
   const inputRef = useRef<TextInput>(null);
   const [text, setText] = useState(currentTitle);
 
@@ -136,7 +138,7 @@ export function RenameDialog({
         style={[styles.scrim, { backgroundColor: 'rgba(0, 0, 0, 0.32)' }]}
         onPress={handleCancel}
         accessibilityRole="button"
-        accessibilityLabel="Dismiss rename dialog"
+        accessibilityLabel={t('accessibility.dismissRenameDialog')}
       >
         {/* Card — prevent scrim tap from propagating */}
         <Animated.View style={[animatedCardStyle, styles.cardWrapper]}>
@@ -155,7 +157,7 @@ export function RenameDialog({
               ]}
               accessibilityRole="header"
             >
-              Rename Chat
+              {t('sessions.rename')}
             </Text>
 
             {/* Text Input */}
@@ -176,8 +178,8 @@ export function RenameDialog({
               selection={undefined}
               returnKeyType="done"
               onSubmitEditing={handleSave}
-              accessibilityLabel="Session title"
-              accessibilityHint="Enter a new name for this chat session"
+              accessibilityLabel={t('sessions.renameInputLabel')}
+              accessibilityHint={t('sessions.renameInputHint')}
             />
 
             {/* Buttons */}
@@ -190,7 +192,7 @@ export function RenameDialog({
                 ]}
                 onPress={handleCancel}
                 accessibilityRole="button"
-                accessibilityLabel="Cancel"
+                accessibilityLabel={t('common.cancel')}
               >
                 <Text
                   style={[
@@ -198,7 +200,7 @@ export function RenameDialog({
                     { color: colors.accent },
                   ]}
                 >
-                  Cancel
+                  {t('common.cancel')}
                 </Text>
               </Pressable>
 
@@ -215,7 +217,7 @@ export function RenameDialog({
                 onPress={handleSave}
                 disabled={!isSaveEnabled}
                 accessibilityRole="button"
-                accessibilityLabel="Save"
+                accessibilityLabel={t('common.save')}
                 accessibilityState={{ disabled: !isSaveEnabled }}
               >
                 <Text
@@ -228,7 +230,7 @@ export function RenameDialog({
                     },
                   ]}
                 >
-                  Save
+                  {t('common.save')}
                 </Text>
               </Pressable>
             </View>

@@ -27,6 +27,7 @@ import * as Haptics from 'expo-haptics';
 
 import { useTheme } from '@/theme';
 import { useToast } from '@/components/overlays/ToastProvider';
+import { useTranslation } from 'react-i18next';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -94,6 +95,7 @@ export interface ContextRingProps {
 export function ContextRing({ percentage, animated = true }: ContextRingProps) {
   const { colors } = useTheme();
   const { show: showToast } = useToast();
+  const { t } = useTranslation();
 
   // Clamp percentage to 0-100
   const clampedPercentage = Math.max(0, Math.min(100, percentage));
@@ -132,13 +134,13 @@ export function ContextRing({ percentage, animated = true }: ContextRingProps) {
       // Show toast on first 50% and 75% crossing per session
       if (currentBand >= 1 && !hasToasted50Ref.current) {
         hasToasted50Ref.current = true;
-        showToast(`Context usage: ${clampedPercentage}%`);
+        showToast(t('chat.contextUsage', { percentage: clampedPercentage }));
       } else if (currentBand >= 2 && !hasToasted75Ref.current) {
         hasToasted75Ref.current = true;
-        showToast(`Context usage: ${clampedPercentage}%`);
+        showToast(t('chat.contextUsage', { percentage: clampedPercentage }));
       }
     }
-  }, [clampedPercentage, animated, scale, showToast]);
+  }, [clampedPercentage, animated, scale, showToast, t]);
 
   // Calculate SVG arc parameters
   const ringColor = getRingColor(
@@ -153,7 +155,7 @@ export function ContextRing({ percentage, animated = true }: ContextRingProps) {
   return (
     <View
       style={styles.container}
-      accessibilityLabel={`Context usage: ${Math.round(clampedPercentage)} percent`}
+      accessibilityLabel={t('accessibility.contextUsageIndicator', { percentage: Math.round(clampedPercentage) })}
       accessibilityRole="progressbar"
       accessibilityValue={{
         min: 0,

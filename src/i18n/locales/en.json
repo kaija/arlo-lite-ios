@@ -40,12 +40,18 @@
 
   "sessions": {
     "title": "Sessions",
-    "empty": "No sessions yet",
+    "empty": "No conversations yet",
+    "emptyHint": "Tap the compose button to start a new chat",
     "newSession": "New Session",
+    "newSessionHint": "Creates a new chat session",
     "rename": "Rename",
+    "renameInputLabel": "Session title",
+    "renameInputHint": "Enter a new name for this chat session",
     "delete": "Delete",
     "deleteConfirm": "Are you sure you want to delete this session? This cannot be undone.",
-    "deleteTitle": "Delete Session"
+    "deleteTitle": "Delete Session",
+    "footerHint": "Swipe left to delete · hold to rename",
+    "activeSession": "active session"
   },
 
   "providers": {
@@ -116,7 +122,11 @@
     "reasoningModeKwargsDesc": "Sends chat_template_kwargs only (for llama.cpp, vLLM, and other Jinja-template backends)",
     "reasoningModeNoneDesc": "Sends no thinking parameters (for models that don't support thinking)",
     "selectProvider": "Select provider",
-    "apiKeyOptionalPlaceholder": "Optional — leave empty for local servers"
+    "apiKeyOptionalPlaceholder": "Optional — leave empty for local servers",
+    "modelCount_one": "{{count}} model",
+    "modelCount_other": "{{count}} models",
+    "openDetailsHint": "Opens provider details",
+    "connectionStatus": "Connection status: {{status}}"
   },
 
   "models": {
@@ -140,6 +150,7 @@
     "selectFromList": "Select from API",
     "manualEntry": "Manual Entry",
     "empty": "No models added",
+    "emptyHint": "Add a provider and model in Settings",
     "save": "Save",
     "fromCache": "Loaded from cache",
     "noModelsAvailable": "No models available. Enter a model ID manually.",
@@ -159,7 +170,8 @@
     "low": "Low",
     "medium": "Medium",
     "high": "High",
-    "xhigh": "Extra High"
+    "xhigh": "Extra High",
+    "cycleHint": "Tap to cycle thinking level"
   },
 
   "systemPrompts": {
@@ -188,10 +200,17 @@
     "themeDark": "Dark",
     "themeSystem": "System",
     "language": "Language",
+    "languageHint": "Tap to switch language",
     "providers": "Providers",
     "systemPrompts": "System Prompts",
     "backup": "Backup & Sync",
-    "about": "About"
+    "about": "About",
+    "generationParameters": "Generation Parameters",
+    "maxTokens": "Max Tokens",
+    "maxTokensDescription": "Maximum number of tokens to generate in the response.",
+    "thinkingExpandedByDefault": "Thinking Expanded by Default",
+    "emptySubtitle": "Add a provider to start chatting with AI models",
+    "addPromptDescription": "Give your prompt a name and provide the system instructions."
   },
 
   "about": {
@@ -224,6 +243,7 @@
     "stopButton": "Stop generating response",
     "newChatButton": "Start new chat",
     "settingsButton": "Open settings",
+    "settingsButtonHint": "Double tap to open the settings screen",
     "backButton": "Go back",
     "deleteButton": "Delete",
     "editButton": "Edit",
@@ -235,6 +255,9 @@
     "voiceInputButton": "Voice input",
     "attachImageButton": "Attach image",
     "attachFileButton": "Attach file",
+    "attachFileHint": "Double tap to attach a file or image",
+    "messageInput": "Message input",
+    "messageInputHint": "Type your message here",
     "contextUsageIndicator": "Context usage: {{percentage}} percent",
     "sessionItem": "Session: {{title}}, last modified {{date}}",
     "providerItem": "Provider: {{name}}, type {{type}}",
@@ -244,7 +267,12 @@
     "collapseThinking": "Collapse thinking content",
     "expandThinking": "Expand thinking content",
     "modelThinking": "Model is thinking",
-    "generatingResponse": "Generating response"
+    "generatingResponse": "Generating response",
+    "toggleSidebar": "Toggle sidebar",
+    "toggleSidebarHint": "Double tap to open or close the session sidebar",
+    "dismissModelPicker": "Dismiss model picker",
+    "dismissContextUsage": "Dismiss context usage",
+    "dismissRenameDialog": "Dismiss rename dialog"
   },
 
   "voiceDictation": {
@@ -277,5 +305,13 @@
     "done": "Done",
     "loading": "Loading...",
     "offline": "Offline"
+  },
+
+  "contextUsage": {
+    "title": "Context window usage breakdown",
+    "contextWindow": "Context window",
+    "systemPrompt": "System prompt",
+    "userMessages": "User messages",
+    "assistantOutput": "Assistant output"
   }
 }

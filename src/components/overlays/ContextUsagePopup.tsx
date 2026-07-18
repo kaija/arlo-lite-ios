@@ -22,6 +22,7 @@ import Animated, {
   withTiming,
   Easing,
 } from 'react-native-reanimated';
+import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '@/theme';
 import { MODEL_PICKER_FADE_DURATION, DIALOG_EASING } from '@/theme/animations';
@@ -78,6 +79,7 @@ export function ContextUsagePopup({
   onDismiss,
 }: ContextUsagePopupProps) {
   const { colors } = useTheme();
+  const { t } = useTranslation();
 
   // Animation
   const opacity = useSharedValue(visible ? 1 : 0);
@@ -129,7 +131,7 @@ export function ContextUsagePopup({
 
   const rows = [
     {
-      label: 'Context window',
+      label: t('contextUsage.contextWindow'),
       tokens: breakdown.totalTokens,
       capacity: contextWindow,
       percent: totalPercent,
@@ -137,7 +139,7 @@ export function ContextUsagePopup({
       isTotal: true,
     },
     {
-      label: 'System prompt',
+      label: t('contextUsage.systemPrompt'),
       tokens: breakdown.systemPromptTokens,
       capacity: contextWindow,
       percent: contextWindow > 0
@@ -147,7 +149,7 @@ export function ContextUsagePopup({
       isTotal: false,
     },
     {
-      label: 'User messages',
+      label: t('contextUsage.userMessages'),
       tokens: breakdown.userPromptTokens,
       capacity: contextWindow,
       percent: contextWindow > 0
@@ -157,7 +159,7 @@ export function ContextUsagePopup({
       isTotal: false,
     },
     {
-      label: 'Assistant output',
+      label: t('contextUsage.assistantOutput'),
       tokens: breakdown.assistantOutputTokens,
       capacity: contextWindow,
       percent: contextWindow > 0
@@ -175,7 +177,7 @@ export function ContextUsagePopup({
         style={StyleSheet.absoluteFill}
         onPress={onDismiss}
         accessibilityRole="button"
-        accessibilityLabel="Dismiss context usage"
+        accessibilityLabel={t('accessibility.dismissContextUsage')}
       >
         <Animated.View style={[styles.scrim, scrimAnimatedStyle]} />
       </Pressable>
@@ -188,7 +190,7 @@ export function ContextUsagePopup({
           cardAnimatedStyle,
         ]}
         accessibilityRole="summary"
-        accessibilityLabel="Context window usage breakdown"
+        accessibilityLabel={t('contextUsage.title')}
       >
         {rows.map((row, index) => (
           <View

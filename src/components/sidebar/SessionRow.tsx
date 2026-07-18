@@ -21,6 +21,7 @@ import Animated, {
 import { GestureDetector } from 'react-native-gesture-handler';
 import * as Haptics from 'expo-haptics';
 import Svg, { Path } from 'react-native-svg';
+import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '@/theme';
 import { useSwipeToDelete } from '@/hooks/useSwipeToDelete';
@@ -63,6 +64,7 @@ export function SessionRow({
   onRename,
 }: SessionRowProps) {
   const { colors } = useTheme();
+  const { t } = useTranslation();
   const { translateX, panGesture, reset } = useSwipeToDelete();
   const { animatedStyle: pressStyle, onPressIn, onPressOut } = usePressAnimation();
 
@@ -93,7 +95,7 @@ export function SessionRow({
           onPress={handleDelete}
           style={styles.deleteButtonPressable}
           accessibilityRole="button"
-          accessibilityLabel="Delete session"
+          accessibilityLabel={t('sessions.delete')}
         >
           <TrashIcon color="#FFFFFF" />
         </Pressable>
@@ -127,12 +129,12 @@ export function SessionRow({
               style={styles.rowPressable}
               accessibilityRole="button"
               accessibilityLabel={
-                isActive ? `${session.title}, active session` : session.title
+                isActive ? `${session.title}, ${t('sessions.activeSession')}` : session.title
               }
               accessibilityState={{ selected: isActive }}
               accessibilityActions={[
-                { name: 'delete', label: 'Delete session' },
-                { name: 'rename', label: 'Rename session' },
+                { name: 'delete', label: t('sessions.delete') },
+                { name: 'rename', label: t('sessions.rename') },
               ]}
               onAccessibilityAction={(event) => {
                 if (event.nativeEvent.actionName === 'delete') {

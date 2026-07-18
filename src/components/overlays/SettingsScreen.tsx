@@ -42,6 +42,7 @@ import Animated, {
   runOnJS,
 } from 'react-native-reanimated';
 import { BlurView } from 'expo-blur';
+import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '@/theme';
 import { SETTINGS_SLIDE_DURATION } from '@/theme/animations';
@@ -50,6 +51,8 @@ import { useSettingsStore } from '@/stores/settings-store';
 import { useChatStore } from '@/stores/chat-store';
 import { useUIStore } from '@/stores/ui-store';
 import { useMaskedKey } from '@/hooks/useMaskedKey';
+import { SUPPORTED_LOCALES, LOCALE_DISPLAY_NAMES } from '@/i18n/index';
+import type { SupportedLocale } from '@/i18n/index';
 import type { Provider, GenerationParams } from '@/database/repositories/provider-repo';
 import type { ModelConfig, ConnectionStatus } from '@/stores/provider-store';
 
@@ -118,6 +121,7 @@ function truncateText(text: string, maxLength: number): string {
 
 export function SettingsScreen({ visible, onClose }: SettingsScreenProps) {
   const { colors, borderRadii, isDark } = useTheme();
+  const { t } = useTranslation();
 
   // Provider store data
   const providers = useProviderStore((state) => state.providers);
@@ -126,6 +130,10 @@ export function SettingsScreen({ visible, onClose }: SettingsScreenProps) {
 
   // Chat store — active provider selection
   const activeProviderId = useChatStore((state) => state.activeProviderId);
+
+  // Settings store — locale
+  const currentLocale = useSettingsStore((s) => s.locale);
+  const setLocale = useSettingsStore((s) => s.setLocale);
 
   // Determine the active provider: use ChatStore's activeProviderId, fallback to first provider
   const activeProvider = useMemo(() => {
@@ -294,6 +302,18 @@ export function SettingsScreen({ visible, onClose }: SettingsScreenProps) {
     setEditParamModalVisible(false);
   }, []);
 
+  /** Cycle to the next supported locale. */
+  const handleLanguagePress = useCallback(() => {
+    const currentIndex = SUPPORTED_LOCALES.indexOf(currentLocale as SupportedLocale);
+    const nextIndex = (currentIndex + 1) % SUPPORTED_LOCALES.length;
+    setLocale(SUPPORTED_LOCALES[nextIndex]);
+  }, [currentLocale, setLocale]);
+
+  /** Get the display name for the current locale. */
+  const currentLocaleDisplay = useMemo(() => {
+    return LOCALE_DISPLAY_NAMES[currentLocale as SupportedLocale] ?? currentLocale;
+  }, [currentLocale]);
+
   if (!shouldRender) return null;
 
   const hasProviders = providers.length > 0;
@@ -306,7 +326,7 @@ export function SettingsScreen({ visible, onClose }: SettingsScreenProps) {
         animatedStyle,
       ]}
       accessibilityViewIsModal
-      accessibilityLabel="Settings"
+      accessibilityLabel={t('settings.title')}
     >
       {/* Header with blur */}
       <BlurView
@@ -320,14 +340,14 @@ export function SettingsScreen({ visible, onClose }: SettingsScreenProps) {
             style={styles.backButton}
             onPress={handleBack}
             accessibilityRole="button"
-            accessibilityLabel="Back to Chat"
+            accessibilityLabel={t('accessibility.backButton')}
             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
           >
             <Text style={[styles.backChevron, { color: colors.accent }]}>
               {'\u2039'}
             </Text>
             <Text style={[styles.backLabel, { color: colors.accent }]}>
-              Chat
+              {t('navigation.chat')}
             </Text>
           </Pressable>
 
@@ -336,7 +356,7 @@ export function SettingsScreen({ visible, onClose }: SettingsScreenProps) {
             style={[styles.headerTitle, { color: colors.text }]}
             accessibilityRole="header"
           >
-            Settings
+            {t('settings.title')}
           </Text>
 
           {/* Spacer for balance */}
@@ -358,19 +378,19 @@ export function SettingsScreen({ visible, onClose }: SettingsScreenProps) {
           // Empty state
           <View style={styles.emptyState}>
             <Text style={[styles.emptyTitle, { color: colors.textSecondary }]}>
-              No providers configured
+              {t('providers.empty')}
             </Text>
             <Text style={[styles.emptySubtitle, { color: colors.textTertiary }]}>
-              Add a provider to start chatting with AI models
+              {t('settings.emptySubtitle')}
             </Text>
             <Pressable
               style={[styles.addProviderButton, { backgroundColor: colors.accent }]}
               onPress={handleAddProvider}
               accessibilityRole="button"
-              accessibilityLabel="Add Provider"
+              accessibilityLabel={t('providers.add')}
             >
               <Text style={[styles.addProviderText, { color: colors.accentText }]}>
-                Add Provider
+                {t('providers.add')}
               </Text>
             </Pressable>
           </View>
@@ -379,7 +399,7 @@ export function SettingsScreen({ visible, onClose }: SettingsScreenProps) {
             {/* Providers Section */}
             <View style={styles.section}>
               <Text style={[styles.sectionHeader, { color: colors.textTertiary }]}>
-                PROVIDERS
+                {t('providers.title').toUpperCase()}
               </Text>
               <View
                 style={[
@@ -405,10 +425,10 @@ export function SettingsScreen({ visible, onClose }: SettingsScreenProps) {
                   style={styles.addActionRow}
                   onPress={handleAddProvider}
                   accessibilityRole="button"
-                  accessibilityLabel="Add Provider"
+                  accessibilityLabel={t('providers.add')}
                 >
                   <Text style={[styles.addActionText, { color: colors.accent }]}>
-                    Add Provider
+                    {t('providers.add')}
                   </Text>
                 </Pressable>
               </View>
@@ -417,7 +437,7 @@ export function SettingsScreen({ visible, onClose }: SettingsScreenProps) {
             {/* System Prompts Section */}
             <View style={styles.section}>
               <Text style={[styles.sectionHeader, { color: colors.textTertiary }]}>
-                SYSTEM PROMPTS
+                {t('systemPrompts.title').toUpperCase()}
               </Text>
               <View
                 style={[
@@ -431,7 +451,7 @@ export function SettingsScreen({ visible, onClose }: SettingsScreenProps) {
                 {systemPrompts.length === 0 ? (
                   <View style={styles.emptyPrompts}>
                     <Text style={[styles.emptyPromptsText, { color: colors.textTertiary }]}>
-                      No system prompts configured
+                      {t('systemPrompts.empty')}
                     </Text>
                   </View>
                 ) : (
@@ -450,10 +470,10 @@ export function SettingsScreen({ visible, onClose }: SettingsScreenProps) {
                   style={styles.addActionRow}
                   onPress={handleAddPrompt}
                   accessibilityRole="button"
-                  accessibilityLabel="Add Prompt"
+                  accessibilityLabel={t('systemPrompts.add')}
                 >
                   <Text style={[styles.addActionText, { color: colors.accent }]}>
-                    Add Prompt
+                    {t('systemPrompts.add')}
                   </Text>
                 </Pressable>
               </View>
@@ -462,7 +482,7 @@ export function SettingsScreen({ visible, onClose }: SettingsScreenProps) {
             {/* Generation Parameters Section */}
             <View style={styles.section}>
               <Text style={[styles.sectionHeader, { color: colors.textTertiary }]}>
-                GENERATION PARAMETERS
+                {t('settings.generationParameters').toUpperCase()}
               </Text>
               <View
                 style={[
@@ -474,7 +494,7 @@ export function SettingsScreen({ visible, onClose }: SettingsScreenProps) {
                 ]}
               >
                 <GenerationParamRow
-                  label="Max Tokens"
+                  label={t('settings.maxTokens')}
                   value={String(generationParams.maxTokens)}
                   onPress={handleParamPress}
                   isLast
@@ -485,7 +505,7 @@ export function SettingsScreen({ visible, onClose }: SettingsScreenProps) {
             {/* Chat Section */}
             <View style={styles.section}>
               <Text style={[styles.sectionHeader, { color: colors.textTertiary }]}>
-                CHAT
+                {t('navigation.chat').toUpperCase()}
               </Text>
               <View
                 style={[
@@ -498,15 +518,51 @@ export function SettingsScreen({ visible, onClose }: SettingsScreenProps) {
               >
                 <View style={styles.settingToggleRow}>
                   <Text style={[styles.paramLabel, { color: colors.text }]}>
-                    Thinking Expanded by Default
+                    {t('settings.thinkingExpandedByDefault')}
                   </Text>
                   <Switch
                     value={thinkingExpandedByDefault}
                     onValueChange={setThinkingExpandedByDefault}
                     trackColor={{ false: colors.border, true: colors.accent }}
-                    accessibilityLabel="Thinking expanded by default"
+                    accessibilityLabel={t('settings.thinkingExpandedByDefault')}
                   />
                 </View>
+              </View>
+            </View>
+
+            {/* Appearance Section — Language */}
+            <View style={styles.section}>
+              <Text style={[styles.sectionHeader, { color: colors.textTertiary }]}>
+                {t('settings.appearance').toUpperCase()}
+              </Text>
+              <View
+                style={[
+                  styles.groupedList,
+                  {
+                    backgroundColor: colors.surface,
+                    borderRadius: borderRadii.groupedList,
+                  },
+                ]}
+              >
+                <Pressable
+                  style={styles.paramRow}
+                  onPress={handleLanguagePress}
+                  accessibilityRole="button"
+                  accessibilityLabel={`${t('settings.language')}: ${currentLocaleDisplay}`}
+                  accessibilityHint={t('settings.languageHint')}
+                >
+                  <Text style={[styles.paramLabel, { color: colors.text }]}>
+                    {t('settings.language')}
+                  </Text>
+                  <View style={styles.paramValueRow}>
+                    <Text style={[styles.paramValue, { color: colors.textSecondary }]}>
+                      {currentLocaleDisplay}
+                    </Text>
+                    <Text style={[styles.chevronRight, { color: colors.textTertiary }]}>
+                      {'\u203A'}
+                    </Text>
+                  </View>
+                </Pressable>
               </View>
             </View>
           </>
@@ -529,10 +585,10 @@ export function SettingsScreen({ visible, onClose }: SettingsScreenProps) {
             onPress={() => {}}
           >
             <Text style={[styles.modalTitle, { color: colors.text }]}>
-              Max Tokens
+              {t('settings.maxTokens')}
             </Text>
             <Text style={[styles.modalDescription, { color: colors.textSecondary }]}>
-              Maximum number of tokens to generate in the response.
+              {t('settings.maxTokensDescription')}
             </Text>
             <TextInput
               style={[
@@ -548,27 +604,27 @@ export function SettingsScreen({ visible, onClose }: SettingsScreenProps) {
               keyboardType="number-pad"
               autoFocus
               selectTextOnFocus
-              accessibilityLabel="Max Tokens value"
+              accessibilityLabel={t('settings.maxTokens')}
             />
             <View style={styles.modalButtons}>
               <Pressable
                 style={[styles.modalButton, styles.modalCancelButton]}
                 onPress={handleParamCancel}
                 accessibilityRole="button"
-                accessibilityLabel="Cancel"
+                accessibilityLabel={t('common.cancel')}
               >
                 <Text style={[styles.modalButtonText, { color: colors.textSecondary }]}>
-                  Cancel
+                  {t('common.cancel')}
                 </Text>
               </Pressable>
               <Pressable
                 style={[styles.modalButton, styles.modalSaveButton, { backgroundColor: colors.accent }]}
                 onPress={handleParamSave}
                 accessibilityRole="button"
-                accessibilityLabel="Save"
+                accessibilityLabel={t('common.save')}
               >
                 <Text style={[styles.modalButtonText, { color: colors.accentText }]}>
-                  Save
+                  {t('common.save')}
                 </Text>
               </Pressable>
             </View>
@@ -596,10 +652,10 @@ export function SettingsScreen({ visible, onClose }: SettingsScreenProps) {
               onPress={() => {}}
             >
               <Text style={[styles.modalTitle, { color: colors.text }]}>
-                Add System Prompt
+                {t('systemPrompts.add')}
               </Text>
               <Text style={[styles.modalDescription, { color: colors.textSecondary }]}>
-                Give your prompt a name and provide the system instructions.
+                {t('settings.addPromptDescription')}
               </Text>
               <TextInput
                 style={[
@@ -612,10 +668,10 @@ export function SettingsScreen({ visible, onClose }: SettingsScreenProps) {
                 ]}
                 value={newPromptName}
                 onChangeText={setNewPromptName}
-                placeholder="Prompt name"
+                placeholder={t('systemPrompts.namePlaceholder')}
                 placeholderTextColor={colors.textTertiary}
                 autoFocus
-                accessibilityLabel="Prompt name"
+                accessibilityLabel={t('systemPrompts.name')}
               />
               <TextInput
                 style={[
@@ -629,21 +685,21 @@ export function SettingsScreen({ visible, onClose }: SettingsScreenProps) {
                 ]}
                 value={newPromptContent}
                 onChangeText={setNewPromptContent}
-                placeholder="System prompt content…"
+                placeholder={t('systemPrompts.contentPlaceholder')}
                 placeholderTextColor={colors.textTertiary}
                 multiline
                 textAlignVertical="top"
-                accessibilityLabel="Prompt content"
+                accessibilityLabel={t('systemPrompts.content')}
               />
               <View style={styles.modalButtons}>
                 <Pressable
                   style={[styles.modalButton, styles.modalCancelButton]}
                   onPress={handleCancelAddPrompt}
                   accessibilityRole="button"
-                  accessibilityLabel="Cancel"
+                  accessibilityLabel={t('common.cancel')}
                 >
                   <Text style={[styles.modalButtonText, { color: colors.textSecondary }]}>
-                    Cancel
+                    {t('common.cancel')}
                   </Text>
                 </Pressable>
                 <Pressable
@@ -656,10 +712,10 @@ export function SettingsScreen({ visible, onClose }: SettingsScreenProps) {
                   onPress={handleSavePrompt}
                   disabled={!newPromptName.trim() || !newPromptContent.trim() || isSavingPrompt}
                   accessibilityRole="button"
-                  accessibilityLabel="Save"
+                  accessibilityLabel={t('common.save')}
                 >
                   <Text style={[styles.modalButtonText, { color: colors.accentText }]}>
-                    Save
+                    {t('common.save')}
                   </Text>
                 </Pressable>
               </View>
@@ -695,11 +751,12 @@ function getStatusDotColor(status: ConnectionStatus | undefined): string {
 
 function ProviderCard({ provider, modelCount, onPress, isLast }: ProviderCardProps) {
   const { colors } = useTheme();
+  const { t } = useTranslation();
   const { suffix: maskedKeyDisplay } = useMaskedKey(provider.id);
   const connectionState = useProviderStore((s) => s.connectionStatuses[provider.id]);
   const statusDotColor = getStatusDotColor(connectionState?.status);
   const apiTypeLabel = formatApiType(provider);
-  const modelCountLabel = `${modelCount} model${modelCount !== 1 ? 's' : ''}`;
+  const modelCountLabel = t('providers.modelCount', { count: modelCount });
 
   return (
     <Pressable
@@ -710,7 +767,7 @@ function ProviderCard({ provider, modelCount, onPress, isLast }: ProviderCardPro
       onPress={onPress}
       accessibilityRole="button"
       accessibilityLabel={`${provider.name}, ${modelCountLabel}, ${apiTypeLabel}`}
-      accessibilityHint="Opens provider details"
+      accessibilityHint={t('providers.openDetailsHint')}
     >
       <View style={styles.providerRow}>
         {/* Icon */}
@@ -733,7 +790,7 @@ function ProviderCard({ provider, modelCount, onPress, isLast }: ProviderCardPro
                 styles.statusDot,
                 { backgroundColor: statusDotColor },
               ]}
-              accessibilityLabel={`Connection status: ${connectionState?.status ?? 'untested'}`}
+              accessibilityLabel={t('providers.connectionStatus', { status: connectionState?.status ?? 'untested' })}
             />
             <Text
               style={[styles.providerName, { color: colors.text }]}
@@ -787,6 +844,7 @@ interface SystemPromptRowProps {
 
 function SystemPromptRow({ prompt, onToggleDefault, isLast }: SystemPromptRowProps) {
   const { colors } = useTheme();
+  const { t } = useTranslation();
   const preview = truncateText(prompt.content, SNIPPET_MAX_CHARS);
 
   return (
@@ -828,10 +886,10 @@ function SystemPromptRow({ prompt, onToggleDefault, isLast }: SystemPromptRowPro
       <Pressable
         style={styles.editButton}
         accessibilityRole="button"
-        accessibilityLabel={`Edit ${prompt.name}`}
+        accessibilityLabel={`${t('systemPrompts.edit')} ${prompt.name}`}
       >
         <Text style={[styles.editButtonText, { color: colors.accent }]}>
-          Edit
+          {t('accessibility.editButton')}
         </Text>
       </Pressable>
 

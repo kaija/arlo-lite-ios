@@ -2,6 +2,7 @@ import React, { useCallback, useMemo } from 'react';
 import { Pressable, SectionList, StyleSheet, Text, View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '@/theme';
 import { groupSessionsByDate } from '@/utils/session-grouping';
@@ -43,6 +44,7 @@ export function SessionSidebar({
   onNewChat,
 }: SessionSidebarProps) {
   const { colors, spacing } = useTheme();
+  const { t } = useTranslation();
   const insets = useSafeAreaInsets();
 
   // Group sessions by date for section rendering
@@ -84,25 +86,25 @@ export function SessionSidebar({
     () => (
       <View style={styles.footer}>
         <Text style={[styles.footerText, { color: colors.textTertiary }]}>
-          Swipe left to delete · hold to rename
+          {t('sessions.footerHint')}
         </Text>
       </View>
     ),
-    [colors.textTertiary]
+    [colors.textTertiary, t]
   );
 
   const listEmpty = useMemo(
     () => (
       <View style={styles.emptyState}>
         <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
-          No conversations yet
+          {t('sessions.empty')}
         </Text>
         <Text style={[styles.emptySubtext, { color: colors.textTertiary }]}>
-          Tap the compose button to start a new chat
+          {t('sessions.emptyHint')}
         </Text>
       </View>
     ),
-    [colors.textSecondary, colors.textTertiary]
+    [colors.textSecondary, colors.textTertiary, t]
   );
 
   return (
@@ -110,14 +112,14 @@ export function SessionSidebar({
       {/* Header with title and New Chat button */}
       <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
         <Text style={[styles.headerTitle, { color: colors.text }]}>
-          Chats
+          {t('navigation.chat')}
         </Text>
         <Pressable
           onPress={onNewChat}
           style={[styles.newChatButton, { backgroundColor: colors.surfaceSecondary }]}
           accessibilityRole="button"
-          accessibilityLabel="New chat"
-          accessibilityHint="Creates a new chat session"
+          accessibilityLabel={t('accessibility.newChatButton')}
+          accessibilityHint={t('sessions.newSessionHint')}
         >
           <ComposeIcon color={colors.accent} />
         </Pressable>

@@ -25,6 +25,7 @@ import {
 } from 'react-native';
 import { BlurView } from 'expo-blur';
 import Svg, { Path } from 'react-native-svg';
+import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '@/theme';
 import type { ThinkingLevel } from '@/stores/chat-store';
@@ -95,6 +96,7 @@ export function InputChrome({
   onContextRingPress,
 }: InputChromeProps) {
   const { colors, borderRadii, isDark } = useTheme();
+  const { t } = useTranslation();
 
   const [text, setText] = useState('');
   const inputRef = useRef<TextInput>(null);
@@ -144,7 +146,7 @@ export function InputChrome({
           <Pressable
             onPress={onContextRingPress}
             accessibilityRole="button"
-            accessibilityLabel="Show context usage breakdown"
+            accessibilityLabel={t('accessibility.contextUsageIndicator', { percentage: contextUsagePercent })}
           >
             <ContextRing percentage={contextUsagePercent} />
           </Pressable>
@@ -159,8 +161,8 @@ export function InputChrome({
           <Pressable
             onPress={onAttach}
             accessibilityRole="button"
-            accessibilityLabel="Attach file"
-            accessibilityHint="Double tap to attach a file or image"
+            accessibilityLabel={t('accessibility.attachFileButton')}
+            accessibilityHint={t('accessibility.attachFileHint')}
             style={styles.attachButton}
           >
             <PaperclipIcon color={colors.textTertiary} />
@@ -171,14 +173,14 @@ export function InputChrome({
             ref={inputRef}
             value={text}
             onChangeText={setText}
-            placeholder="Message"
+            placeholder={t('chat.placeholder')}
             placeholderTextColor={colors.textTertiary}
             multiline
             blurOnSubmit={false}
             returnKeyType="default"
             textAlignVertical="top"
-            accessibilityLabel="Message input"
-            accessibilityHint="Type your message here"
+            accessibilityLabel={t('accessibility.messageInput')}
+            accessibilityHint={t('accessibility.messageInputHint')}
             style={[
               styles.textInput,
               {

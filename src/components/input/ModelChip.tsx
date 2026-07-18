@@ -5,6 +5,7 @@ import Animated, {
   useAnimatedStyle,
   withSpring,
 } from 'react-native-reanimated';
+import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '@/theme';
 
@@ -25,6 +26,7 @@ export interface ModelChipProps {
  */
 export function ModelChip({ modelName, onPress }: ModelChipProps) {
   const { colors, borderRadii } = useTheme();
+  const { t } = useTranslation();
   const scale = useSharedValue(1);
   const opacity = useSharedValue(1);
 
@@ -50,8 +52,8 @@ export function ModelChip({ modelName, onPress }: ModelChipProps) {
         onPressIn={handlePressIn}
         onPressOut={handlePressOut}
         accessibilityRole="button"
-        accessibilityLabel={`Active model: ${modelName}`}
-        accessibilityHint="Double tap to open model picker"
+        accessibilityLabel={t('accessibility.modelLabel', { model: modelName })}
+        accessibilityHint={t('accessibility.modelSwitcherButton')}
         style={[
           styles.container,
           {
