@@ -8,13 +8,13 @@ import type { Provider, GenerationParams } from '../provider-store';
  * **Validates: Requirements 2.1**
  *
  * For any provider in the ProviderStore, its generationParams.maxTokens
- * SHALL be a positive integer. A newly created provider SHALL have
- * maxTokens 4096 when generationParams are not provided.
+ * SHALL be a positive integer when defined. A newly created provider SHALL have
+ * maxTokens 12000 and maxTokensEnabled false when generationParams are not provided.
  */
 
 // Mock provider-repo
 jest.mock('@/database/repositories/provider-repo', () => {
-  const DEFAULT_GENERATION_PARAMS = { maxTokens: 4096 };
+  const DEFAULT_GENERATION_PARAMS = { maxTokens: 12000, maxTokensEnabled: false };
 
   return {
     createProvider: jest.fn((_db, data) => {
@@ -115,7 +115,7 @@ describe('Property 3: Generation Params Schema Invariant', () => {
     );
   });
 
-  it('defaults to maxTokens 4096 when generationParams not provided', async () => {
+  it('defaults to maxTokens 12000 when generationParams not provided', async () => {
     await fc.assert(
       fc.asyncProperty(
         fc.constantFrom('openai', 'anthropic', 'custom'),
@@ -130,7 +130,8 @@ describe('Property 3: Generation Params Schema Invariant', () => {
             // No generationParams provided — should use defaults
           });
 
-          expect(provider.generationParams.maxTokens).toBe(4096);
+          expect(provider.generationParams.maxTokens).toBe(12000);
+          expect(provider.generationParams.maxTokensEnabled).toBe(false);
         },
       ),
       { numRuns: 100 },

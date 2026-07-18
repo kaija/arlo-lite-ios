@@ -207,6 +207,7 @@
     "about": "About",
     "generationParameters": "Generation Parameters",
     "maxTokens": "Max Tokens",
+    "maxTokensValue": "Max Token Limit",
     "maxTokensDescription": "Maximum number of tokens to generate in the response.",
     "thinkingExpandedByDefault": "Thinking Expanded by Default",
     "emptySubtitle": "Add a provider to start chatting with AI models",

@@ -9,12 +9,15 @@ export type OpenAIApiMode = 'responses' | 'chat-completions';
 
 /** Per-provider generation settings sent with completion requests. */
 export interface GenerationParams {
-  /** Maximum tokens to generate, default 4096 */
-  maxTokens: number;
+  /** Maximum tokens to generate. When undefined the parameter is not sent to the provider. Default 12000. */
+  maxTokens?: number;
+  /** Whether max tokens limiting is enabled. Default false (off). */
+  maxTokensEnabled?: boolean;
 }
 
 const DEFAULT_GENERATION_PARAMS: GenerationParams = {
-  maxTokens: 4096,
+  maxTokens: 12000,
+  maxTokensEnabled: false,
 };
 
 export interface ProviderRow {

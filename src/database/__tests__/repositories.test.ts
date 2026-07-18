@@ -79,7 +79,7 @@ describe('provider-repo', () => {
         'https://api.openai.com/v1',
         'responses',
         1,
-        '{"maxTokens":4096}',
+        '{"maxTokens":12000,"maxTokensEnabled":false}',
         null,
         null,
         null,
@@ -92,7 +92,7 @@ describe('provider-repo', () => {
       expect(result.baseUrl).toBe('https://api.openai.com/v1');
       expect(result.apiMode).toBe('responses');
       expect(result.streamingEnabled).toBe(true);
-      expect(result.generationParams).toEqual({ maxTokens: 4096 });
+      expect(result.generationParams).toEqual({ maxTokens: 12000, maxTokensEnabled: false });
     });
 
     it('defaults streamingEnabled to true', async () => {
@@ -111,7 +111,7 @@ describe('provider-repo', () => {
         'https://api.anthropic.com',
         null,
         1, // streaming_enabled = 1
-        '{"maxTokens":4096}',
+        '{"maxTokens":12000,"maxTokensEnabled":false}',
         null,
         null,
         null,

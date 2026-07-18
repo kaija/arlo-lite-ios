@@ -149,7 +149,7 @@ export function SettingsScreen({ visible, onClose }: SettingsScreenProps) {
     if (activeProvider) {
       return activeProvider.generationParams;
     }
-    return { maxTokens: 4096 };
+    return { maxTokens: 12000, maxTokensEnabled: false };
   }, [activeProvider]);
 
   // Edit modal state for generation params
@@ -277,9 +277,17 @@ export function SettingsScreen({ visible, onClose }: SettingsScreenProps) {
 
   /** Open the edit modal for max tokens. */
   const handleParamPress = useCallback(() => {
-    setEditParamValue(String(generationParams.maxTokens));
+    setEditParamValue(String(generationParams.maxTokens ?? 12000));
     setEditParamModalVisible(true);
   }, [generationParams]);
+
+  /** Toggle max tokens enabled/disabled. */
+  const handleMaxTokensToggle = useCallback((enabled: boolean) => {
+    if (!activeProvider) return;
+    updateProvider(activeProvider.id, {
+      generationParams: { ...generationParams, maxTokensEnabled: enabled },
+    });
+  }, [activeProvider, generationParams, updateProvider]);
 
   /** Save the edited generation parameter value. */
   const handleParamSave = useCallback(() => {
@@ -493,12 +501,25 @@ export function SettingsScreen({ visible, onClose }: SettingsScreenProps) {
                   },
                 ]}
               >
-                <GenerationParamRow
-                  label={t('settings.maxTokens')}
-                  value={String(generationParams.maxTokens)}
-                  onPress={handleParamPress}
-                  isLast
-                />
+                <View style={styles.settingToggleRow}>
+                  <Text style={[styles.paramLabel, { color: colors.text }]}>
+                    {t('settings.maxTokens')}
+                  </Text>
+                  <Switch
+                    value={generationParams.maxTokensEnabled ?? false}
+                    onValueChange={handleMaxTokensToggle}
+                    trackColor={{ false: colors.border, true: colors.accent }}
+                    accessibilityLabel={t('settings.maxTokens')}
+                  />
+                </View>
+                {generationParams.maxTokensEnabled && (
+                  <GenerationParamRow
+                    label={t('settings.maxTokensValue')}
+                    value={String(generationParams.maxTokens ?? 12000)}
+                    onPress={handleParamPress}
+                    isLast
+                  />
+                )}
               </View>
             </View>
 

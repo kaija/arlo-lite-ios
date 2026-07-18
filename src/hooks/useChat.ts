@@ -522,7 +522,9 @@ export function useChat(): UseChatResult {
         providerConfig: providerConfigForService,
         modelId: activeModelId,
         thinkingLevel,
-        maxTokens: providerConfig.generationParams.maxTokens,
+        ...(providerConfig.generationParams.maxTokensEnabled && providerConfig.generationParams.maxTokens !== undefined
+          ? { maxTokens: providerConfig.generationParams.maxTokens }
+          : {}),
       };
 
       if (providerConfig.streamingEnabled) {
@@ -592,7 +594,9 @@ export function useChat(): UseChatResult {
         providerConfig: providerConfigForService,
         modelId: activeModelId,
         thinkingLevel,
-        maxTokens: providerConfig.generationParams.maxTokens,
+        ...(providerConfig.generationParams.maxTokensEnabled && providerConfig.generationParams.maxTokens !== undefined
+          ? { maxTokens: providerConfig.generationParams.maxTokens }
+          : {}),
       };
 
       if (providerConfig.streamingEnabled) {

@@ -207,6 +207,7 @@
     "about": "關於",
     "generationParameters": "生成參數",
     "maxTokens": "最大 Token 數",
+    "maxTokensValue": "Token 上限值",
     "maxTokensDescription": "回覆中生成的最大 token 數量。",
     "thinkingExpandedByDefault": "預設展開思考內容",
     "emptySubtitle": "新增提供者以開始與 AI 模型對話",
