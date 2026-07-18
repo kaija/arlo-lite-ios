@@ -44,6 +44,9 @@ fi
 # Xcode build phases run with a minimal PATH that excludes Homebrew, so
 # "$(command -v node)" in .xcode.env resolves to nothing during archive.
 echo "export NODE_BINARY=$(command -v node)" > ios/.xcode.env.local
+# Xcode Cloud sets CI=TRUE (uppercase), which Expo's getenv rejects
+# ("GetEnv.NoBoolean: TRUE is not a boolean"). Normalize it.
+echo "export CI=1" >> ios/.xcode.env.local
 
 # Install CocoaPods dependencies
 cd ios
