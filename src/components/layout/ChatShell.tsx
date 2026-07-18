@@ -14,7 +14,7 @@
  * Requirements: 7.1, 7.2, 7.3, 7.4, 7.5, 14.1, 14.4
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Alert, FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
 import Animated, { useAnimatedStyle, interpolate, useAnimatedReaction, runOnJS } from 'react-native-reanimated';
@@ -129,6 +129,15 @@ export function ChatShell({ children }: ChatShellProps) {
   const activeModel = models.find(
     (m) => m.providerId === activeProviderId && m.modelId === activeModelId,
   );
+
+  // Build a provider ID → display name map for the model picker
+  const providerNameMap = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const p of providers) {
+      map.set(p.id, p.name);
+    }
+    return map;
+  }, [providers]);
 
   // If no active model but models exist, auto-select the first one
   useEffect(() => {
@@ -563,6 +572,7 @@ export function ChatShell({ children }: ChatShellProps) {
               visible={modelPickerVisible}
               models={models}
               activeModelId={activeModel?.id ?? null}
+              providerNames={providerNameMap}
               onSelect={handleModelSelect}
               onDismiss={closeModelPicker}
             />

@@ -16,7 +16,7 @@
  * Requirements: 8.1, 8.2, 8.3, 8.4, 8.5, 8.6, 8.7, 8.8, 8.9
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import Animated, {
   useAnimatedStyle,
@@ -38,27 +38,24 @@ export interface ModelPickerProps {
   models: ModelConfig[];
   /** Currently active model ID (the internal `id` field) */
   activeModelId: string | null;
+  /** Map of provider ID → display name */
+  providerNames: Map<string, string>;
   /** Called when a model is selected; receives providerId and modelId */
   onSelect: (providerId: string, modelId: string) => void;
   /** Called when the picker is dismissed (tap outside) */
   onDismiss: () => void;
 }
 
-interface ModelGroup {
-  providerName: string;
-  models: ModelConfig[];
-}
-
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 /** Maximum visible rows before scrolling activates */
-const MAX_VISIBLE_ROWS = 5;
+const MAX_VISIBLE_ROWS = 6;
 
-/** Approximate height per model row (name + subline + padding) */
-const ROW_HEIGHT = 52;
+/** Approximate height per model row (single line + padding) */
+const ROW_HEIGHT = 40;
 
-/** Section header height */
-const SECTION_HEADER_HEIGHT = 28;
+/** Section header height (unused but kept for reference) */
+const SECTION_HEADER_HEIGHT = 0;
 
 /** Vertical translate distance for the fade-up entrance */
 const TRANSLATE_Y_DISTANCE = 8;
@@ -71,59 +68,13 @@ const PICKER_EASING = Easing.bezier(
   DIALOG_EASING[3]
 );
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
-/**
- * Formats a context window size into a human-readable string.
- * e.g. 200000 → "200K", 128000 → "128K", 4096 → "4K"
- */
-function formatContextWindow(contextWindow: number | null): string | null {
-  if (contextWindow == null || contextWindow <= 0) return null;
-  if (contextWindow >= 1000) {
-    const k = Math.round(contextWindow / 1000);
-    return `${k}K`;
-  }
-  return `${contextWindow}`;
-}
-
-/**
- * Groups models by their provider ID and pairs them with provider names.
- * Uses the model's providerId to group — the provider name is derived
- * from the providerId (uppercase) as a fallback since we don't receive
- * provider objects here.
- */
-function groupModelsByProvider(
-  models: ModelConfig[],
-  providerNames?: Map<string, string>
-): ModelGroup[] {
-  const grouped = new Map<string, ModelConfig[]>();
-
-  for (const model of models) {
-    const existing = grouped.get(model.providerId);
-    if (existing) {
-      existing.push(model);
-    } else {
-      grouped.set(model.providerId, [model]);
-    }
-  }
-
-  const groups: ModelGroup[] = [];
-  for (const [providerId, providerModels] of grouped) {
-    groups.push({
-      providerName: providerNames?.get(providerId) ?? providerId,
-      models: providerModels,
-    });
-  }
-
-  return groups;
-}
-
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export function ModelPicker({
   visible,
   models,
   activeModelId,
+  providerNames,
   onSelect,
   onDismiss,
 }: ModelPickerProps) {
@@ -176,14 +127,11 @@ export function ModelPicker({
     transform: [{ translateY: translateY.value }],
   }));
 
-  // Group models by provider
-  const groups = useMemo(() => groupModelsByProvider(models), [models]);
-
-  // Calculate max scroll height (5 rows worth)
+  // Calculate max scroll height
   const totalRows = models.length;
   const needsScroll = totalRows > MAX_VISIBLE_ROWS;
   const maxHeight = needsScroll
-    ? MAX_VISIBLE_ROWS * ROW_HEIGHT + SECTION_HEADER_HEIGHT
+    ? MAX_VISIBLE_ROWS * ROW_HEIGHT
     : undefined;
 
   if (!shouldRender) return null;
@@ -242,72 +190,48 @@ export function ModelPicker({
             showsVerticalScrollIndicator={needsScroll}
             bounces={false}
           >
-            {groups.map((group) => (
-              <View key={group.providerName}>
-                {/* Section header */}
-                <View style={styles.sectionHeader}>
-                  <Text
-                    style={[
-                      styles.sectionHeaderText,
-                      { color: colors.textTertiary },
-                    ]}
-                  >
-                    {group.providerName.toUpperCase()}
-                  </Text>
-                </View>
+            {models.map((model) => {
+              const isActive = model.id === activeModelId;
+              const provider = providerNames.get(model.providerId) ?? model.providerId;
 
-                {/* Model rows */}
-                {group.models.map((model) => {
-                  const isActive = model.id === activeModelId;
-                  const contextLabel = formatContextWindow(model.contextWindow);
-
-                  return (
-                    <Pressable
-                      key={model.id}
-                      style={({ pressed }) => [
-                        styles.row,
-                        pressed && { backgroundColor: colors.surfaceSecondary },
+              return (
+                <Pressable
+                  key={model.id}
+                  style={({ pressed }) => [
+                    styles.row,
+                    pressed && { backgroundColor: colors.surfaceSecondary },
+                  ]}
+                  onPress={() => onSelect(model.providerId, model.modelId)}
+                  accessibilityRole="menuitem"
+                  accessibilityLabel={`${model.modelId}, ${provider}${isActive ? ', selected' : ''}`}
+                  accessibilityState={{ selected: isActive }}
+                >
+                  <View style={styles.rowContent}>
+                    <Text
+                      style={[
+                        styles.modelName,
+                        { color: colors.text },
                       ]}
-                      onPress={() => onSelect(model.providerId, model.modelId)}
-                      accessibilityRole="menuitem"
-                      accessibilityLabel={`${model.displayName}${contextLabel ? `, ${contextLabel} context` : ''}${isActive ? ', selected' : ''}`}
-                      accessibilityState={{ selected: isActive }}
+                      numberOfLines={1}
                     >
-                      <View style={styles.rowContent}>
-                        <Text
-                          style={[
-                            styles.modelName,
-                            { color: colors.text },
-                          ]}
-                          numberOfLines={1}
-                        >
-                          {model.displayName}
-                        </Text>
-                        {contextLabel && (
-                          <Text
-                            style={[
-                              styles.modelSubline,
-                              { color: colors.textTertiary },
-                            ]}
-                          >
-                            {contextLabel}
-                          </Text>
-                        )}
-                      </View>
+                      {model.modelId}
+                      <Text style={[styles.providerLabel, { color: colors.textTertiary }]}>
+                        {' '}({provider})
+                      </Text>
+                    </Text>
+                  </View>
 
-                      {/* Active checkmark */}
-                      {isActive && (
-                        <Text
-                          style={[styles.checkmark, { color: colors.accent }]}
-                        >
-                          {'\u2713'}
-                        </Text>
-                      )}
-                    </Pressable>
-                  );
-                })}
-              </View>
-            ))}
+                  {/* Active checkmark */}
+                  {isActive && (
+                    <Text
+                      style={[styles.checkmark, { color: colors.accent }]}
+                    >
+                      {'\u2713'}
+                    </Text>
+                  )}
+                </Pressable>
+              );
+            })}
           </ScrollView>
         )}
       </Animated.View>
@@ -323,8 +247,9 @@ const styles = StyleSheet.create({
     zIndex: 7,
     elevation: 7,
     justifyContent: 'flex-end',
+    alignItems: 'center',
     paddingBottom: 120, // Position above input chrome
-    paddingHorizontal: 16,
+    paddingHorizontal: 32,
   },
   scrim: {
     ...StyleSheet.absoluteFillObject,
@@ -332,29 +257,19 @@ const styles = StyleSheet.create({
   },
   card: {
     overflow: 'hidden',
-    paddingVertical: 8,
+    paddingVertical: 6,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.15,
     shadowRadius: 12,
     elevation: 8,
-  },
-  sectionHeader: {
-    paddingHorizontal: 16,
-    paddingTop: 12,
-    paddingBottom: 4,
-    height: SECTION_HEADER_HEIGHT,
-    justifyContent: 'center',
-  },
-  sectionHeaderText: {
-    fontSize: 11,
-    fontWeight: '600',
-    letterSpacing: 0.6,
+    maxWidth: 300,
+    width: '100%',
   },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
     minHeight: ROW_HEIGHT,
   },
   rowContent: {
@@ -362,33 +277,31 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   modelName: {
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: '400',
-    lineHeight: 20,
+    lineHeight: 18,
   },
-  modelSubline: {
+  providerLabel: {
     fontSize: 12,
     fontWeight: '400',
-    lineHeight: 16,
-    marginTop: 2,
   },
   checkmark: {
-    fontSize: 17,
+    fontSize: 16,
     fontWeight: '600',
-    marginLeft: 12,
+    marginLeft: 10,
   },
   emptyState: {
-    paddingVertical: 24,
-    paddingHorizontal: 20,
+    paddingVertical: 20,
+    paddingHorizontal: 16,
     alignItems: 'center',
   },
   emptyTitle: {
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: '500',
     marginBottom: 4,
   },
   emptySubtitle: {
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: '400',
     textAlign: 'center',
   },
