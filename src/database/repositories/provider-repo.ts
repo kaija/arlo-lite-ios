@@ -1,5 +1,6 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
 import type { CustomReasoningMode } from '@/domain/thinking-mapper';
+import { type PresetId, inferPresetFromType } from '@/constants/provider-presets';
 import { generateId } from '@/utils/uuid';
 import { getCurrentTimestamp } from '@/utils/date';
 
@@ -26,6 +27,7 @@ export interface ProviderRow {
   generation_params: string;
   reasoning_mode: string | null;
   thinking_kwargs: string | null;
+  preset: string | null;
   created_at: number;
   updated_at: number;
 }
@@ -39,6 +41,7 @@ export interface CreateProviderData {
   generationParams?: GenerationParams;
   reasoningMode?: CustomReasoningMode | null;
   thinkingKwargs?: Record<string, unknown> | null;
+  preset?: PresetId;
 }
 
 export interface UpdateProviderData {
@@ -49,11 +52,13 @@ export interface UpdateProviderData {
   generationParams?: GenerationParams;
   reasoningMode?: CustomReasoningMode | null;
   thinkingKwargs?: Record<string, unknown> | null;
+  preset?: PresetId;
 }
 
 export interface Provider {
   id: string;
   type: ProviderType;
+  preset: PresetId;
   name: string;
   baseUrl: string;
   apiMode: OpenAIApiMode | null;
@@ -76,6 +81,7 @@ function rowToProvider(row: ProviderRow): Provider {
   return {
     id: row.id,
     type: row.type,
+    preset: (row.preset as PresetId) ?? inferPresetFromType(row.type),
     name: row.name,
     baseUrl: row.base_url,
     apiMode: row.api_mode,
@@ -106,10 +112,11 @@ export async function createProvider(
   const generationParamsJson = JSON.stringify(generationParams);
   const reasoningMode = data.reasoningMode ?? null;
   const thinkingKwargsJson = data.thinkingKwargs ? JSON.stringify(data.thinkingKwargs) : null;
+  const preset = data.preset ?? null;
 
   await db.runAsync(
-    `INSERT INTO providers (id, type, name, base_url, api_mode, streaming_enabled, generation_params, reasoning_mode, thinking_kwargs, created_at, updated_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    `INSERT INTO providers (id, type, name, base_url, api_mode, streaming_enabled, generation_params, reasoning_mode, thinking_kwargs, preset, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     id,
     data.type,
     data.name,
@@ -119,6 +126,7 @@ export async function createProvider(
     generationParamsJson,
     reasoningMode,
     thinkingKwargsJson,
+    preset,
     now,
     now
   );
@@ -126,6 +134,7 @@ export async function createProvider(
   return {
     id,
     type: data.type,
+    preset: data.preset ?? inferPresetFromType(data.type),
     name: data.name,
     baseUrl: data.baseUrl,
     apiMode: data.apiMode ?? null,
@@ -200,6 +209,10 @@ export async function updateProvider(
   if (updates.thinkingKwargs !== undefined) {
     setClauses.push('thinking_kwargs = ?');
     params.push(updates.thinkingKwargs ? JSON.stringify(updates.thinkingKwargs) : null);
+  }
+  if (updates.preset !== undefined) {
+    setClauses.push('preset = ?');
+    params.push(updates.preset);
   }
 
   if (setClauses.length === 0) {

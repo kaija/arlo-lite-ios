@@ -10,7 +10,7 @@
  */
 
 import OpenAI, { APIError } from 'openai';
-import { fetch } from 'expo/fetch';
+import { xhrFetch } from '@/utils/xhr-fetch';
 import type {
   CompletionRequest,
   CompletionResponse,
@@ -87,7 +87,7 @@ export class CustomProvider implements IProvider {
       baseURL: baseUrl,
       maxRetries: 2,
       dangerouslyAllowBrowser: true,
-      fetch,
+      fetch: xhrFetch as unknown as OpenAI['_options']['fetch'],
     });
     this.clientKey = apiKey;
     this.clientBaseUrl = baseUrl;
@@ -147,15 +147,15 @@ export class CustomProvider implements IProvider {
 
       const choice = response.choices?.[0];
       const content = choice?.message?.content || '';
-      const reasoningContent = (choice?.message as Record<string, unknown>)?.reasoning_content as string | undefined;
+      const reasoningContent = (choice?.message as unknown as Record<string, unknown>)?.reasoning_content as string | undefined;
       const finishReason = choice?.finish_reason || 'stop';
 
       const usage: TokenUsage = {
         promptTokens: response.usage?.prompt_tokens || 0,
         completionTokens: response.usage?.completion_tokens || 0,
         totalTokens: response.usage?.total_tokens || 0,
-        cachedTokens: (response.usage as Record<string, unknown>)?.prompt_tokens_details
-          ? ((response.usage as Record<string, unknown>).prompt_tokens_details as Record<string, unknown>)?.cached_tokens as number | undefined
+        cachedTokens: (response.usage as unknown as Record<string, unknown>)?.prompt_tokens_details
+          ? ((response.usage as unknown as Record<string, unknown>).prompt_tokens_details as Record<string, unknown>)?.cached_tokens as number | undefined
           : undefined,
       };
 
@@ -291,17 +291,80 @@ export class CustomProvider implements IProvider {
    * the OpenAI models listing format.
    */
   async listModels(config: ProviderConfig, apiKey: string): Promise<string[]> {
-    const client = this.getClient(apiKey, config.baseUrl);
-
+    // Try with the primary client (uses expo/fetch)
     try {
+      console.log('[listModels] SDK attempt, baseUrl:', config.baseUrl);
+      const client = this.getClient(apiKey, config.baseUrl);
       const list = await client.models.list();
+      console.log('[listModels] SDK list obtained, iterating...');
       const modelIds: string[] = [];
       for await (const model of list) {
+        console.log('[listModels] SDK model:', model.id);
         modelIds.push(model.id);
       }
+      console.log('[listModels] SDK result count:', modelIds.length);
+      if (modelIds.length > 0) {
+        return modelIds.sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
+      }
+    } catch (err) {
+      console.log('[listModels] SDK failed:', err instanceof Error ? err.message : err);
+    }
+
+    // Fallback: use XMLHttpRequest which goes through RN's classic networking
+    // bridge and properly respects NSAllowsArbitraryLoads ATS configuration.
+    // Both expo/fetch and globalThis.fetch fail on HTTP URLs with New Architecture.
+    try {
+      const url = config.baseUrl.replace(/\/+$/, '') + '/models';
+      console.log('[listModels] XHR fallback fetch:', url);
+      
+      const json = await new Promise<Record<string, unknown>>((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open('GET', url, true);
+        xhr.setRequestHeader('Accept', 'application/json');
+        if (apiKey && apiKey !== 'sk-no-key-required') {
+          xhr.setRequestHeader('Authorization', `Bearer ${apiKey}`);
+        }
+        xhr.timeout = 10000;
+        xhr.onload = () => {
+          console.log('[listModels] XHR status:', xhr.status);
+          if (xhr.status >= 200 && xhr.status < 300) {
+            try {
+              console.log('[listModels] XHR response (first 500):', xhr.responseText.substring(0, 500));
+              resolve(JSON.parse(xhr.responseText));
+            } catch (e) {
+              reject(new Error('Invalid JSON response'));
+            }
+          } else {
+            reject(new Error(`HTTP ${xhr.status}`));
+          }
+        };
+        xhr.onerror = () => reject(new Error('XHR network error'));
+        xhr.ontimeout = () => reject(new Error('XHR timeout'));
+        xhr.send();
+      });
+
+      const modelIds: string[] = [];
+
+      // OpenAI format: { data: [{ id: "model-name" }] }
+      if (Array.isArray(json.data)) {
+        for (const item of json.data as Array<{ id?: string }>) {
+          if (item.id) modelIds.push(item.id);
+        }
+        console.log('[listModels] Parsed from data[]:', modelIds.length);
+      }
+      // Ollama format: { models: [{ name: "model-name", model?: "model-name" }] }
+      if (modelIds.length === 0 && Array.isArray(json.models)) {
+        for (const item of json.models as Array<{ name?: string; model?: string }>) {
+          if (item.name) modelIds.push(item.name);
+          else if (item.model) modelIds.push(item.model);
+        }
+        console.log('[listModels] Parsed from models[]:', modelIds.length);
+      }
+
+      console.log('[listModels] XHR fallback total:', modelIds.length, modelIds);
       return modelIds.sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
-    } catch {
-      // Many custom endpoints don't support /models — fail gracefully
+    } catch (err) {
+      console.log('[listModels] XHR fallback failed:', err instanceof Error ? err.message : err);
       return [];
     }
   }

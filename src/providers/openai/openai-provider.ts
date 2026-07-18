@@ -57,7 +57,7 @@ export class OpenAIProvider implements IProvider {
       baseURL: baseUrl,
       maxRetries: 2,
       dangerouslyAllowBrowser: true,
-      fetch,
+      fetch: fetch as unknown as OpenAI['_options']['fetch'],
     });
     this.clientKey = apiKey;
     this.clientBaseUrl = baseUrl;
@@ -635,8 +635,8 @@ function classifyOpenAIError(error: unknown, baseUrl?: string): ProviderError {
       url: baseUrl,
       status,
       message: error.message,
-      code: (error as Record<string, unknown>).code,
-      type: (error as Record<string, unknown>).type,
+      code: (error as unknown as Record<string, unknown>).code,
+      type: (error as unknown as Record<string, unknown>).type,
       body: JSON.stringify(error.error, null, 2),
     });
 

@@ -1,0 +1,513 @@
+{
+  "pbtResults": {
+    "8.1 Write property test for preset-to-wireType mapping consistency": {
+      "status": "passed",
+      "lastRunTimestamp": 1784297673889
+    },
+    "8.2 Write property test for preset defaults resolution completeness": {
+      "status": "passed",
+      "lastRunTimestamp": 1784297674697
+    },
+    "8.3 Write property test for legacy preset inference round-trip": {
+      "status": "passed",
+      "lastRunTimestamp": 1784297675588
+    },
+    "8.4 Write property test for API key requirement consistency": {
+      "status": "passed",
+      "lastRunTimestamp": 1784297676393
+    }
+  },
+  "executionHistory": {
+    "1.1 Create `src/constants/provider-presets.ts` with types and preset data": [
+      {
+        "executionId": "45deede9-f3bf-4d33-8f43-009c7708d8f6",
+        "chatSessionId": "sess_46dc6424-9d9f-46fe-90c5-e19f68f6b6b5",
+        "timestamp": 1784296379559
+      },
+      {
+        "executionId": "45deede9-f3bf-4d33-8f43-009c7708d8f6",
+        "chatSessionId": "sess_46dc6424-9d9f-46fe-90c5-e19f68f6b6b5",
+        "timestamp": 1784296390130
+      },
+      {
+        "executionId": "45deede9-f3bf-4d33-8f43-009c7708d8f6",
+        "chatSessionId": "sess_46dc6424-9d9f-46fe-90c5-e19f68f6b6b5",
+        "timestamp": 1784296530408
+      }
+    ],
+    "1.2 Write unit tests for provider presets registry": [
+      {
+        "executionId": "45deede9-f3bf-4d33-8f43-009c7708d8f6",
+        "chatSessionId": "sess_46dc6424-9d9f-46fe-90c5-e19f68f6b6b5",
+        "timestamp": 1784296379608
+      },
+      {
+        "executionId": "45deede9-f3bf-4d33-8f43-009c7708d8f6",
+        "chatSessionId": "sess_46dc6424-9d9f-46fe-90c5-e19f68f6b6b5",
+        "timestamp": 1784296538688
+      },
+      {
+        "executionId": "45deede9-f3bf-4d33-8f43-009c7708d8f6",
+        "chatSessionId": "sess_46dc6424-9d9f-46fe-90c5-e19f68f6b6b5",
+        "timestamp": 1784296670654
+      }
+    ],
+    "2.1 Create `src/database/migrations/v5.ts` migration file": [
+      {
+        "executionId": "45deede9-f3bf-4d33-8f43-009c7708d8f6",
+        "chatSessionId": "sess_46dc6424-9d9f-46fe-90c5-e19f68f6b6b5",
+        "timestamp": 1784296379678
+      },
+      {
+        "executionId": "45deede9-f3bf-4d33-8f43-009c7708d8f6",
+        "chatSessionId": "sess_46dc6424-9d9f-46fe-90c5-e19f68f6b6b5",
+        "timestamp": 1784296390872
+      },
+      {
+        "executionId": "45deede9-f3bf-4d33-8f43-009c7708d8f6",
+        "chatSessionId": "sess_46dc6424-9d9f-46fe-90c5-e19f68f6b6b5",
+        "timestamp": 1784296531213
+      }
+    ],
+    "2.2 Register migration v5 in `src/database/database.ts`": [
+      {
+        "executionId": "45deede9-f3bf-4d33-8f43-009c7708d8f6",
+        "chatSessionId": "sess_46dc6424-9d9f-46fe-90c5-e19f68f6b6b5",
+        "timestamp": 1784296379713
+      },
+      {
+        "executionId": "45deede9-f3bf-4d33-8f43-009c7708d8f6",
+        "chatSessionId": "sess_46dc6424-9d9f-46fe-90c5-e19f68f6b6b5",
+        "timestamp": 1784296539347
+      },
+      {
+        "executionId": "45deede9-f3bf-4d33-8f43-009c7708d8f6",
+        "chatSessionId": "sess_46dc6424-9d9f-46fe-90c5-e19f68f6b6b5",
+        "timestamp": 1784296671394
+      }
+    ],
+    "2.3 Update `src/database/repositories/provider-repo.ts` to support preset field": [
+      {
+        "executionId": "45deede9-f3bf-4d33-8f43-009c7708d8f6",
+        "chatSessionId": "sess_46dc6424-9d9f-46fe-90c5-e19f68f6b6b5",
+        "timestamp": 1784296379745
+      },
+      {
+        "executionId": "45deede9-f3bf-4d33-8f43-009c7708d8f6",
+        "chatSessionId": "sess_46dc6424-9d9f-46fe-90c5-e19f68f6b6b5",
+        "timestamp": 1784296540314
+      },
+      {
+        "executionId": "45deede9-f3bf-4d33-8f43-009c7708d8f6",
+        "chatSessionId": "sess_46dc6424-9d9f-46fe-90c5-e19f68f6b6b5",
+        "timestamp": 1784296672323
+      }
+    ],
+    "3. Checkpoint — Database layer complete": [
+      {
+        "executionId": "45deede9-f3bf-4d33-8f43-009c7708d8f6",
+        "chatSessionId": "sess_46dc6424-9d9f-46fe-90c5-e19f68f6b6b5",
+        "timestamp": 1784296379777
+      },
+      {
+        "executionId": "45deede9-f3bf-4d33-8f43-009c7708d8f6",
+        "chatSessionId": "sess_46dc6424-9d9f-46fe-90c5-e19f68f6b6b5",
+        "timestamp": 1784297823144
+      },
+      {
+        "executionId": "45deede9-f3bf-4d33-8f43-009c7708d8f6",
+        "chatSessionId": "sess_46dc6424-9d9f-46fe-90c5-e19f68f6b6b5",
+        "timestamp": 1784297866228
+      }
+    ],
+    "4.1 Update `src/stores/provider-store.ts` to pass preset through": [
+      {
+        "executionId": "45deede9-f3bf-4d33-8f43-009c7708d8f6",
+        "chatSessionId": "sess_46dc6424-9d9f-46fe-90c5-e19f68f6b6b5",
+        "timestamp": 1784296379811
+      },
+      {
+        "executionId": "45deede9-f3bf-4d33-8f43-009c7708d8f6",
+        "chatSessionId": "sess_46dc6424-9d9f-46fe-90c5-e19f68f6b6b5",
+        "timestamp": 1784296682672
+      },
+      {
+        "executionId": "45deede9-f3bf-4d33-8f43-009c7708d8f6",
+        "chatSessionId": "sess_46dc6424-9d9f-46fe-90c5-e19f68f6b6b5",
+        "timestamp": 1784296746573
+      }
+    ],
+    "4.2 Add i18n keys to `src/i18n/locales/en.json`": [
+      {
+        "executionId": "45deede9-f3bf-4d33-8f43-009c7708d8f6",
+        "chatSessionId": "sess_46dc6424-9d9f-46fe-90c5-e19f68f6b6b5",
+        "timestamp": 1784296379857
+      },
+      {
+        "executionId": "45deede9-f3bf-4d33-8f43-009c7708d8f6",
+        "chatSessionId": "sess_46dc6424-9d9f-46fe-90c5-e19f68f6b6b5",
+        "timestamp": 1784296391744
+      },
+      {
+        "executionId": "45deede9-f3bf-4d33-8f43-009c7708d8f6",
+        "chatSessionId": "sess_46dc6424-9d9f-46fe-90c5-e19f68f6b6b5",
+        "timestamp": 1784296532320
+      }
+    ],
+    "4.3 Add i18n keys to `src/i18n/locales/zh-TW.json`": [
+      {
+        "executionId": "45deede9-f3bf-4d33-8f43-009c7708d8f6",
+        "chatSessionId": "sess_46dc6424-9d9f-46fe-90c5-e19f68f6b6b5",
+        "timestamp": 1784296379910
+      },
+      {
+        "executionId": "45deede9-f3bf-4d33-8f43-009c7708d8f6",
+        "chatSessionId": "sess_46dc6424-9d9f-46fe-90c5-e19f68f6b6b5",
+        "timestamp": 1784296392642
+      },
+      {
+        "executionId": "45deede9-f3bf-4d33-8f43-009c7708d8f6",
+        "chatSessionId": "sess_46dc6424-9d9f-46fe-90c5-e19f68f6b6b5",
+        "timestamp": 1784296533115
+      }
+    ],
+    "5.1 Install `@react-native-picker/picker` dependency and add Picker component": [
+      {
+        "executionId": "45deede9-f3bf-4d33-8f43-009c7708d8f6",
+        "chatSessionId": "sess_46dc6424-9d9f-46fe-90c5-e19f68f6b6b5",
+        "timestamp": 1784296379955
+      },
+      {
+        "executionId": "45deede9-f3bf-4d33-8f43-009c7708d8f6",
+        "chatSessionId": "sess_46dc6424-9d9f-46fe-90c5-e19f68f6b6b5",
+        "timestamp": 1784296683502
+      },
+      {
+        "executionId": "45deede9-f3bf-4d33-8f43-009c7708d8f6",
+        "chatSessionId": "sess_46dc6424-9d9f-46fe-90c5-e19f68f6b6b5",
+        "timestamp": 1784296747409
+      }
+    ],
+    "5.2 Replace segmented control with Provider Dropdown in add mode": [
+      {
+        "executionId": "45deede9-f3bf-4d33-8f43-009c7708d8f6",
+        "chatSessionId": "sess_46dc6424-9d9f-46fe-90c5-e19f68f6b6b5",
+        "timestamp": 1784296379991
+      },
+      {
+        "executionId": "45deede9-f3bf-4d33-8f43-009c7708d8f6",
+        "chatSessionId": "sess_46dc6424-9d9f-46fe-90c5-e19f68f6b6b5",
+        "timestamp": 1784296770241
+      },
+      {
+        "executionId": "45deede9-f3bf-4d33-8f43-009c7708d8f6",
+        "chatSessionId": "sess_46dc6424-9d9f-46fe-90c5-e19f68f6b6b5",
+        "timestamp": 1784297051621
+      }
+    ],
+    "5.3 Add contextual help text below dropdown": [
+      {
+        "executionId": "45deede9-f3bf-4d33-8f43-009c7708d8f6",
+        "chatSessionId": "sess_46dc6424-9d9f-46fe-90c5-e19f68f6b6b5",
+        "timestamp": 1784296380028
+      },
+      {
+        "executionId": "45deede9-f3bf-4d33-8f43-009c7708d8f6",
+        "chatSessionId": "sess_46dc6424-9d9f-46fe-90c5-e19f68f6b6b5",
+        "timestamp": 1784297052469
+      },
+      {
+        "executionId": "45deede9-f3bf-4d33-8f43-009c7708d8f6",
+        "chatSessionId": "sess_46dc6424-9d9f-46fe-90c5-e19f68f6b6b5",
+        "timestamp": 1784297059344
+      }
+    ],
+    "5.4 Disable dropdown in edit mode": [
+      {
+        "executionId": "45deede9-f3bf-4d33-8f43-009c7708d8f6",
+        "chatSessionId": "sess_46dc6424-9d9f-46fe-90c5-e19f68f6b6b5",
+        "timestamp": 1784296380060
+      },
+      {
+        "executionId": "45deede9-f3bf-4d33-8f43-009c7708d8f6",
+        "chatSessionId": "sess_46dc6424-9d9f-46fe-90c5-e19f68f6b6b5",
+        "timestamp": 1784297053369
+      },
+      {
+        "executionId": "45deede9-f3bf-4d33-8f43-009c7708d8f6",
+        "chatSessionId": "sess_46dc6424-9d9f-46fe-90c5-e19f68f6b6b5",
+        "timestamp": 1784297059508
+      }
+    ],
+    "6.1 Implement section layout rules based on wireType": [
+      {
+        "executionId": "45deede9-f3bf-4d33-8f43-009c7708d8f6",
+        "chatSessionId": "sess_46dc6424-9d9f-46fe-90c5-e19f68f6b6b5",
+        "timestamp": 1784296380100
+      },
+      {
+        "executionId": "45deede9-f3bf-4d33-8f43-009c7708d8f6",
+        "chatSessionId": "sess_46dc6424-9d9f-46fe-90c5-e19f68f6b6b5",
+        "timestamp": 1784297066372
+      },
+      {
+        "executionId": "45deede9-f3bf-4d33-8f43-009c7708d8f6",
+        "chatSessionId": "sess_46dc6424-9d9f-46fe-90c5-e19f68f6b6b5",
+        "timestamp": 1784297317414
+      }
+    ],
+    "6.2 Add reasoning mode help text": [
+      {
+        "executionId": "45deede9-f3bf-4d33-8f43-009c7708d8f6",
+        "chatSessionId": "sess_46dc6424-9d9f-46fe-90c5-e19f68f6b6b5",
+        "timestamp": 1784296380145
+      },
+      {
+        "executionId": "45deede9-f3bf-4d33-8f43-009c7708d8f6",
+        "chatSessionId": "sess_46dc6424-9d9f-46fe-90c5-e19f68f6b6b5",
+        "timestamp": 1784297067154
+      },
+      {
+        "executionId": "45deede9-f3bf-4d33-8f43-009c7708d8f6",
+        "chatSessionId": "sess_46dc6424-9d9f-46fe-90c5-e19f68f6b6b5",
+        "timestamp": 1784297318001
+      }
+    ],
+    "6.3 Implement API key field conditional logic": [
+      {
+        "executionId": "45deede9-f3bf-4d33-8f43-009c7708d8f6",
+        "chatSessionId": "sess_46dc6424-9d9f-46fe-90c5-e19f68f6b6b5",
+        "timestamp": 1784296380177
+      },
+      {
+        "executionId": "45deede9-f3bf-4d33-8f43-009c7708d8f6",
+        "chatSessionId": "sess_46dc6424-9d9f-46fe-90c5-e19f68f6b6b5",
+        "timestamp": 1784297068102
+      },
+      {
+        "executionId": "45deede9-f3bf-4d33-8f43-009c7708d8f6",
+        "chatSessionId": "sess_46dc6424-9d9f-46fe-90c5-e19f68f6b6b5",
+        "timestamp": 1784297318902
+      }
+    ],
+    "6.4 Implement connection test button with enable/disable logic": [
+      {
+        "executionId": "45deede9-f3bf-4d33-8f43-009c7708d8f6",
+        "chatSessionId": "sess_46dc6424-9d9f-46fe-90c5-e19f68f6b6b5",
+        "timestamp": 1784296380229
+      },
+      {
+        "executionId": "45deede9-f3bf-4d33-8f43-009c7708d8f6",
+        "chatSessionId": "sess_46dc6424-9d9f-46fe-90c5-e19f68f6b6b5",
+        "timestamp": 1784297324301
+      },
+      {
+        "executionId": "45deede9-f3bf-4d33-8f43-009c7708d8f6",
+        "chatSessionId": "sess_46dc6424-9d9f-46fe-90c5-e19f68f6b6b5",
+        "timestamp": 1784297570930
+      }
+    ],
+    "6.5 Wire up save handler to persist preset field": [
+      {
+        "executionId": "45deede9-f3bf-4d33-8f43-009c7708d8f6",
+        "chatSessionId": "sess_46dc6424-9d9f-46fe-90c5-e19f68f6b6b5",
+        "timestamp": 1784296380260
+      },
+      {
+        "executionId": "45deede9-f3bf-4d33-8f43-009c7708d8f6",
+        "chatSessionId": "sess_46dc6424-9d9f-46fe-90c5-e19f68f6b6b5",
+        "timestamp": 1784297325102
+      },
+      {
+        "executionId": "45deede9-f3bf-4d33-8f43-009c7708d8f6",
+        "chatSessionId": "sess_46dc6424-9d9f-46fe-90c5-e19f68f6b6b5",
+        "timestamp": 1784297571816
+      }
+    ],
+    "7. Checkpoint — UI implementation complete": [
+      {
+        "executionId": "45deede9-f3bf-4d33-8f43-009c7708d8f6",
+        "chatSessionId": "sess_46dc6424-9d9f-46fe-90c5-e19f68f6b6b5",
+        "timestamp": 1784296380294
+      },
+      {
+        "executionId": "45deede9-f3bf-4d33-8f43-009c7708d8f6",
+        "chatSessionId": "sess_46dc6424-9d9f-46fe-90c5-e19f68f6b6b5",
+        "timestamp": 1784297871163
+      },
+      {
+        "executionId": "45deede9-f3bf-4d33-8f43-009c7708d8f6",
+        "chatSessionId": "sess_46dc6424-9d9f-46fe-90c5-e19f68f6b6b5",
+        "timestamp": 1784298489819
+      }
+    ],
+    "8.1 Write property test for preset-to-wireType mapping consistency": [
+      {
+        "executionId": "45deede9-f3bf-4d33-8f43-009c7708d8f6",
+        "chatSessionId": "sess_46dc6424-9d9f-46fe-90c5-e19f68f6b6b5",
+        "timestamp": 1784296380326
+      },
+      {
+        "executionId": "45deede9-f3bf-4d33-8f43-009c7708d8f6",
+        "chatSessionId": "sess_46dc6424-9d9f-46fe-90c5-e19f68f6b6b5",
+        "timestamp": 1784297577983
+      },
+      {
+        "executionId": "45deede9-f3bf-4d33-8f43-009c7708d8f6",
+        "chatSessionId": "sess_46dc6424-9d9f-46fe-90c5-e19f68f6b6b5",
+        "timestamp": 1784297690071
+      }
+    ],
+    "8.2 Write property test for preset defaults resolution completeness": [
+      {
+        "executionId": "45deede9-f3bf-4d33-8f43-009c7708d8f6",
+        "chatSessionId": "sess_46dc6424-9d9f-46fe-90c5-e19f68f6b6b5",
+        "timestamp": 1784296380377
+      },
+      {
+        "executionId": "45deede9-f3bf-4d33-8f43-009c7708d8f6",
+        "chatSessionId": "sess_46dc6424-9d9f-46fe-90c5-e19f68f6b6b5",
+        "timestamp": 1784297578817
+      },
+      {
+        "executionId": "45deede9-f3bf-4d33-8f43-009c7708d8f6",
+        "chatSessionId": "sess_46dc6424-9d9f-46fe-90c5-e19f68f6b6b5",
+        "timestamp": 1784297690883
+      }
+    ],
+    "8.3 Write property test for legacy preset inference round-trip": [
+      {
+        "executionId": "45deede9-f3bf-4d33-8f43-009c7708d8f6",
+        "chatSessionId": "sess_46dc6424-9d9f-46fe-90c5-e19f68f6b6b5",
+        "timestamp": 1784296380445
+      },
+      {
+        "executionId": "45deede9-f3bf-4d33-8f43-009c7708d8f6",
+        "chatSessionId": "sess_46dc6424-9d9f-46fe-90c5-e19f68f6b6b5",
+        "timestamp": 1784297579687
+      },
+      {
+        "executionId": "45deede9-f3bf-4d33-8f43-009c7708d8f6",
+        "chatSessionId": "sess_46dc6424-9d9f-46fe-90c5-e19f68f6b6b5",
+        "timestamp": 1784297691814
+      }
+    ],
+    "8.4 Write property test for API key requirement consistency": [
+      {
+        "executionId": "45deede9-f3bf-4d33-8f43-009c7708d8f6",
+        "chatSessionId": "sess_46dc6424-9d9f-46fe-90c5-e19f68f6b6b5",
+        "timestamp": 1784296380479
+      },
+      {
+        "executionId": "45deede9-f3bf-4d33-8f43-009c7708d8f6",
+        "chatSessionId": "sess_46dc6424-9d9f-46fe-90c5-e19f68f6b6b5",
+        "timestamp": 1784297580464
+      },
+      {
+        "executionId": "45deede9-f3bf-4d33-8f43-009c7708d8f6",
+        "chatSessionId": "sess_46dc6424-9d9f-46fe-90c5-e19f68f6b6b5",
+        "timestamp": 1784297692518
+      }
+    ],
+    "9.1 Write integration test for migration v5": [
+      {
+        "executionId": "45deede9-f3bf-4d33-8f43-009c7708d8f6",
+        "chatSessionId": "sess_46dc6424-9d9f-46fe-90c5-e19f68f6b6b5",
+        "timestamp": 1784296380528
+      },
+      {
+        "executionId": "45deede9-f3bf-4d33-8f43-009c7708d8f6",
+        "chatSessionId": "sess_46dc6424-9d9f-46fe-90c5-e19f68f6b6b5",
+        "timestamp": 1784297698864
+      },
+      {
+        "executionId": "45deede9-f3bf-4d33-8f43-009c7708d8f6",
+        "chatSessionId": "sess_46dc6424-9d9f-46fe-90c5-e19f68f6b6b5",
+        "timestamp": 1784297810360
+      }
+    ],
+    "9.2 Write integration test for create + read round-trip with preset": [
+      {
+        "executionId": "45deede9-f3bf-4d33-8f43-009c7708d8f6",
+        "chatSessionId": "sess_46dc6424-9d9f-46fe-90c5-e19f68f6b6b5",
+        "timestamp": 1784296380564
+      },
+      {
+        "executionId": "45deede9-f3bf-4d33-8f43-009c7708d8f6",
+        "chatSessionId": "sess_46dc6424-9d9f-46fe-90c5-e19f68f6b6b5",
+        "timestamp": 1784297699652
+      },
+      {
+        "executionId": "45deede9-f3bf-4d33-8f43-009c7708d8f6",
+        "chatSessionId": "sess_46dc6424-9d9f-46fe-90c5-e19f68f6b6b5",
+        "timestamp": 1784297811399
+      }
+    ],
+    "10. Final checkpoint": [
+      {
+        "executionId": "45deede9-f3bf-4d33-8f43-009c7708d8f6",
+        "chatSessionId": "sess_46dc6424-9d9f-46fe-90c5-e19f68f6b6b5",
+        "timestamp": 1784296380611
+      },
+      {
+        "executionId": "45deede9-f3bf-4d33-8f43-009c7708d8f6",
+        "chatSessionId": "sess_46dc6424-9d9f-46fe-90c5-e19f68f6b6b5",
+        "timestamp": 1784298494918
+      },
+      {
+        "executionId": "45deede9-f3bf-4d33-8f43-009c7708d8f6",
+        "chatSessionId": "sess_46dc6424-9d9f-46fe-90c5-e19f68f6b6b5",
+        "timestamp": 1784298500261
+      }
+    ],
+    "1. Provider Presets Registry": [
+      {
+        "executionId": "45deede9-f3bf-4d33-8f43-009c7708d8f6",
+        "chatSessionId": "sess_46dc6424-9d9f-46fe-90c5-e19f68f6b6b5",
+        "timestamp": 1784296670691
+      }
+    ],
+    "2. Database migration and repository updates": [
+      {
+        "executionId": "45deede9-f3bf-4d33-8f43-009c7708d8f6",
+        "chatSessionId": "sess_46dc6424-9d9f-46fe-90c5-e19f68f6b6b5",
+        "timestamp": 1784296672358
+      }
+    ],
+    "4. Provider store and i18n updates": [
+      {
+        "executionId": "45deede9-f3bf-4d33-8f43-009c7708d8f6",
+        "chatSessionId": "sess_46dc6424-9d9f-46fe-90c5-e19f68f6b6b5",
+        "timestamp": 1784296746608
+      }
+    ],
+    "5. ProviderDetailScreen UI — Dropdown and preset selection": [
+      {
+        "executionId": "45deede9-f3bf-4d33-8f43-009c7708d8f6",
+        "chatSessionId": "sess_46dc6424-9d9f-46fe-90c5-e19f68f6b6b5",
+        "timestamp": 1784297059555
+      }
+    ],
+    "6. ProviderDetailScreen UI — Section restructuring and form logic": [
+      {
+        "executionId": "45deede9-f3bf-4d33-8f43-009c7708d8f6",
+        "chatSessionId": "sess_46dc6424-9d9f-46fe-90c5-e19f68f6b6b5",
+        "timestamp": 1784297571899
+      }
+    ],
+    "8. Property-based tests": [
+      {
+        "executionId": "45deede9-f3bf-4d33-8f43-009c7708d8f6",
+        "chatSessionId": "sess_46dc6424-9d9f-46fe-90c5-e19f68f6b6b5",
+        "timestamp": 1784297692585
+      }
+    ],
+    "9. Integration tests": [
+      {
+        "executionId": "45deede9-f3bf-4d33-8f43-009c7708d8f6",
+        "chatSessionId": "sess_46dc6424-9d9f-46fe-90c5-e19f68f6b6b5",
+        "timestamp": 1784297811448
+      }
+    ]
+  }
+}

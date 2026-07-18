@@ -80,6 +80,9 @@ describe('provider-repo', () => {
         'responses',
         1,
         '{"maxTokens":4096}',
+        null,
+        null,
+        null,
         1700000000000,
         1700000000000
       );
@@ -109,6 +112,9 @@ describe('provider-repo', () => {
         null,
         1, // streaming_enabled = 1
         '{"maxTokens":4096}',
+        null,
+        null,
+        null,
         expect.any(Number),
         expect.any(Number)
       );
@@ -152,6 +158,9 @@ describe('provider-repo', () => {
         api_mode: 'responses',
         streaming_enabled: 1,
         generation_params: '{"temperature":0.7,"maxTokens":4096}',
+        reasoning_mode: null,
+        thinking_kwargs: null,
+        preset: null,
         created_at: 1700000000000,
         updated_at: 1700000000000,
       });
@@ -161,11 +170,14 @@ describe('provider-repo', () => {
       expect(result).toEqual({
         id: 'p1',
         type: 'openai',
+        preset: 'openai',
         name: 'OpenAI',
         baseUrl: 'https://api.openai.com/v1',
         apiMode: 'responses',
         streamingEnabled: true,
         generationParams: { temperature: 0.7, maxTokens: 4096 },
+        reasoningMode: null,
+        thinkingKwargs: null,
         createdAt: 1700000000000,
         updatedAt: 1700000000000,
       });

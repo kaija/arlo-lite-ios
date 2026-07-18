@@ -4,13 +4,14 @@ import { migrateV1 } from './migrations/v1';
 import { migrateV2 } from './migrations/v2';
 import { migrateV3 } from './migrations/v3';
 import { migrateV4 } from './migrations/v4';
+import { migrateV5 } from './migrations/v5';
 
 const DATABASE_NAME = 'arlo-lite.db';
 
 /**
  * Current schema version. Increment when adding new migrations.
  */
-const CURRENT_VERSION = 4;
+const CURRENT_VERSION = 5;
 
 /**
  * Migration registry — maps schema version to its migration function.
@@ -21,6 +22,7 @@ const migrations: Record<number, (db: SQLiteDatabase) => Promise<void>> = {
   2: migrateV2,
   3: migrateV3,
   4: migrateV4,
+  5: migrateV5,
 };
 
 /**

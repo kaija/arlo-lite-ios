@@ -89,7 +89,34 @@
     "reasoningModeDescription": "向後端傳達思考力度的方式",
     "thinkingKwargs": "模板參數（JSON）",
     "thinkingKwargsPlaceholder": "{\"enable_thinking\": true}",
-    "thinkingKwargsError": "JSON 格式無效"
+    "thinkingKwargsError": "JSON 格式無效",
+    "presetOpenAI": "OpenAI",
+    "presetAnthropic": "Anthropic",
+    "presetOpenRouter": "OpenRouter",
+    "presetLlamaCpp": "llama.cpp",
+    "presetOllama": "Ollama",
+    "presetVllm": "vLLM",
+    "presetGoogle": "Google (Gemini)",
+    "presetBedrock": "AWS Bedrock",
+    "presetOther": "其他（OpenAI 相容）",
+    "presetOpenAIDesc": "官方 OpenAI API（GPT-4o、o1、o3 等）",
+    "presetAnthropicDesc": "官方 Anthropic Messages API（Claude）",
+    "presetOpenRouterDesc": "統一的多 LLM 服務閘道",
+    "presetLlamaCppDesc": "本機 llama.cpp 伺服器（llama-server）",
+    "presetOllamaDesc": "本機 Ollama 實例",
+    "presetVllmDesc": "本機 vLLM 推理伺服器",
+    "presetGoogleDesc": "透過 OpenAI 相容端點連接 Google Gemini",
+    "presetBedrockDesc": "AWS Bedrock（需自行提供端點網址）",
+    "presetOtherDesc": "上方未列出的任何 OpenAI 相容端點",
+    "sectionConnection": "連線",
+    "sectionThinking": "思考",
+    "sectionConfiguration": "設定",
+    "reasoningModeAutoDesc": "同時傳送 reasoning_effort 和 chat_template_kwargs，相容大多數後端",
+    "reasoningModeEffortDesc": "僅傳送 reasoning_effort 參數（適用於 OpenRouter 等支援此標準的服務）",
+    "reasoningModeKwargsDesc": "僅傳送 chat_template_kwargs（適用於 llama.cpp、vLLM 等使用 Jinja 模板的後端）",
+    "reasoningModeNoneDesc": "不傳送任何思考參數（模型不支援思考時使用）",
+    "selectProvider": "選擇提供者",
+    "apiKeyOptionalPlaceholder": "選填 — 本機伺服器可留空"
   },
 
   "models": {
@@ -215,7 +242,9 @@
     "themeSelector": "主題選擇",
     "expandError": "展開錯誤詳情",
     "collapseThinking": "收合思考內容",
-    "expandThinking": "展開思考內容"
+    "expandThinking": "展開思考內容",
+    "modelThinking": "模型正在思考",
+    "generatingResponse": "正在生成回覆"
   },
 
   "voiceDictation": {

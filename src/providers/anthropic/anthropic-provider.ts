@@ -80,7 +80,7 @@ export class AnthropicProvider implements IProvider {
       apiKey,
       baseURL: baseUrl,
       defaultHeaders: { 'anthropic-version': ANTHROPIC_VERSION },
-      fetch,
+      fetch: fetch as unknown as Anthropic['_options']['fetch'],
     });
     this.clientKey = apiKey;
     this.clientBaseUrl = baseUrl;

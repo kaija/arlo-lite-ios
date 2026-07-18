@@ -34,6 +34,7 @@ import Reanimated, {
 import { GestureDetector } from 'react-native-gesture-handler';
 import { useTranslation } from 'react-i18next';
 
+import { Picker } from '@react-native-picker/picker';
 import { useTheme } from '@/theme';
 import { SETTINGS_SLIDE_DURATION, DIALOG_EASING } from '@/theme/animations';
 import { useProviderStore } from '@/stores/provider-store';
@@ -41,6 +42,8 @@ import type { ModelConfig, CreateModelData } from '@/stores/provider-store';
 import { getApiKey, storeApiKey } from '@/database/secure-store';
 import { useSwipeToDelete } from '@/hooks/useSwipeToDelete';
 import { DEFAULT_PROVIDER_URLS } from '@/constants/defaults';
+import { PROVIDER_PRESETS, getPreset, presetToWireType } from '@/constants/provider-presets';
+import type { PresetId } from '@/constants/provider-presets';
 import { getProvider } from '@/providers/registry';
 import { ProviderError } from '@/providers/errors';
 import type { OpenAIApiMode, ProviderType } from '@/database/repositories/provider-repo';
@@ -289,9 +292,16 @@ export function ProviderDetailScreen({
 
   // Add-mode specific state
   const [newName, setNewName] = useState('');
-  const [newType, setNewType] = useState<ProviderType>('openai');
+  const [selectedPreset, setSelectedPreset] = useState<PresetId>('openai');
   const [newApiKey, setNewApiKey] = useState('');
   const [isSaving, setIsSaving] = useState(false);
+
+  // Connection test state (add mode)
+  const [isTestingConnection, setIsTestingConnection] = useState(false);
+  const [connectionTestResult, setConnectionTestResult] = useState<'connected' | 'failed' | null>(null);
+
+  // Derive wire type from selected preset (replaces the old newType useState)
+  const newType = presetToWireType(selectedPreset);
 
   // Reasoning mode state (for both add and edit modes)
   const [reasoningMode, setReasoningMode] = useState<CustomReasoningMode>('auto');
@@ -307,13 +317,14 @@ export function ProviderDetailScreen({
       setThinkingKwargsText(provider.thinkingKwargs ? JSON.stringify(provider.thinkingKwargs, null, 2) : '');
       setThinkingKwargsError(null);
     } else if (isAddMode) {
-      setBaseUrl(DEFAULT_PROVIDER_URLS.openai);
+      const defaultPreset = getPreset('openai');
+      setBaseUrl(defaultPreset.defaultBaseUrl);
       setStreamingEnabled(true);
       setApiMode('responses');
+      setSelectedPreset('openai');
       setNewName('');
-      setNewType('openai');
       setNewApiKey('');
-      setReasoningMode('auto');
+      setReasoningMode(defaultPreset.defaultReasoningMode);
       setThinkingKwargsText('');
       setThinkingKwargsError(null);
     }
@@ -529,10 +540,8 @@ export function ProviderDetailScreen({
     if (provider) {
       setIsLoadingModels(true);
       getApiKey(provider.id).then(async (key) => {
-        if (!key) {
-          setIsLoadingModels(false);
-          return;
-        }
+        const effectiveKey = key || 'sk-no-key-required';
+        console.log('[AddModel] Fetching models for provider:', provider.type, 'baseUrl:', provider.baseUrl, 'hasKey:', !!key);
         try {
           const providerAdapter = getProvider(provider.type);
           const providerConfig: ProviderConfig = {
@@ -545,14 +554,17 @@ export function ProviderDetailScreen({
             createdAt: provider.createdAt,
             updatedAt: provider.updatedAt,
           };
-          const modelIds = await providerAdapter.listModels(providerConfig, key);
+          const modelIds = await providerAdapter.listModels(providerConfig, effectiveKey);
+          console.log('[AddModel] Models returned:', modelIds.length, modelIds);
           setAvailableModels(modelIds);
-        } catch {
-          // Silently fail — user can enter model ID manually
+        } catch (err) {
+          console.error('[AddModel] Error fetching models:', err);
         } finally {
           setIsLoadingModels(false);
         }
       });
+    } else {
+      console.log('[AddModel] No provider object available');
     }
   }, [provider]);
 
@@ -603,21 +615,61 @@ export function ProviderDetailScreen({
     }
   }, [newModelId, newModelDisplayName, isModelSaving, provider, addModel]);
 
-  // Handler for add-mode type change
-  const handleTypeChange = useCallback((type: ProviderType) => {
-    setNewType(type);
-    if (type === 'openai') {
-      setBaseUrl(DEFAULT_PROVIDER_URLS.openai);
-    } else if (type === 'anthropic') {
-      setBaseUrl(DEFAULT_PROVIDER_URLS.anthropic);
-    } else {
-      setBaseUrl('');
-    }
+  // Handler for add-mode preset change
+  const handlePresetChange = useCallback((presetId: PresetId) => {
+    setSelectedPreset(presetId);
+    const preset = getPreset(presetId);
+    setBaseUrl(preset.defaultBaseUrl);
+    setReasoningMode(preset.defaultReasoningMode);
+    // Reset connection test result when preset changes
+    setConnectionTestResult(null);
   }, []);
+
+  // Whether the selected preset requires an API key
+  const apiKeyRequired = getPreset(selectedPreset).apiKeyRequired;
+
+  // Connection test enabled logic (add mode)
+  const connectionTestEnabled = useMemo(() => {
+    if (newType !== 'custom' || !baseUrl.trim()) return false;
+    if (apiKeyRequired && !newApiKey.trim()) return false;
+    return true;
+  }, [newType, baseUrl, apiKeyRequired, newApiKey]);
+
+  // Connection test handler (add mode)
+  const handleTestConnection = useCallback(async () => {
+    if (!connectionTestEnabled || isTestingConnection) return;
+    setIsTestingConnection(true);
+    setConnectionTestResult(null);
+    try {
+      const adapter = getProvider('custom');
+      const config: ProviderConfig = {
+        id: 'temp-test',
+        type: 'custom' as ProviderType,
+        name: 'Test',
+        baseUrl: baseUrl.trim(),
+        streamingEnabled,
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+      };
+      // Use a placeholder key for local servers that don't require auth —
+      // the OpenAI SDK rejects empty-string apiKey during construction.
+      const keyForTest = newApiKey.trim() || 'sk-no-key-required';
+      await adapter.listModels(config, keyForTest);
+      setConnectionTestResult('connected');
+    } catch {
+      setConnectionTestResult('failed');
+    } finally {
+      setIsTestingConnection(false);
+    }
+  }, [connectionTestEnabled, isTestingConnection, baseUrl, streamingEnabled, newApiKey]);
 
   // Handler for saving a new provider
   const handleSaveNewProvider = useCallback(async () => {
-    if (!newName.trim() || !newApiKey.trim() || !baseUrl.trim() || isSaving) return;
+    const presetApiKeyRequired = getPreset(selectedPreset).apiKeyRequired;
+    if (!baseUrl.trim() || (presetApiKeyRequired && !newApiKey.trim()) || isSaving) return;
+
+    // Default name to preset label if user leaves it empty
+    const providerName = newName.trim() || t(getPreset(selectedPreset).labelKey);
 
     // Parse thinkingKwargs if present
     let parsedKwargs: Record<string, unknown> | null = null;
@@ -630,17 +682,20 @@ export function ProviderDetailScreen({
       }
     }
 
+    const wireType = presetToWireType(selectedPreset);
+
     setIsSaving(true);
     try {
       await addProvider(
         {
-          type: newType,
-          name: newName.trim(),
+          type: wireType,
+          name: providerName,
           baseUrl: baseUrl.trim(),
-          apiMode: newType === 'openai' ? apiMode : undefined,
+          apiMode: wireType === 'openai' ? apiMode : undefined,
           streamingEnabled,
-          reasoningMode: newType === 'custom' ? reasoningMode : undefined,
-          thinkingKwargs: newType === 'custom' ? parsedKwargs : undefined,
+          reasoningMode: wireType === 'custom' ? reasoningMode : undefined,
+          thinkingKwargs: wireType === 'custom' ? parsedKwargs : undefined,
+          preset: selectedPreset,
         },
         newApiKey.trim(),
       );
@@ -653,14 +708,13 @@ export function ProviderDetailScreen({
     } finally {
       setIsSaving(false);
     }
-  }, [newName, newApiKey, baseUrl, isSaving, newType, apiMode, streamingEnabled, reasoningMode, thinkingKwargsText, t, addProvider, onClose]);
+  }, [newName, newApiKey, baseUrl, isSaving, selectedPreset, apiMode, streamingEnabled, reasoningMode, thinkingKwargsText, t, addProvider, onClose]);
 
   // Validate add-mode form
-  const isFormValid = !!(newName.trim() && newApiKey.trim() && baseUrl.trim());
+  const isFormValid = !!(baseUrl.trim() && (apiKeyRequired ? newApiKey.trim() : true));
 
   if (!shouldRender) return null;
 
-  const PROVIDER_TYPES: ProviderType[] = ['openai', 'anthropic', 'custom'];
   const effectiveType = isAddMode ? newType : (provider?.type ?? 'openai');
 
   return (
@@ -709,10 +763,10 @@ export function ProviderDetailScreen({
         {isAddMode ? (
           /* ─── Add New Provider Form ─── */
           <>
-            {/* Provider Type */}
+            {/* Provider Type — Dropdown Picker */}
             <View style={styles.section}>
               <Text style={[styles.sectionHeader, { color: colors.textTertiary }]}>
-                PROVIDER TYPE
+                {t('providers.type').toUpperCase()}
               </Text>
               <View
                 style={[
@@ -720,39 +774,24 @@ export function ProviderDetailScreen({
                   { backgroundColor: colors.surface, borderRadius: borderRadii.groupedList },
                 ]}
               >
-                <View style={styles.apiTypeSelector}>
-                  {PROVIDER_TYPES.map((pt, index) => (
-                    <Pressable
-                      key={pt}
-                      style={[
-                        styles.apiTypeOption,
-                        {
-                          backgroundColor:
-                            newType === pt ? colors.accent : colors.surfaceSecondary,
-                          borderTopLeftRadius: index === 0 ? 8 : 0,
-                          borderBottomLeftRadius: index === 0 ? 8 : 0,
-                          borderTopRightRadius: index === PROVIDER_TYPES.length - 1 ? 8 : 0,
-                          borderBottomRightRadius: index === PROVIDER_TYPES.length - 1 ? 8 : 0,
-                        },
-                      ]}
-                      onPress={() => handleTypeChange(pt)}
-                      accessibilityRole="radio"
-                      accessibilityState={{ selected: newType === pt }}
-                      accessibilityLabel={pt.charAt(0).toUpperCase() + pt.slice(1)}
-                    >
-                      <Text
-                        style={[
-                          styles.apiTypeText,
-                          {
-                            color: newType === pt ? colors.accentText : colors.text,
-                          },
-                        ]}
-                      >
-                        {pt.charAt(0).toUpperCase() + pt.slice(1)}
-                      </Text>
-                    </Pressable>
+                <Picker
+                  selectedValue={selectedPreset}
+                  onValueChange={handlePresetChange}
+                  accessibilityLabel={t('providers.selectProvider')}
+                  accessibilityRole="combobox"
+                  style={{ color: colors.text }}
+                >
+                  {PROVIDER_PRESETS.map((preset) => (
+                    <Picker.Item
+                      key={preset.id}
+                      label={t(preset.labelKey)}
+                      value={preset.id}
+                    />
                   ))}
-                </View>
+                </Picker>
+                <Text style={[styles.keychainNote, { color: colors.textTertiary }]}>
+                  {t(getPreset(selectedPreset).descriptionKey)}
+                </Text>
               </View>
             </View>
 
@@ -809,7 +848,7 @@ export function ProviderDetailScreen({
                   ]}
                   value={newApiKey}
                   onChangeText={setNewApiKey}
-                  placeholder="sk-..."
+                  placeholder={apiKeyRequired ? "sk-..." : t('providers.apiKeyOptionalPlaceholder')}
                   placeholderTextColor={colors.textTertiary}
                   accessibilityLabel="API key"
                   secureTextEntry
@@ -825,7 +864,9 @@ export function ProviderDetailScreen({
             {/* Configuration */}
             <View style={styles.section}>
               <Text style={[styles.sectionHeader, { color: colors.textTertiary }]}>
-                CONFIGURATION
+                {newType === 'openai'
+                  ? t('providers.sectionConfiguration')
+                  : t('providers.sectionConnection')}
               </Text>
               <View
                 style={[
@@ -876,6 +917,44 @@ export function ProviderDetailScreen({
                     accessibilityLabel="Streaming enabled"
                   />
                 </View>
+
+                {/* Connection Test Button (Custom only, when baseUrl is non-empty) */}
+                {newType === 'custom' && baseUrl.trim() && (
+                  <>
+                    <View style={[styles.separator, { backgroundColor: colors.border }]} />
+                    <Pressable
+                      style={[
+                        styles.testConnectionButton,
+                        !connectionTestEnabled && styles.saveButtonDisabled,
+                      ]}
+                      onPress={handleTestConnection}
+                      disabled={!connectionTestEnabled || isTestingConnection}
+                      accessibilityRole="button"
+                      accessibilityLabel={t('providers.testConnection')}
+                    >
+                      {isTestingConnection ? (
+                        <ActivityIndicator size="small" color={colors.accent} />
+                      ) : (
+                        <Text style={[styles.testConnectionText, { color: colors.accent }]}>
+                          {t('providers.testConnection')}
+                        </Text>
+                      )}
+                    </Pressable>
+                    {connectionTestResult && (
+                      <Text
+                        style={[
+                          styles.keychainNote,
+                          { color: connectionTestResult === 'connected' ? '#34C759' : '#FF3B30' },
+                        ]}
+                        accessibilityLiveRegion="polite"
+                      >
+                        {connectionTestResult === 'connected'
+                          ? t('providers.connected')
+                          : t('providers.connectionFailed')}
+                      </Text>
+                    )}
+                  </>
+                )}
 
                 {/* API Mode (OpenAI only) */}
                 {newType === 'openai' && (
@@ -959,7 +1038,7 @@ export function ProviderDetailScreen({
             {newType === 'custom' && (
               <View style={styles.section}>
                 <Text style={[styles.sectionHeader, { color: colors.textTertiary }]}>
-                  {t('providers.reasoningMode').toUpperCase()}
+                  {t('providers.sectionThinking')}
                 </Text>
                 <View
                   style={[
@@ -967,7 +1046,7 @@ export function ProviderDetailScreen({
                     { backgroundColor: colors.surface, borderRadius: borderRadii.groupedList },
                   ]}
                 >
-                  <View style={styles.apiTypeSelector}>
+                  <View style={styles.apiTypeSelector} accessibilityRole="radiogroup">
                     {([
                       { value: 'auto' as const, label: t('providers.reasoningModeAuto') },
                       { value: 'openai-reasoning-effort' as const, label: t('providers.reasoningModeOpenAI') },
@@ -1006,7 +1085,10 @@ export function ProviderDetailScreen({
                     ))}
                   </View>
                   <Text style={[styles.keychainNote, { color: colors.textTertiary }]}>
-                    {t('providers.reasoningModeDescription')}
+                    {reasoningMode === 'auto' && t('providers.reasoningModeAutoDesc')}
+                    {reasoningMode === 'openai-reasoning-effort' && t('providers.reasoningModeEffortDesc')}
+                    {reasoningMode === 'chat-template-kwargs' && t('providers.reasoningModeKwargsDesc')}
+                    {reasoningMode === 'none' && t('providers.reasoningModeNoneDesc')}
                   </Text>
 
                   {/* thinkingKwargs input (visible when mode is auto or chat-template-kwargs) */}
@@ -1071,6 +1153,28 @@ export function ProviderDetailScreen({
         ) : (
           /* ─── Edit Existing Provider ─── */
           <>
+            {/* Provider Type (read-only) */}
+            {provider && (
+              <View style={styles.section}>
+                <Text style={[styles.sectionHeader, { color: colors.textTertiary }]}>
+                  {t('providers.type').toUpperCase()}
+                </Text>
+                <View
+                  style={[
+                    styles.sectionCard,
+                    { backgroundColor: colors.surface, borderRadius: borderRadii.groupedList },
+                  ]}
+                >
+                  <Text style={[styles.configLabel, { color: colors.text }]}>
+                    {t(getPreset(provider.preset).labelKey)}
+                  </Text>
+                  <Text style={[styles.keychainNote, { color: colors.textTertiary }]}>
+                    {t(getPreset(provider.preset).descriptionKey)}
+                  </Text>
+                </View>
+              </View>
+            )}
+
             {/* API Key Section */}
             <View style={styles.section}>
               <Text style={[styles.sectionHeader, { color: colors.textTertiary }]}>
@@ -1186,7 +1290,9 @@ export function ProviderDetailScreen({
             {/* Configuration Section */}
             <View style={styles.section}>
               <Text style={[styles.sectionHeader, { color: colors.textTertiary }]}>
-                CONFIGURATION
+                {provider?.type === 'openai'
+                  ? t('providers.sectionConfiguration')
+                  : t('providers.sectionConnection')}
               </Text>
               <View
                 style={[
@@ -1320,7 +1426,7 @@ export function ProviderDetailScreen({
             {provider?.type === 'custom' && (
               <View style={styles.section}>
                 <Text style={[styles.sectionHeader, { color: colors.textTertiary }]}>
-                  {t('providers.reasoningMode').toUpperCase()}
+                  {t('providers.sectionThinking')}
                 </Text>
                 <View
                   style={[
@@ -1328,7 +1434,7 @@ export function ProviderDetailScreen({
                     { backgroundColor: colors.surface, borderRadius: borderRadii.groupedList },
                   ]}
                 >
-                  <View style={styles.apiTypeSelector}>
+                  <View style={styles.apiTypeSelector} accessibilityRole="radiogroup">
                     {([
                       { value: 'auto' as const, label: t('providers.reasoningModeAuto') },
                       { value: 'openai-reasoning-effort' as const, label: t('providers.reasoningModeOpenAI') },
@@ -1367,7 +1473,10 @@ export function ProviderDetailScreen({
                     ))}
                   </View>
                   <Text style={[styles.keychainNote, { color: colors.textTertiary }]}>
-                    {t('providers.reasoningModeDescription')}
+                    {reasoningMode === 'auto' && t('providers.reasoningModeAutoDesc')}
+                    {reasoningMode === 'openai-reasoning-effort' && t('providers.reasoningModeEffortDesc')}
+                    {reasoningMode === 'chat-template-kwargs' && t('providers.reasoningModeKwargsDesc')}
+                    {reasoningMode === 'none' && t('providers.reasoningModeNoneDesc')}
                   </Text>
 
                   {/* thinkingKwargs input (visible when mode is auto or chat-template-kwargs) */}
@@ -2093,6 +2202,14 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '500',
     color: '#FF3B30',
+  },
+  testConnectionButton: {
+    paddingVertical: 12,
+    alignItems: 'center',
+  },
+  testConnectionText: {
+    fontSize: 15,
+    fontWeight: '500',
   },
   modelEditChevron: {
     fontSize: 20,

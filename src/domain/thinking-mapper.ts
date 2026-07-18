@@ -197,7 +197,7 @@ export function mapThinkingLevel(
     case 'openai':
       return mapThinkingLevelOpenAI(level);
     case 'custom':
-      return mapThinkingLevelCustom(level, 'auto');
+      return mapThinkingLevelCustom(level, 'auto') as Record<string, unknown>;
     case 'anthropic':
       return mapThinkingLevelAnthropic(level);
   }
