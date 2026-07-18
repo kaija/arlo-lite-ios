@@ -15,6 +15,7 @@ import {
 } from '@/database/repositories/message-repo';
 import type { Message, CreateMessageData } from '@/database/repositories/message-repo';
 import { SESSION_TITLE_MAX_LENGTH } from '@/constants/defaults';
+import { useSettingsStore } from '@/stores/settings-store';
 
 /**
  * Generate an auto-title from the first user message.
@@ -73,6 +74,9 @@ export interface SessionStore {
   /** Update a session with partial data */
   updateSession: (id: string, data: { providerId?: string; modelId?: string; thinkingLevel?: string | null }) => Promise<void>;
 
+  /** Set the system prompt for a specific session */
+  setSessionSystemPrompt: (sessionId: string, systemPromptId: string | null) => Promise<void>;
+
   /** Set the active session and load its messages */
   setActiveSession: (sessionId: string | null) => Promise<void>;
 }
@@ -102,10 +106,14 @@ export const useSessionStore = create<SessionStore>((set, get) => ({
       throw new Error('Database not initialized. Call setDatabase first.');
     }
 
+    // Attach the current default system prompt to the new session
+    const { defaultSystemPromptId } = useSettingsStore.getState();
+
     const session = await createSessionInDb(db, {
       title: 'New Chat',
       providerId,
       modelId,
+      systemPromptId: defaultSystemPromptId,
     });
 
     set((state) => ({
@@ -288,6 +296,20 @@ export const useSessionStore = create<SessionStore>((set, get) => ({
 
     set((state) => ({
       sessions: state.sessions.map((s) => (s.id === id ? updated : s)),
+    }));
+  },
+
+  setSessionSystemPrompt: async (sessionId: string, systemPromptId: string | null) => {
+    const { db } = get();
+    if (!db) {
+      throw new Error('Database not initialized. Call setDatabase first.');
+    }
+
+    const updated = await updateSessionInDb(db, sessionId, { systemPromptId });
+    if (!updated) return;
+
+    set((state) => ({
+      sessions: state.sessions.map((s) => (s.id === sessionId ? updated : s)),
     }));
   },
 

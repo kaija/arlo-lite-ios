@@ -19,6 +19,7 @@ import { streamCompletion, complete } from '@/services/completion-service';
 import type { CompletionServiceOptions } from '@/services/completion-service';
 import { ProviderError } from '@/providers/errors';
 import { calculateMessageCost } from '@/domain/cost-calculator';
+import { DEFAULT_SYSTEM_PROMPT } from '@/constants/defaults';
 import type { ChatMessage, ContentPart, ProviderConfig, TokenUsage } from '@/providers/types';
 import type { Message } from '@/database/repositories/message-repo';
 
@@ -266,17 +267,37 @@ export function useChat(): UseChatResult {
   }
 
   /**
-   * Prepend the default system prompt (if configured) to the messages array.
-   * Reads from the SettingsStore and inserts at index 0.
+   * Resolve and prepend the system prompt to the messages array.
+   *
+   * Resolution order:
+   * 1. Session-level system prompt (session.systemPromptId)
+   * 2. Global default system prompt (settings.defaultSystemPromptId)
+   * 3. Built-in DEFAULT_SYSTEM_PROMPT constant
    */
   function prependSystemPrompt(chatMessages: ChatMessage[]): ChatMessage[] {
     const { defaultSystemPromptId, systemPrompts } = useSettingsStore.getState();
-    if (!defaultSystemPromptId) return chatMessages;
+    const sessions = useSessionStore.getState().sessions;
+    const sessionId = useSessionStore.getState().activeSessionId;
 
-    const prompt = systemPrompts.find((p) => p.id === defaultSystemPromptId);
-    if (!prompt) return chatMessages;
+    // 1. Try session-level prompt
+    const session = sessionId ? sessions.find((s) => s.id === sessionId) : null;
+    if (session?.systemPromptId) {
+      const sessionPrompt = systemPrompts.find((p) => p.id === session.systemPromptId);
+      if (sessionPrompt) {
+        return [{ role: 'system', content: sessionPrompt.content }, ...chatMessages];
+      }
+    }
 
-    return [{ role: 'system', content: prompt.content }, ...chatMessages];
+    // 2. Try global default prompt
+    if (defaultSystemPromptId) {
+      const globalPrompt = systemPrompts.find((p) => p.id === defaultSystemPromptId);
+      if (globalPrompt) {
+        return [{ role: 'system', content: globalPrompt.content }, ...chatMessages];
+      }
+    }
+
+    // 3. Fallback to built-in default
+    return [{ role: 'system', content: DEFAULT_SYSTEM_PROMPT }, ...chatMessages];
   }
 
   /**

@@ -17,7 +17,7 @@ export const DEFAULT_PROVIDER_URLS = {
  */
 export const APP_METADATA = {
   name: 'Arlo Lite',
-  version: '1.0.0',
+  version: '1.1.0',
   description: 'A lightweight LLM client - bring your own API key',
   license: 'MIT',
   repository: 'https://github.com/arlo-lite/arlo-lite-ios',
