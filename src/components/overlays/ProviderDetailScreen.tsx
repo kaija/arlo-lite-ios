@@ -50,6 +50,8 @@ import type { OpenAIApiMode, ProviderType } from '@/database/repositories/provid
 import type { ProviderConfig } from '@/providers/types';
 import { inferSupportsReasoning } from '@/utils/model-capabilities';
 import type { CustomReasoningMode } from '@/domain/thinking-mapper';
+import { EyeIcon } from '@/components/icons/EyeIcon';
+import { EyeOffIcon } from '@/components/icons/EyeOffIcon';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -1263,9 +1265,9 @@ export function ProviderDetailScreen({
                         }
                         hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                       >
-                        <Text style={[styles.eyeIcon, { color: colors.textTertiary }]}>
-                          {keyRevealed ? '👁' : '👁‍🗨'}
-                        </Text>
+                        {keyRevealed
+                          ? <EyeIcon size={18} color={colors.textTertiary} />
+                          : <EyeOffIcon size={18} color={colors.textTertiary} />}
                       </Pressable>
                       <Pressable
                         onPress={handleStartEditKey}
@@ -1945,9 +1947,6 @@ const styles = StyleSheet.create({
     minHeight: 44,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  eyeIcon: {
-    fontSize: 18,
   },
   keychainNote: {
     fontSize: 12,
