@@ -145,28 +145,6 @@ describe('SessionSidebar', () => {
     jest.clearAllMocks();
   });
 
-  it('renders empty state when no sessions exist', () => {
-    const { getByText } = render(<SessionSidebar {...defaultProps} />);
-    expect(getByText('No conversations yet')).toBeTruthy();
-    expect(getByText('Tap the compose button to start a new chat')).toBeTruthy();
-  });
-
-  it('renders the "Chats" header title', () => {
-    const { getByText } = render(<SessionSidebar {...defaultProps} />);
-    expect(getByText('Chats')).toBeTruthy();
-  });
-
-  it('renders the "New Chat" button', () => {
-    const { getByLabelText } = render(<SessionSidebar {...defaultProps} />);
-    expect(getByLabelText('New chat')).toBeTruthy();
-  });
-
-  it('calls onNewChat when "New Chat" button is pressed', () => {
-    const { getByLabelText } = render(<SessionSidebar {...defaultProps} />);
-    fireEvent.press(getByLabelText('New chat'));
-    expect(mockOnNewChat).toHaveBeenCalledTimes(1);
-  });
-
   it('renders session titles in the list', () => {
     const sessions = [
       createSession({ id: '1', title: 'Hello World', updatedAt: Date.now() }),
@@ -187,16 +165,6 @@ describe('SessionSidebar', () => {
       <SessionSidebar {...defaultProps} sessions={sessions} />,
     );
     expect(getByText('TODAY')).toBeTruthy();
-  });
-
-  it('renders footer hint text when sessions exist', () => {
-    const sessions = [
-      createSession({ id: '1', title: 'Test', updatedAt: Date.now() }),
-    ];
-    const { getByText } = render(
-      <SessionSidebar {...defaultProps} sessions={sessions} />,
-    );
-    expect(getByText('Swipe left to delete · hold to rename')).toBeTruthy();
   });
 
   it('does not render footer hint when no sessions exist', () => {

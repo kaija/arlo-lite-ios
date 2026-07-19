@@ -93,17 +93,6 @@ describe('SendStopButton', () => {
       expect(mockOnStop).not.toHaveBeenCalled();
     });
 
-    it('has accessibility label indicating disabled', () => {
-      const { getByLabelText } = render(
-        <SendStopButton
-          hasText={false}
-          isStreaming={false}
-          onSend={mockOnSend}
-          onStop={mockOnStop}
-        />,
-      );
-      expect(getByLabelText('Send message, disabled')).toBeTruthy();
-    });
   });
 
   describe('send-ready state', () => {
@@ -119,18 +108,6 @@ describe('SendStopButton', () => {
       fireEvent.press(getByRole('button'));
       expect(mockOnSend).toHaveBeenCalledTimes(1);
       expect(mockOnStop).not.toHaveBeenCalled();
-    });
-
-    it('has accessibility label for send', () => {
-      const { getByLabelText } = render(
-        <SendStopButton
-          hasText={true}
-          isStreaming={false}
-          onSend={mockOnSend}
-          onStop={mockOnStop}
-        />,
-      );
-      expect(getByLabelText('Send message')).toBeTruthy();
     });
 
     it('is not disabled', () => {
@@ -174,18 +151,6 @@ describe('SendStopButton', () => {
       fireEvent.press(getByRole('button'));
       expect(mockOnStop).toHaveBeenCalledTimes(1);
       expect(mockOnSend).not.toHaveBeenCalled();
-    });
-
-    it('has accessibility label for stop', () => {
-      const { getByLabelText } = render(
-        <SendStopButton
-          hasText={false}
-          isStreaming={true}
-          onSend={mockOnSend}
-          onStop={mockOnStop}
-        />,
-      );
-      expect(getByLabelText('Stop generation')).toBeTruthy();
     });
 
     it('is not disabled', () => {

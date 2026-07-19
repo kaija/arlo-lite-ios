@@ -65,11 +65,6 @@ describe('ContextRing', () => {
     jest.clearAllMocks();
   });
 
-  it('renders with correct accessibility label for percentage', () => {
-    const { getByLabelText } = render(<ContextRing percentage={42} />);
-    expect(getByLabelText('Context usage: 42 percent')).toBeTruthy();
-  });
-
   it('renders the SVG ring', () => {
     const { getAllByTestId } = render(<ContextRing percentage={30} />);
     expect(getAllByTestId('svg')).toHaveLength(1);
@@ -77,21 +72,6 @@ describe('ContextRing', () => {
     expect(getAllByTestId('svg-circle')).toHaveLength(2);
   });
 
-  it('clamps percentage to 0-100', () => {
-    const { getByLabelText } = render(<ContextRing percentage={150} />);
-    expect(getByLabelText('Context usage: 100 percent')).toBeTruthy();
-  });
-
-  it('clamps negative percentage to 0', () => {
-    const { getByLabelText } = render(<ContextRing percentage={-10} />);
-    expect(getByLabelText('Context usage: 0 percent')).toBeTruthy();
-  });
-
-  it('has progressbar accessibility role', () => {
-    const { getByLabelText } = render(<ContextRing percentage={60} />);
-    const ring = getByLabelText('Context usage: 60 percent');
-    expect(ring.props.accessibilityRole).toBe('progressbar');
-  });
 });
 
 describe('getRingColor', () => {

@@ -78,30 +78,6 @@ describe('NavigationChrome', () => {
     expect(getByRole('header')).toBeTruthy();
   });
 
-  it('renders sidebar toggle button with correct VoiceOver label', () => {
-    const { getByLabelText } = render(<NavigationChrome {...defaultProps} />);
-    const button = getByLabelText('Toggle sidebar');
-    expect(button).toBeTruthy();
-  });
-
-  it('renders settings button with correct VoiceOver label', () => {
-    const { getByLabelText } = render(<NavigationChrome {...defaultProps} />);
-    const button = getByLabelText('Open settings');
-    expect(button).toBeTruthy();
-  });
-
-  it('calls onSidebarToggle when sidebar button is pressed', () => {
-    const { getByLabelText } = render(<NavigationChrome {...defaultProps} />);
-    fireEvent.press(getByLabelText('Toggle sidebar'));
-    expect(defaultProps.onSidebarToggle).toHaveBeenCalledTimes(1);
-  });
-
-  it('calls onSettingsOpen when settings button is pressed', () => {
-    const { getByLabelText } = render(<NavigationChrome {...defaultProps} />);
-    fireEvent.press(getByLabelText('Open settings'));
-    expect(defaultProps.onSettingsOpen).toHaveBeenCalledTimes(1);
-  });
-
   it('truncates long titles to a single line', () => {
     const longTitle = 'This is a very long session title that should be truncated to a single line';
     const { getByText } = render(

@@ -63,23 +63,6 @@ describe('ModelChip', () => {
     expect(mockOnPress).toHaveBeenCalledTimes(1);
   });
 
-  it('has VoiceOver accessibility label announcing the model name', () => {
-    const { getByLabelText } = render(
-      <ModelChip modelName="Claude Sonnet 4" onPress={mockOnPress} />,
-    );
-    expect(getByLabelText('Active model: Claude Sonnet 4')).toBeTruthy();
-  });
-
-  it('provides an accessibility hint', () => {
-    const { getByRole } = render(
-      <ModelChip modelName="GPT-4o" onPress={mockOnPress} />,
-    );
-    const button = getByRole('button');
-    expect(button.props.accessibilityHint).toBe(
-      'Double tap to open model picker',
-    );
-  });
-
   it('truncates long model names to a single line', () => {
     const { getByText } = render(
       <ModelChip

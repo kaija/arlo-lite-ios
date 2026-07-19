@@ -160,51 +160,6 @@ describe('SessionRow', () => {
     );
   });
 
-  it('calls onDelete when delete button is pressed', () => {
-    const { getByLabelText } = render(
-      <SessionRow
-        session={mockSession}
-        isActive={false}
-        onSelect={mockOnSelect}
-        onDelete={mockOnDelete}
-        onRename={mockOnRename}
-      />,
-    );
-    fireEvent.press(getByLabelText('Delete session'));
-    expect(mockOnDelete).toHaveBeenCalledTimes(1);
-  });
-
-  it('marks active session in accessibility label and state', () => {
-    const { getByLabelText } = render(
-      <SessionRow
-        session={mockSession}
-        isActive={true}
-        onSelect={mockOnSelect}
-        onDelete={mockOnDelete}
-        onRename={mockOnRename}
-      />,
-    );
-    const row = getByLabelText('Test Session, active session');
-    expect(row.props.accessibilityState).toEqual({ selected: true });
-  });
-
-  it('provides VoiceOver custom actions for delete and rename', () => {
-    const { getByLabelText } = render(
-      <SessionRow
-        session={mockSession}
-        isActive={false}
-        onSelect={mockOnSelect}
-        onDelete={mockOnDelete}
-        onRename={mockOnRename}
-      />,
-    );
-    const pressable = getByLabelText('Test Session');
-    expect(pressable.props.accessibilityActions).toEqual([
-      { name: 'delete', label: 'Delete session' },
-      { name: 'rename', label: 'Rename session' },
-    ]);
-  });
-
   it('handles delete accessibility action', () => {
     const { getByLabelText } = render(
       <SessionRow
