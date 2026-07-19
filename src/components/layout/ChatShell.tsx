@@ -27,6 +27,7 @@ import { useUIStore } from '@/stores/ui-store';
 import { useSessionStore } from '@/stores/session-store';
 import { useChatStore } from '@/stores/chat-store';
 import { useProviderStore } from '@/stores/provider-store';
+import { useSettingsStore } from '@/stores/settings-store';
 import { useChat } from '@/hooks/useChat';
 import { useMessageActions } from '@/hooks/useMessageActions';
 import { useScrollBehavior } from '@/hooks/useScrollBehavior';
@@ -45,6 +46,7 @@ import { ContextUsagePopup } from '@/components/overlays/ContextUsagePopup';
 import { ScrollFAB } from '@/components/chat/ScrollFAB';
 import { resolveModelName } from '@/utils/resolve-model-name';
 import { computeTokenBreakdown, DEFAULT_CONTEXT_WINDOW } from '@/domain/context-tracker';
+import { DEFAULT_SYSTEM_PROMPT } from '@/constants/defaults';
 
 import type { Message } from '@/database/repositories/message-repo';
 
@@ -396,11 +398,37 @@ export function ChatShell({ children }: ChatShellProps) {
 
   const contextWindow = activeModel?.contextWindow ?? DEFAULT_CONTEXT_WINDOW;
 
-  // Compute token breakdown from messages
-  const tokenBreakdown = useMemo(
-    () => computeTokenBreakdown(messages),
-    [messages],
-  );
+  // Resolve the active system prompt content for token estimation
+  const systemPrompts = useSettingsStore((s) => s.systemPrompts);
+  const defaultSystemPromptId = useSettingsStore((s) => s.defaultSystemPromptId);
+  const activeSession = sessions.find((s) => s.id === activeSessionId);
+
+  const systemPromptContent = useMemo(() => {
+    // 1. Session-level prompt
+    if (activeSession?.systemPromptId) {
+      const sessionPrompt = systemPrompts.find((p) => p.id === activeSession.systemPromptId);
+      if (sessionPrompt) return sessionPrompt.content;
+    }
+    // 2. Global default prompt
+    if (defaultSystemPromptId) {
+      const globalPrompt = systemPrompts.find((p) => p.id === defaultSystemPromptId);
+      if (globalPrompt) return globalPrompt.content;
+    }
+    // 3. Built-in default
+    return DEFAULT_SYSTEM_PROMPT;
+  }, [activeSession?.systemPromptId, defaultSystemPromptId, systemPrompts]);
+
+  // Compute token breakdown from messages + system prompt estimate
+  const tokenBreakdown = useMemo(() => {
+    const breakdown = computeTokenBreakdown(messages);
+    // Add estimated system prompt tokens (heuristic: ~4 chars per token)
+    const systemTokens = Math.ceil(systemPromptContent.length / 4);
+    return {
+      ...breakdown,
+      systemPromptTokens: systemTokens,
+      totalTokens: breakdown.totalTokens + systemTokens,
+    };
+  }, [messages, systemPromptContent]);
 
   // Usage percentage for the ring indicator
   const contextUsagePercent = contextWindow > 0
@@ -414,7 +442,6 @@ export function ChatShell({ children }: ChatShellProps) {
 
   // ─── Active Session Title ───────────────────────────────────────────
 
-  const activeSession = sessions.find((s) => s.id === activeSessionId);
   const sessionTitle = activeSession?.title ?? t('chat.newSession', 'New Chat');
 
   // ─── Render Message Item ────────────────────────────────────────────
