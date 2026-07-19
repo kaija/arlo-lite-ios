@@ -1,16 +1,26 @@
 /**
- * Custom provider adapter — implements IProvider for OpenAI-compatible endpoints.
+ * Custom provider adapter — OpenAI-compatible Chat Completions over raw
+ * XMLHttpRequest. Covers llama.cpp (llama-server), Ollama, vLLM, OpenRouter,
+ * Gemini OpenAI-compat, and any other /v1-style backend.
  *
- * Uses the official OpenAI SDK with a user-supplied base URL, allowing connection
- * to any OpenAI-compatible API (e.g., local LLM servers, alternative hosted
- * endpoints, or proxy services like OpenRouter, Together AI, etc.).
+ * Why raw XHR: on React Native New Architecture, fetch/expo-fetch fail on
+ * plain-HTTP LAN servers (ATS) and cannot deliver incremental SSE chunks
+ * reliably. XHR uses the classic networking bridge, honours
+ * NSAllowsArbitraryLoads, and exposes responseText incrementally via
+ * onprogress — everything SSE needs. No OpenAI SDK.
  *
- * The SDK handles streaming properly in React Native (no ReadableStream required).
- * Always operates in Chat Completions mode since that's the universal compatibility format.
+ * Thinking effort is mapped per backend via config.reasoningMode, whose
+ * default comes from the provider preset (see constants/provider-presets.ts):
+ * - 'chat-template-kwargs' — llama.cpp / vLLM / Ollama:
+ *     chat_template_kwargs: { enable_thinking, reasoning_effort }
+ *     (Qwen templates read enable_thinking, gpt-oss templates read
+ *     reasoning_effort; each ignores the key it doesn't know)
+ * - 'openai-reasoning-effort' — OpenRouter / Gemini / cloud proxies:
+ *     reasoning_effort: "low" | "medium" | "high"
+ * - 'auto' — send both mechanisms; servers ignore unknown fields
+ * - 'none' — send nothing
  */
 
-import OpenAI, { APIError } from 'openai';
-import { xhrFetch } from '@/utils/xhr-fetch';
 import type {
   CompletionRequest,
   CompletionResponse,
@@ -23,377 +33,364 @@ import type {
 import { ProviderError } from '../errors';
 import { mapThinkingLevelCustom } from '../../domain/thinking-mapper';
 
-/**
- * Classify an OpenAI SDK error into a ProviderError.
- */
-function classifyOpenAIError(error: unknown): ProviderError {
-  if (error instanceof APIError) {
-    if (error.status === 401 || error.status === 403) {
-      return new ProviderError('Authentication failed', 'authentication');
-    }
-    if (error.status === 429) {
-      const retryAfter = error.headers?.['retry-after'];
-      const seconds = retryAfter ? parseInt(retryAfter, 10) : null;
-      return new ProviderError(
-        'Rate limited',
-        'rate_limit',
-        seconds !== null && !isNaN(seconds) ? seconds : null,
-      );
-    }
-    if (error.status && error.status >= 500) {
-      return new ProviderError('Server error', 'server');
-    }
-    return new ProviderError(
-      error.message || `HTTP ${error.status}`,
-      'server',
-    );
+/** Sentinel stored when a backend needs no API key (see ProviderDetailScreen). */
+const NO_KEY_SENTINEL = 'sk-no-key-required';
+
+function authHeader(apiKey: string): Record<string, string> {
+  return apiKey && apiKey !== NO_KEY_SENTINEL
+    ? { Authorization: `Bearer ${apiKey}` }
+    : {};
+}
+
+function joinUrl(baseUrl: string, path: string): string {
+  return baseUrl.replace(/\/+$/, '') + path;
+}
+
+interface JsonResult {
+  status: number;
+  json: Record<string, unknown> | null;
+  retryAfter: number | null;
+}
+
+/** Plain JSON request over XHR. Rejects with ProviderError on network failure. */
+function requestJson(
+  method: 'GET' | 'POST',
+  url: string,
+  apiKey: string,
+  body?: unknown,
+  timeoutMs = 120000,
+): Promise<JsonResult> {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open(method, url, true);
+    xhr.setRequestHeader('Accept', 'application/json');
+    if (body !== undefined) xhr.setRequestHeader('Content-Type', 'application/json');
+    for (const [k, v] of Object.entries(authHeader(apiKey))) xhr.setRequestHeader(k, v);
+    xhr.timeout = timeoutMs;
+    xhr.onload = () => {
+      let json: Record<string, unknown> | null = null;
+      try {
+        json = JSON.parse(xhr.responseText) as Record<string, unknown>;
+      } catch {
+        // Non-JSON body — caller decides based on status
+      }
+      const ra = parseInt(xhr.getResponseHeader('retry-after') ?? '', 10);
+      resolve({ status: xhr.status, json, retryAfter: Number.isNaN(ra) ? null : ra });
+    };
+    xhr.onerror = () => {
+      console.log('[CustomProvider] XHR network error:', method, url);
+      reject(new ProviderError('Network request failed', 'network'));
+    };
+    xhr.ontimeout = () => {
+      console.log('[CustomProvider] XHR timeout:', method, url);
+      reject(new ProviderError('Request timed out', 'network'));
+    };
+    xhr.send(body !== undefined ? JSON.stringify(body) : null);
+  });
+}
+
+function errorFromStatus(
+  status: number,
+  json: Record<string, unknown> | null,
+  retryAfter: number | null,
+): ProviderError {
+  if (status === 401 || status === 403) {
+    return new ProviderError('Authentication failed', 'authentication');
   }
-  if (error instanceof Error) {
-    return new ProviderError(error.message, 'network');
+  if (status === 429) {
+    return new ProviderError('Rate limited', 'rate_limit', retryAfter);
   }
-  return new ProviderError('Unknown error', 'server');
+  // llama.cpp / OpenAI error shape: { error: { message } } or { error: "..." }
+  const err = json?.error;
+  const message =
+    (typeof err === 'object' && err !== null && typeof (err as Record<string, unknown>).message === 'string'
+      ? ((err as Record<string, unknown>).message as string)
+      : undefined) ??
+    (typeof err === 'string' ? err : undefined) ??
+    `HTTP ${status}`;
+  return new ProviderError(message, 'server');
 }
 
 /**
- * Custom provider adapter.
+ * POST an SSE request and yield each `data:` JSON payload.
  *
- * Delegates to the OpenAI SDK in Chat Completions mode with a user-supplied
- * base URL. This approach works reliably in React Native since the SDK
- * handles streaming without requiring ReadableStream support.
+ * Line-based parsing: OpenAI-compatible servers emit single-line
+ * `data: {...}` events terminated by `data: [DONE]`. Non-data lines
+ * (keep-alive comments, blank separators) are skipped.
+ */
+function streamSSE(
+  url: string,
+  apiKey: string,
+  body: unknown,
+  signal: AbortSignal,
+): AsyncIterable<Record<string, unknown>> {
+  const events: Record<string, unknown>[] = [];
+  let finished = false;
+  let failure: ProviderError | null = null;
+  let notify: (() => void) | null = null;
+
+  const wake = () => {
+    const n = notify;
+    notify = null;
+    n?.();
+  };
+  const finish = (err?: ProviderError) => {
+    if (finished) return;
+    finished = true;
+    if (err) failure = err;
+    wake();
+  };
+
+  const xhr = new XMLHttpRequest();
+  xhr.open('POST', url, true);
+  xhr.responseType = 'text';
+  xhr.setRequestHeader('Content-Type', 'application/json');
+  xhr.setRequestHeader('Accept', 'text/event-stream');
+  for (const [k, v] of Object.entries(authHeader(apiKey))) xhr.setRequestHeader(k, v);
+
+  let seen = 0;
+  let buf = '';
+  const pump = () => {
+    if (finished || xhr.status >= 400) return; // error body handled in onload
+    const text = xhr.responseText;
+    if (text.length > seen) {
+      buf += text.slice(seen);
+      seen = text.length;
+    }
+    let nl: number;
+    while ((nl = buf.indexOf('\n')) !== -1) {
+      const line = buf.slice(0, nl).trim();
+      buf = buf.slice(nl + 1);
+      if (!line.startsWith('data:')) continue;
+      const payload = line.slice(5).trim();
+      if (payload === '[DONE]') {
+        finish();
+        return;
+      }
+      try {
+        events.push(JSON.parse(payload) as Record<string, unknown>);
+      } catch {
+        // Partial or non-JSON payload — skip
+      }
+    }
+    wake();
+  };
+
+  xhr.onprogress = pump;
+  xhr.onload = () => {
+    if (xhr.status >= 400) {
+      let json: Record<string, unknown> | null = null;
+      try {
+        json = JSON.parse(xhr.responseText) as Record<string, unknown>;
+      } catch {
+        // Non-JSON error body
+      }
+      const ra = parseInt(xhr.getResponseHeader('retry-after') ?? '', 10);
+      finish(errorFromStatus(xhr.status, json, Number.isNaN(ra) ? null : ra));
+      return;
+    }
+    pump();
+    finish();
+  };
+  xhr.onerror = () => finish(new ProviderError('Network request failed', 'network'));
+  xhr.ontimeout = () => finish(new ProviderError('Request timed out', 'network'));
+
+  const onAbort = () => {
+    xhr.abort();
+    finish();
+  };
+  if (signal.aborted) {
+    finish();
+  } else {
+    signal.addEventListener('abort', onAbort);
+    xhr.send(JSON.stringify(body));
+  }
+
+  return {
+    async *[Symbol.asyncIterator]() {
+      while (true) {
+        while (events.length > 0) yield events.shift()!;
+        if (failure) throw failure;
+        if (finished) return;
+        await new Promise<void>((resolve) => {
+          notify = resolve;
+        });
+      }
+    },
+  };
+}
+
+function parseUsage(u: Record<string, unknown>): TokenUsage {
+  const details = u.prompt_tokens_details as Record<string, unknown> | undefined;
+  return {
+    promptTokens: (u.prompt_tokens as number) ?? 0,
+    completionTokens: (u.completion_tokens as number) ?? 0,
+    totalTokens: (u.total_tokens as number) ?? 0,
+    cachedTokens: details?.cached_tokens as number | undefined,
+  };
+}
+
+/** Reasoning text lives in different delta/message keys across backends. */
+function reasoningText(obj: Record<string, unknown>): string | undefined {
+  const value = obj.reasoning_content ?? obj.reasoning ?? obj.thinking;
+  return typeof value === 'string' && value.length > 0 ? value : undefined;
+}
+
+function buildBody(
+  config: ProviderConfig,
+  request: CompletionRequest,
+  stream: boolean,
+): Record<string, unknown> {
+  const messages = request.messages.map((msg) => ({
+    role: msg.role,
+    content:
+      typeof msg.content === 'string'
+        ? msg.content
+        : msg.content.map((part) =>
+            part.type === 'text'
+              ? { type: 'text' as const, text: part.text }
+              : { type: 'image_url' as const, image_url: { url: part.image_url.url } },
+          ),
+  }));
+
+  const body: Record<string, unknown> = { model: request.model, messages, stream };
+  if (stream) body.stream_options = { include_usage: true };
+  if (request.maxTokens !== undefined) body.max_tokens = request.maxTokens;
+
+  const thinking = mapThinkingLevelCustom(
+    request.thinkingLevel,
+    config.reasoningMode ?? 'auto',
+    config.thinkingKwargs,
+  );
+  if (thinking.reasoning_effort) body.reasoning_effort = thinking.reasoning_effort;
+  if (thinking.chat_template_kwargs) body.chat_template_kwargs = thinking.chat_template_kwargs;
+
+  return body;
+}
+
+/**
+ * Custom provider adapter for OpenAI-compatible endpoints.
+ * Stateless — all per-request state lives in the transport functions.
  */
 export class CustomProvider implements IProvider {
   readonly type: ProviderType = 'custom';
 
-  /** Cached SDK client instance. */
-  private client: OpenAI | null = null;
-
-  /** API key used to construct the cached client. */
-  private clientKey: string = '';
-
-  /** Base URL used to construct the cached client. */
-  private clientBaseUrl: string = '';
-
-  /**
-   * Get or create an OpenAI SDK client with the custom base URL.
-   *
-   * The client is cached and reused as long as apiKey and baseUrl remain unchanged.
-   */
-  private getClient(apiKey: string, baseUrl: string): OpenAI {
-    if (this.client && this.clientKey === apiKey && this.clientBaseUrl === baseUrl) {
-      return this.client;
-    }
-    this.client = new OpenAI({
-      apiKey,
-      baseURL: baseUrl,
-      maxRetries: 2,
-      dangerouslyAllowBrowser: true,
-      fetch: xhrFetch as unknown as OpenAI['_options']['fetch'],
-    });
-    this.clientKey = apiKey;
-    this.clientBaseUrl = baseUrl;
-    return this.client;
-  }
-
-  /**
-   * Execute a non-streaming completion request.
-   *
-   * Uses OpenAI Chat Completions format via the SDK.
-   *
-   * @throws ProviderError on auth, network, or server failures
-   */
   async complete(
     config: ProviderConfig,
     request: CompletionRequest,
     apiKey: string,
   ): Promise<CompletionResponse> {
-    const client = this.getClient(apiKey, config.baseUrl);
-    const thinkingParams = mapThinkingLevelCustom(
-      request.thinkingLevel,
-      config.reasoningMode ?? 'auto',
-      config.thinkingKwargs,
+    const url = joinUrl(config.baseUrl, '/chat/completions');
+    const { status, json, retryAfter } = await requestJson(
+      'POST',
+      url,
+      apiKey,
+      buildBody(config, request, false),
+      300000,
     );
-
-    try {
-      const messages = request.messages.map((msg) => ({
-        role: msg.role as 'system' | 'user' | 'assistant',
-        content: typeof msg.content === 'string'
-          ? msg.content
-          : msg.content.map((part) =>
-              part.type === 'text'
-                ? { type: 'text' as const, text: part.text }
-                : { type: 'image_url' as const, image_url: { url: part.image_url.url } }
-            ),
-      }));
-
-      const params: Record<string, unknown> = {
-        model: request.model,
-        messages,
-        stream: false,
-      };
-
-      if (request.maxTokens !== undefined) {
-        params.max_tokens = request.maxTokens;
-      }
-
-      if (thinkingParams.reasoning_effort) {
-        params.reasoning_effort = thinkingParams.reasoning_effort;
-      }
-      if (thinkingParams.chat_template_kwargs) {
-        params.chat_template_kwargs = thinkingParams.chat_template_kwargs;
-      }
-
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const response = await client.chat.completions.create(params as any);
-
-      const choice = response.choices?.[0];
-      const content = choice?.message?.content || '';
-      const reasoningContent = (choice?.message as unknown as Record<string, unknown>)?.reasoning_content as string | undefined;
-      const finishReason = choice?.finish_reason || 'stop';
-
-      const usage: TokenUsage = {
-        promptTokens: response.usage?.prompt_tokens || 0,
-        completionTokens: response.usage?.completion_tokens || 0,
-        totalTokens: response.usage?.total_tokens || 0,
-        cachedTokens: (response.usage as unknown as Record<string, unknown>)?.prompt_tokens_details
-          ? ((response.usage as unknown as Record<string, unknown>).prompt_tokens_details as Record<string, unknown>)?.cached_tokens as number | undefined
-          : undefined,
-      };
-
-      return {
-        content,
-        thinkingContent: reasoningContent,
-        usage,
-        finishReason,
-      };
-    } catch (error) {
-      throw classifyOpenAIError(error);
+    if (status < 200 || status >= 300 || !json) {
+      throw errorFromStatus(status, json, retryAfter);
     }
+
+    const choice = (json.choices as Array<Record<string, unknown>> | undefined)?.[0];
+    const message = (choice?.message as Record<string, unknown> | undefined) ?? {};
+    return {
+      content: (message.content as string) ?? '',
+      thinkingContent: reasoningText(message),
+      usage: parseUsage((json.usage as Record<string, unknown>) ?? {}),
+      finishReason: (choice?.finish_reason as string) ?? 'stop',
+    };
   }
 
-  /**
-   * Execute a streaming completion request via the OpenAI SDK.
-   *
-   * Uses the SDK's built-in streaming which works in React Native
-   * (no ReadableStream/response.body required).
-   */
   async *streamCompletion(
     config: ProviderConfig,
     request: CompletionRequest,
     apiKey: string,
     signal: AbortSignal,
   ): AsyncIterable<StreamChunk> {
-    if (signal.aborted) {
-      yield { type: 'error', content: 'Request cancelled' };
-      yield { type: 'done', content: '' };
-      return;
-    }
-
-    const client = this.getClient(apiKey, config.baseUrl);
-    const thinkingParams = mapThinkingLevelCustom(
-      request.thinkingLevel,
-      config.reasoningMode ?? 'auto',
-      config.thinkingKwargs,
-    );
-
+    const url = joinUrl(config.baseUrl, '/chat/completions');
     try {
-      const messages = request.messages.map((msg) => ({
-        role: msg.role as 'system' | 'user' | 'assistant',
-        content: typeof msg.content === 'string'
-          ? msg.content
-          : msg.content.map((part) =>
-              part.type === 'text'
-                ? { type: 'text' as const, text: part.text }
-                : { type: 'image_url' as const, image_url: { url: part.image_url.url } }
-            ),
-      }));
-
-      const params: Record<string, unknown> = {
-        model: request.model,
-        messages,
-        stream: true,
-      };
-
-      if (request.maxTokens !== undefined) {
-        params.max_tokens = request.maxTokens;
-      }
-
-      if (thinkingParams.reasoning_effort) {
-        params.reasoning_effort = thinkingParams.reasoning_effort;
-      }
-      if (thinkingParams.chat_template_kwargs) {
-        params.chat_template_kwargs = thinkingParams.chat_template_kwargs;
-      }
-
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const stream = await client.chat.completions.create(
-        params as any,
-        { signal },
-      );
-
       let usage: TokenUsage | undefined;
-
-      for await (const chunk of stream as unknown as AsyncIterable<Record<string, unknown>>) {
-        if (signal.aborted) {
-          yield { type: 'done', content: '' };
-          return;
-        }
-
-        const choices = chunk.choices as Array<Record<string, unknown>> | undefined;
-
-        if (choices && choices.length > 0) {
-          const choice = choices[0];
-          const delta = choice.delta as Record<string, unknown> | undefined;
-
-          if (delta) {
-            // Reasoning/thinking content
-            if (delta.reasoning_content) {
-              yield { type: 'thinking', content: delta.reasoning_content as string };
-              continue;
-            }
-
-            // Regular text content
-            if (delta.content) {
-              yield { type: 'text', content: delta.content as string };
-              continue;
-            }
+      const sse = streamSSE(url, apiKey, buildBody(config, request, true), signal);
+      for await (const chunk of sse) {
+        const choice = (chunk.choices as Array<Record<string, unknown>> | undefined)?.[0];
+        const delta = choice?.delta as Record<string, unknown> | undefined;
+        if (delta) {
+          const thinking = reasoningText(delta);
+          if (thinking) yield { type: 'thinking', content: thinking };
+          if (typeof delta.content === 'string' && delta.content.length > 0) {
+            yield { type: 'text', content: delta.content };
           }
         }
-
-        // Usage-only chunk (typically at end of stream with stream_options.include_usage)
-        if (chunk.usage) {
-          const u = chunk.usage as Record<string, unknown>;
-          usage = {
-            promptTokens: (u.prompt_tokens as number) || 0,
-            completionTokens: (u.completion_tokens as number) || 0,
-            totalTokens: (u.total_tokens as number) || 0,
-            cachedTokens: (u.prompt_tokens_details as Record<string, unknown>)?.cached_tokens as number | undefined,
-          };
-        }
+        if (chunk.usage) usage = parseUsage(chunk.usage as Record<string, unknown>);
       }
-
-      // Emit final done chunk with accumulated usage
       yield { type: 'done', content: '', ...(usage ? { usage } : {}) };
     } catch (error) {
       if (signal.aborted) {
         yield { type: 'done', content: '' };
         return;
       }
-      const classified = classifyOpenAIError(error);
-      yield { type: 'error', content: `${classified.category}: ${classified.message}` };
+      const err =
+        error instanceof ProviderError
+          ? error
+          : new ProviderError(error instanceof Error ? error.message : 'Unknown error', 'network');
+      yield { type: 'error', content: `${err.category}: ${err.message}` };
       yield { type: 'done', content: '' };
     }
   }
 
   /**
-   * List available models from the custom endpoint.
-   *
-   * GET {baseUrl}/models — may fail gracefully if the endpoint doesn't support
-   * the OpenAI models listing format.
+   * List models from GET {baseUrl}/models.
+   * Parses OpenAI `data[]` first, then Ollama `models[]`. Returns [] on failure.
    */
   async listModels(config: ProviderConfig, apiKey: string): Promise<string[]> {
-    // Try with the primary client (uses expo/fetch)
     try {
-      console.log('[listModels] SDK attempt, baseUrl:', config.baseUrl);
-      const client = this.getClient(apiKey, config.baseUrl);
-      const list = await client.models.list();
-      console.log('[listModels] SDK list obtained, iterating...');
-      const modelIds: string[] = [];
-      for await (const model of list) {
-        console.log('[listModels] SDK model:', model.id);
-        modelIds.push(model.id);
+      const { status, json } = await requestJson(
+        'GET',
+        joinUrl(config.baseUrl, '/models'),
+        apiKey,
+        undefined,
+        10000,
+      );
+      if (status < 200 || status >= 300 || !json) {
+        console.log('[CustomProvider] listModels HTTP', status, 'json:', !!json);
+        return [];
       }
-      console.log('[listModels] SDK result count:', modelIds.length);
-      if (modelIds.length > 0) {
-        return modelIds.sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
-      }
-    } catch (err) {
-      console.log('[listModels] SDK failed:', err instanceof Error ? err.message : err);
-    }
 
-    // Fallback: use XMLHttpRequest which goes through RN's classic networking
-    // bridge and properly respects NSAllowsArbitraryLoads ATS configuration.
-    // Both expo/fetch and globalThis.fetch fail on HTTP URLs with New Architecture.
-    try {
-      const url = config.baseUrl.replace(/\/+$/, '') + '/models';
-      console.log('[listModels] XHR fallback fetch:', url);
-      
-      const json = await new Promise<Record<string, unknown>>((resolve, reject) => {
-        const xhr = new XMLHttpRequest();
-        xhr.open('GET', url, true);
-        xhr.setRequestHeader('Accept', 'application/json');
-        if (apiKey && apiKey !== 'sk-no-key-required') {
-          xhr.setRequestHeader('Authorization', `Bearer ${apiKey}`);
-        }
-        xhr.timeout = 10000;
-        xhr.onload = () => {
-          console.log('[listModels] XHR status:', xhr.status);
-          if (xhr.status >= 200 && xhr.status < 300) {
-            try {
-              console.log('[listModels] XHR response (first 500):', xhr.responseText.substring(0, 500));
-              resolve(JSON.parse(xhr.responseText));
-            } catch (e) {
-              reject(new Error('Invalid JSON response'));
-            }
-          } else {
-            reject(new Error(`HTTP ${xhr.status}`));
-          }
-        };
-        xhr.onerror = () => reject(new Error('XHR network error'));
-        xhr.ontimeout = () => reject(new Error('XHR timeout'));
-        xhr.send();
-      });
-
-      const modelIds: string[] = [];
-
-      // OpenAI format: { data: [{ id: "model-name" }] }
+      const ids: string[] = [];
       if (Array.isArray(json.data)) {
         for (const item of json.data as Array<{ id?: string }>) {
-          if (item.id) modelIds.push(item.id);
+          if (item?.id) ids.push(item.id);
         }
-        console.log('[listModels] Parsed from data[]:', modelIds.length);
       }
-      // Ollama format: { models: [{ name: "model-name", model?: "model-name" }] }
-      if (modelIds.length === 0 && Array.isArray(json.models)) {
+      if (ids.length === 0 && Array.isArray(json.models)) {
         for (const item of json.models as Array<{ name?: string; model?: string }>) {
-          if (item.name) modelIds.push(item.name);
-          else if (item.model) modelIds.push(item.model);
+          if (item?.name) ids.push(item.name);
+          else if (item?.model) ids.push(item.model);
         }
-        console.log('[listModels] Parsed from models[]:', modelIds.length);
       }
-
-      console.log('[listModels] XHR fallback total:', modelIds.length, modelIds);
-      return modelIds.sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
+      return ids.sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
     } catch (err) {
-      console.log('[listModels] XHR fallback failed:', err instanceof Error ? err.message : err);
+      console.log('[CustomProvider] listModels failed:', err instanceof Error ? err.message : err);
       return [];
     }
   }
 
   /**
-   * Validate an API key by attempting to list models or a minimal completion.
-   *
-   * Falls back gracefully since not all custom endpoints support the same features.
+   * Validate connectivity via GET /models: only 401/403 mean a bad key;
+   * any other HTTP response proves the endpoint is reachable.
    */
   async validateApiKey(config: ProviderConfig, apiKey: string): Promise<boolean> {
-    const client = this.getClient(apiKey, config.baseUrl);
-
     try {
-      // Try listing models first
-      const list = await client.models.list();
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      for await (const _model of list) {
-        break; // Only need one to confirm validity
-      }
-      return true;
-    } catch (error) {
-      if (error instanceof APIError) {
-        if (error.status === 401 || error.status === 403) {
-          return false;
-        }
-        // Other errors (429, 500, etc.) mean the key is likely valid
-        return true;
-      }
-      // Network errors — can't validate, but don't reject the key
+      const { status } = await requestJson(
+        'GET',
+        joinUrl(config.baseUrl, '/models'),
+        apiKey,
+        undefined,
+        10000,
+      );
+      return status !== 401 && status !== 403;
+    } catch {
       return false;
     }
   }

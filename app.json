@@ -19,11 +19,13 @@
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
         "NSAppTransportSecurity": {
-          "NSAllowsArbitraryLoads": true,
-          "NSAllowsLocalNetworking": true
+          "NSAllowsArbitraryLoads": true
         },
         "NSLocalNetworkUsageDescription": "Arlo Lite needs local network access to connect to LLM inference servers on your network.",
-        "NSBonjourServices": ["_http._tcp.", "_https._tcp."]
+        "NSBonjourServices": [
+          "_http._tcp.",
+          "_https._tcp."
+        ]
       }
     },
     "android": {

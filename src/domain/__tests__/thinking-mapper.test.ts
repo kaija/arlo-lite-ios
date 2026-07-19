@@ -146,7 +146,10 @@ describe('thinking-mapper', () => {
             expect(result.chat_template_kwargs).toEqual({ enable_thinking: false });
           } else {
             expect(result.reasoning_effort).toBe(expectedEffort[level]);
-            expect(result.chat_template_kwargs).toEqual({ enable_thinking: true });
+            expect(result.chat_template_kwargs).toEqual({
+              enable_thinking: true,
+              reasoning_effort: expectedEffort[level],
+            });
           }
         });
       });
@@ -173,7 +176,10 @@ describe('thinking-mapper', () => {
           if (level === 'off') {
             expect(result.chat_template_kwargs).toEqual({ enable_thinking: false });
           } else {
-            expect(result.chat_template_kwargs).toEqual({ enable_thinking: true });
+            expect(result.chat_template_kwargs).toEqual({
+              enable_thinking: true,
+              reasoning_effort: expectedEffort[level],
+            });
           }
         });
       });
@@ -227,10 +233,10 @@ describe('thinking-mapper', () => {
       });
     });
 
-    describe('null/undefined kwargs defaults to enable_thinking', () => {
-      it('null kwargs defaults to { enable_thinking: true } for non-off', () => {
+    describe('null/undefined kwargs defaults to enable_thinking + reasoning_effort', () => {
+      it('null kwargs defaults to enable_thinking + effort for non-off', () => {
         const result = mapThinkingLevelCustom('medium', 'auto', null);
-        expect(result.chat_template_kwargs).toEqual({ enable_thinking: true });
+        expect(result.chat_template_kwargs).toEqual({ enable_thinking: true, reasoning_effort: 'medium' });
       });
 
       it('null kwargs defaults to { enable_thinking: false } for off', () => {
@@ -238,9 +244,9 @@ describe('thinking-mapper', () => {
         expect(result.chat_template_kwargs).toEqual({ enable_thinking: false });
       });
 
-      it('undefined kwargs defaults to { enable_thinking: true } for non-off', () => {
+      it('undefined kwargs defaults to enable_thinking + effort for non-off', () => {
         const result = mapThinkingLevelCustom('medium', 'auto', undefined);
-        expect(result.chat_template_kwargs).toEqual({ enable_thinking: true });
+        expect(result.chat_template_kwargs).toEqual({ enable_thinking: true, reasoning_effort: 'medium' });
       });
 
       it('undefined kwargs defaults to { enable_thinking: false } for off', () => {
@@ -250,7 +256,7 @@ describe('thinking-mapper', () => {
 
       it('omitted kwargs (default param) works the same as undefined', () => {
         const result = mapThinkingLevelCustom('high', 'auto');
-        expect(result.chat_template_kwargs).toEqual({ enable_thinking: true });
+        expect(result.chat_template_kwargs).toEqual({ enable_thinking: true, reasoning_effort: 'high' });
       });
     });
 

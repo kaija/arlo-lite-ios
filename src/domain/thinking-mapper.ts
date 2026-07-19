@@ -104,15 +104,20 @@ function mapReasoningEffortValue(level: ThinkingLevel): string | undefined {
  * If custom thinkingKwargs are provided, use them when enabling thinking,
  * and negate boolean values when disabling. If negation semantics are unclear
  * (non-boolean values present), return undefined to omit the field entirely.
- * Otherwise use the Qwen-standard {"enable_thinking": true/false} default.
+ *
+ * Default (no custom kwargs) covers both major template families in one
+ * object: Qwen templates read enable_thinking, gpt-oss templates read
+ * reasoning_effort — each ignores the key it doesn't know.
  */
 function buildChatTemplateKwargs(
   enableThinking: boolean,
   thinkingKwargs?: Record<string, unknown> | null,
+  reasoningEffort?: string,
 ): Record<string, unknown> | undefined {
   if (!thinkingKwargs) {
-    // Default: Qwen-family format
-    return { enable_thinking: enableThinking };
+    return enableThinking && reasoningEffort
+      ? { enable_thinking: true, reasoning_effort: reasoningEffort }
+      : { enable_thinking: enableThinking };
   }
 
   if (enableThinking) {
@@ -153,7 +158,7 @@ export function mapThinkingLevelCustom(
 
   const enableThinking = level !== 'off';
   const reasoningEffort = mapReasoningEffortValue(level);
-  const kwargs = buildChatTemplateKwargs(enableThinking, thinkingKwargs);
+  const kwargs = buildChatTemplateKwargs(enableThinking, thinkingKwargs, reasoningEffort);
 
   switch (mode) {
     case 'openai-reasoning-effort':
