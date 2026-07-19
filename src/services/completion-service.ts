@@ -62,8 +62,7 @@ export async function* streamCompletion(
   options: CompletionServiceOptions,
   signal: AbortSignal,
 ): AsyncGenerator<StreamChunk> {
-  const apiKey = await getApiKey(options.providerId);
-  if (!apiKey) throw new ProviderError('API key not found', 'authentication');
+  const apiKey = await getApiKey(options.providerId) ?? 'sk-no-key-required';
 
   const provider = getProvider(options.providerConfig.type);
   const request: CompletionRequest = {
@@ -93,8 +92,7 @@ export async function complete(
   messages: ChatMessage[],
   options: CompletionServiceOptions,
 ): Promise<CompletionResponse> {
-  const apiKey = await getApiKey(options.providerId);
-  if (!apiKey) throw new ProviderError('API key not found', 'authentication');
+  const apiKey = await getApiKey(options.providerId) ?? 'sk-no-key-required';
 
   const provider = getProvider(options.providerConfig.type);
   const request: CompletionRequest = {
@@ -125,8 +123,7 @@ export async function testConnection(
   providerId: string,
   providerConfig: ProviderConfig,
 ): Promise<boolean> {
-  const apiKey = await getApiKey(providerId);
-  if (!apiKey) throw new ProviderError('API key not found', 'authentication');
+  const apiKey = await getApiKey(providerId) ?? 'sk-no-key-required';
 
   const provider = getProvider(providerConfig.type);
   return provider.validateApiKey(providerConfig, apiKey);
