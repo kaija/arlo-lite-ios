@@ -1,33 +1,33 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Arlo Lite — Lightweight LLM Client for iOS</title>
-  <meta name="description" content="A free, open-source iOS client for interacting with LLMs. Bring your own API key — no backend, no subscription." />
+  <title>Arlo Lite — 경량 iOS LLM 클라이언트</title>
+  <meta name="description" content="무료 오픈소스 iOS LLM 클라이언트. 자신의 API 키를 사용하여 프로바이더에 직접 연결 — 백엔드 없음, 구독 없음." />
   <meta name="theme-color" content="#5856D6" />
 
   <!-- Open Graph -->
-  <meta property="og:title" content="Arlo Lite — Lightweight LLM Client for iOS" />
-  <meta property="og:description" content="A free, open-source iOS client for interacting with LLMs. Bring your own API key — no backend, no subscription." />
+  <meta property="og:title" content="Arlo Lite — 경량 iOS LLM 클라이언트" />
+  <meta property="og:description" content="무료 오픈소스 iOS LLM 클라이언트. 자신의 API 키를 사용하여 프로바이더에 직접 연결 — 백엔드 없음, 구독 없음." />
   <meta property="og:type" content="website" />
-  <meta property="og:image" content="assets/og-image.png" />
+  <meta property="og:image" content="../assets/og-image.png" />
 
   <!-- Favicon -->
-  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+  <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg" />
 
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
 
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="../styles.css" />
 </head>
 <body>
   <!-- Navigation -->
-  <nav class="nav" aria-label="Main navigation">
+  <nav class="nav" aria-label="주요 내비게이션">
     <div class="nav-inner container">
-      <a href="/" class="nav-brand" aria-label="Arlo Lite home">
+      <a href="/ko/" class="nav-brand" aria-label="Arlo Lite 홈">
         <svg class="nav-logo" width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true">
           <rect width="28" height="28" rx="7" fill="#5856D6"/>
           <path d="M8 20L14 8L20 20" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
@@ -36,15 +36,15 @@
         <span>Arlo Lite</span>
       </a>
       <div class="nav-links">
-        <a href="#features">Features</a>
-        <a href="#providers">Providers</a>
-        <a href="#open-source">Open Source</a>
+        <a href="#features">기능</a>
+        <a href="#providers">프로바이더</a>
+        <a href="#open-source">오픈소스</a>
         <a href="https://github.com/kaija/arlo-lite" class="btn btn-sm" target="_blank" rel="noopener">
           <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
           GitHub
         </a>
       </div>
-      <button class="nav-toggle" aria-label="Toggle menu" aria-expanded="false">
+      <button class="nav-toggle" aria-label="메뉴 전환" aria-expanded="false">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
       </button>
     </div>
@@ -54,24 +54,24 @@
   <section class="hero">
     <div class="container">
       <div class="hero-content">
-        <div class="hero-badge">Free &amp; Open Source</div>
-        <h1>Your LLMs,<br/>your keys,<br/>your device.</h1>
+        <div class="hero-badge">무료 &amp; 오픈소스</div>
+        <h1>당신의 LLM,<br/>당신의 키,<br/>당신의 디바이스.</h1>
         <p class="hero-subtitle">
-          Arlo Lite is a lightweight iOS client for chatting with LLMs. Bring your own API key and talk directly to the provider — no backend, no subscription, no telemetry.
+          Arlo Lite는 LLM과 대화하기 위한 경량 iOS 클라이언트입니다. 자신의 API 키를 사용하여 프로바이더에 직접 연결 — 백엔드 없음, 구독 없음, 텔레메트리 없음.
         </p>
         <div class="hero-actions">
           <a href="https://github.com/kaija/arlo-lite" class="btn btn-primary" target="_blank" rel="noopener">
             <svg width="20" height="20" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
-            View on GitHub
+            GitHub에서 보기
           </a>
-          <a href="#features" class="btn btn-secondary">Learn More</a>
+          <a href="#features" class="btn btn-secondary">자세히 보기</a>
         </div>
       </div>
       <div class="hero-visual">
         <div class="iphone-frame">
           <div class="iphone-notch"></div>
           <div class="iphone-screen">
-            <img src="assets/screenshot1.png" alt="Arlo Lite app screenshot showing a chat conversation" class="hero-screenshot" />
+            <img src="../assets/screenshot1.png" alt="Arlo Lite 앱 스크린샷 — 채팅 화면" class="hero-screenshot" />
           </div>
         </div>
       </div>
@@ -82,51 +82,51 @@
   <section id="features" class="features">
     <div class="container">
       <div class="section-header">
-        <h2>Built for power users</h2>
-        <p>No fluff. Just a fast, capable interface for working with LLMs every day.</p>
+        <h2>파워 유저를 위한 설계</h2>
+        <p>불필요한 기능 없이, 매일 LLM을 사용하기 위한 빠르고 강력한 인터페이스.</p>
       </div>
       <div class="features-grid">
         <div class="feature-card">
           <div class="feature-icon">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
           </div>
-          <h3>Bring Your Own Key</h3>
-          <p>Your API keys stay on your device in the iOS Keychain. No middleman, no backend server, no account required.</p>
+          <h3>나만의 API 키 사용</h3>
+          <p>API 키는 iOS Keychain에 안전하게 저장됩니다. 중간 서버 없음, 백엔드 없음, 계정 불필요.</p>
         </div>
         <div class="feature-card">
           <div class="feature-icon">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
           </div>
-          <h3>Real-time Streaming</h3>
-          <p>Responses stream in token-by-token via SSE. Stop generation anytime. Provider-specific parsers for maximum fidelity.</p>
+          <h3>실시간 스트리밍</h3>
+          <p>SSE를 통해 토큰 단위로 스트리밍 수신. 언제든 생성 중단 가능. 프로바이더별 전용 파서로 최고의 정확도.</p>
         </div>
         <div class="feature-card">
           <div class="feature-icon">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
           </div>
-          <h3>Session Management</h3>
-          <p>All chats persisted locally. Switch models mid-session. Rename, delete, or pick up where you left off.</p>
+          <h3>세션 관리</h3>
+          <p>모든 대화가 로컬에 저장됩니다. 세션 중 모델 전환 가능. 이름 변경, 삭제, 이어서 대화하기.</p>
         </div>
         <div class="feature-card">
           <div class="feature-icon">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
           </div>
-          <h3>Rich Markdown</h3>
-          <p>Code blocks with syntax highlighting, tables, lists, and one-tap copy. Designed for technical conversations.</p>
+          <h3>풍부한 Markdown</h3>
+          <p>구문 강조가 적용된 코드 블록, 테이블, 리스트, 원탭 복사. 기술적 대화에 최적화.</p>
         </div>
         <div class="feature-card">
           <div class="feature-icon">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
           </div>
-          <h3>Cost Tracking <span class="feature-status">計劃中</span></h3>
-          <p>Per-turn and per-session cost computed from token usage and model pricing. Know exactly what you're spending.</p>
+          <h3>비용 추적 <span class="feature-status">계획 중</span></h3>
+          <p>토큰 사용량과 모델 가격을 기반으로 턴별, 세션별 비용을 산출. 지출을 정확히 파악.</p>
         </div>
         <div class="feature-card">
           <div class="feature-icon">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 100 20 10 10 0 000-20z"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
           </div>
-          <h3>Thinking Controls</h3>
-          <p>Adjust reasoning effort per session. Unified abstraction across providers — from minimal to extended thinking.</p>
+          <h3>사고 수준 제어</h3>
+          <p>세션별로 추론 깊이를 조절. 프로바이더를 아우르는 통합 추상화 — 최소 사고에서 확장 사고까지.</p>
         </div>
       </div>
     </div>
@@ -136,8 +136,8 @@
   <section id="providers" class="providers">
     <div class="container">
       <div class="section-header">
-        <h2>Multi-provider, one interface</h2>
-        <p>Connect to the models you use. Switch between them seamlessly.</p>
+        <h2>멀티 프로바이더, 하나의 인터페이스</h2>
+        <p>사용하는 모델에 연결. 원활하게 전환.</p>
       </div>
       <div class="providers-grid">
         <div class="provider-card">
@@ -145,21 +145,21 @@
             <svg width="32" height="32" viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="14" stroke="currentColor" stroke-width="2"/><path d="M16 8v8l5.66 5.66" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
           </div>
           <h3>OpenAI</h3>
-          <p>Chat Completions &amp; Responses API. Connect to the latest OpenAI models.</p>
+          <p>Chat Completions & Responses API. 최신 OpenAI 모델에 연결.</p>
         </div>
         <div class="provider-card">
           <div class="provider-logo">
             <svg width="32" height="32" viewBox="0 0 32 32" fill="none"><path d="M16 4L6 10v12l10 6 10-6V10L16 4z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M16 16v12M16 16L6 10M16 16l10-6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
           </div>
           <h3>Anthropic</h3>
-          <p>Messages API. Claude Opus, Sonnet, and Haiku models.</p>
+          <p>Messages API. Claude Opus, Sonnet, Haiku 모델.</p>
         </div>
         <div class="provider-card">
           <div class="provider-logo">
             <svg width="32" height="32" viewBox="0 0 32 32" fill="none"><rect x="6" y="6" width="20" height="20" rx="4" stroke="currentColor" stroke-width="2"/><path d="M11 16h10M16 11v10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
           </div>
-          <h3>Local Inference</h3>
-          <p>Ollama, llama.cpp, vLLM, and any OpenAI-compatible local endpoint.</p>
+          <h3>로컬 추론</h3>
+          <p>Ollama, llama.cpp, vLLM 및 모든 OpenAI 호환 로컬 엔드포인트.</p>
         </div>
       </div>
     </div>
@@ -169,43 +169,43 @@
   <section class="privacy">
     <div class="container">
       <div class="privacy-content">
-        <h2>Privacy by design</h2>
+        <h2>프라이버시 바이 디자인</h2>
         <div class="privacy-grid">
           <div class="privacy-item">
             <div class="privacy-check" aria-hidden="true">
               <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M5 10l3 3 7-7" stroke="#5856D6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </div>
-            <span>No backend server — calls go direct to provider</span>
+            <span>백엔드 서버 없음 — 프로바이더에 직접 통신</span>
           </div>
           <div class="privacy-item">
             <div class="privacy-check" aria-hidden="true">
               <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M5 10l3 3 7-7" stroke="#5856D6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </div>
-            <span>No telemetry or analytics</span>
+            <span>텔레메트리나 분석 도구 없음</span>
           </div>
           <div class="privacy-item">
             <div class="privacy-check" aria-hidden="true">
               <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M5 10l3 3 7-7" stroke="#5856D6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </div>
-            <span>API keys stored in iOS Keychain only</span>
+            <span>API 키는 iOS Keychain에만 저장</span>
           </div>
           <div class="privacy-item">
             <div class="privacy-check" aria-hidden="true">
               <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M5 10l3 3 7-7" stroke="#5856D6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </div>
-            <span>No account or sign-up required</span>
+            <span>계정이나 회원가입 불필요</span>
           </div>
           <div class="privacy-item">
             <div class="privacy-check" aria-hidden="true">
               <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M5 10l3 3 7-7" stroke="#5856D6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </div>
-            <span>Offline read access to past conversations</span>
+            <span>오프라인에서 과거 대화 열람 가능</span>
           </div>
           <div class="privacy-item">
             <div class="privacy-check" aria-hidden="true">
               <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M5 10l3 3 7-7" stroke="#5856D6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </div>
-            <span>Optional iCloud backup (text only, no keys)</span>
+            <span>선택적 iCloud 백업 (텍스트만, 키 제외)</span>
           </div>
         </div>
       </div>
@@ -216,8 +216,8 @@
   <section id="open-source" class="open-source">
     <div class="container">
       <div class="oss-content">
-        <h2>Open source, always</h2>
-        <p>Arlo Lite is free to use, modify, and distribute. The entire codebase is on GitHub. Built with React Native and Expo for a native iOS experience.</p>
+        <h2>언제나 오픈소스</h2>
+        <p>Arlo Lite는 자유롭게 사용, 수정, 배포할 수 있습니다. 전체 코드베이스가 GitHub에 공개되어 있습니다. React Native와 Expo로 네이티브 iOS 경험을 구현.</p>
         <div class="tech-pills">
           <span class="pill">React Native</span>
           <span class="pill">Expo SDK 52</span>
@@ -228,7 +228,7 @@
         </div>
         <a href="https://github.com/kaija/arlo-lite" class="btn btn-primary" target="_blank" rel="noopener">
           <svg width="20" height="20" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
-          Star on GitHub
+          GitHub에서 스타하기
         </a>
       </div>
     </div>
@@ -249,8 +249,8 @@
         <div class="footer-links">
           <a href="https://github.com/kaija/arlo-lite" target="_blank" rel="noopener">GitHub</a>
           <a href="https://github.com/kaija/arlo-lite/issues" target="_blank" rel="noopener">Issues</a>
-          <a href="https://github.com/kaija/arlo-lite/blob/main/LICENSE" target="_blank" rel="noopener">License</a>
-          <a href="privacy.html">Privacy</a>
+          <a href="https://github.com/kaija/arlo-lite/blob/main/LICENSE" target="_blank" rel="noopener">라이선스</a>
+          <a href="../privacy-ko.html">개인정보</a>
         </div>
         <div class="footer-lang">
           <a href="/">English</a>
@@ -262,6 +262,6 @@
     </div>
   </footer>
 
-  <script src="main.js"></script>
+  <script src="../main.js"></script>
 </body>
 </html>
