@@ -20,6 +20,7 @@ import { testConnection as testConnectionService } from '@/services/completion-s
 import { ProviderError } from '@/providers/errors';
 import { generateId } from '@/utils/uuid';
 import { getCurrentTimestamp } from '@/utils/date';
+import { getModelDefaults } from '@/constants/model-capabilities';
 
 export type { Provider, GenerationParams, CreateProviderData, UpdateProviderData };
 
@@ -62,8 +63,16 @@ export interface ModelConfig {
 
 /**
  * Data required to create a new model (id is generated automatically).
+ * Capability flags are optional — omitted fields are auto-populated
+ * from the model catalog when a match is found.
  */
-export type CreateModelData = Omit<ModelConfig, 'id'>;
+export type CreateModelData = Omit<ModelConfig, 'id' | 'supportsReasoning' | 'supportsImageInput' | 'supportsImageGeneration' | 'supportsFileInput' | 'supportsToolUse'> & {
+  supportsReasoning?: boolean;
+  supportsImageInput?: boolean;
+  supportsImageGeneration?: boolean;
+  supportsFileInput?: boolean;
+  supportsToolUse?: boolean;
+};
 
 /**
  * Row shape returned from the models SQLite table.
@@ -231,6 +240,24 @@ export const useProviderStore = create<ProviderStore>((set, get) => ({
       throw new Error('Database not initialized. Call setDatabase first.');
     }
 
+    // Auto-populate from catalog when caller hasn't set explicit values
+    const defaults = getModelDefaults(data.modelId);
+    const merged = {
+      providerId: data.providerId,
+      modelId: data.modelId,
+      displayName: data.displayName || defaults?.displayName || data.modelId,
+      contextWindow: data.contextWindow ?? defaults?.contextWindow ?? null,
+      inputPrice: data.inputPrice ?? defaults?.inputPrice ?? null,
+      outputPrice: data.outputPrice ?? defaults?.outputPrice ?? null,
+      cachedInputPrice: data.cachedInputPrice ?? defaults?.cachedInputPrice ?? null,
+      cachedOutputPrice: data.cachedOutputPrice ?? null,
+      supportsReasoning: data.supportsReasoning ?? defaults?.supportsReasoning ?? false,
+      supportsImageInput: data.supportsImageInput ?? defaults?.supportsImageInput ?? false,
+      supportsImageGeneration: data.supportsImageGeneration ?? defaults?.supportsImageGeneration ?? false,
+      supportsFileInput: data.supportsFileInput ?? defaults?.supportsFileInput ?? false,
+      supportsToolUse: data.supportsToolUse ?? defaults?.supportsToolUse ?? false,
+    };
+
     const id = generateId();
     const now = getCurrentTimestamp();
 
@@ -238,22 +265,22 @@ export const useProviderStore = create<ProviderStore>((set, get) => ({
       `INSERT INTO models (id, provider_id, model_id, display_name, context_window, input_price, output_price, cached_input_price, cached_output_price, supports_reasoning, supports_image_input, supports_image_generation, supports_file_input, supports_tool_use)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       id,
-      data.providerId,
-      data.modelId,
-      data.displayName,
-      data.contextWindow,
-      data.inputPrice,
-      data.outputPrice,
-      data.cachedInputPrice,
-      data.cachedOutputPrice,
-      data.supportsReasoning ? 1 : 0,
-      data.supportsImageInput ? 1 : 0,
-      data.supportsImageGeneration ? 1 : 0,
-      data.supportsFileInput ? 1 : 0,
-      data.supportsToolUse ? 1 : 0
+      merged.providerId,
+      merged.modelId,
+      merged.displayName,
+      merged.contextWindow,
+      merged.inputPrice,
+      merged.outputPrice,
+      merged.cachedInputPrice,
+      merged.cachedOutputPrice,
+      merged.supportsReasoning ? 1 : 0,
+      merged.supportsImageInput ? 1 : 0,
+      merged.supportsImageGeneration ? 1 : 0,
+      merged.supportsFileInput ? 1 : 0,
+      merged.supportsToolUse ? 1 : 0
     );
 
-    const model: ModelConfig = { id, ...data };
+    const model: ModelConfig = { id, ...merged };
 
     set((state) => ({
       models: [...state.models, model],
