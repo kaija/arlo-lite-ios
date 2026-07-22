@@ -48,7 +48,7 @@ import { getProvider } from '@/providers/registry';
 import { ProviderError } from '@/providers/errors';
 import type { OpenAIApiMode, ProviderType } from '@/database/repositories/provider-repo';
 import type { ProviderConfig } from '@/providers/types';
-import { inferSupportsReasoning } from '@/utils/model-capabilities';
+import { inferSupportsReasoning, inferSupportsImageInput } from '@/utils/model-capabilities';
 import type { CustomReasoningMode } from '@/domain/thinking-mapper';
 import { EyeIcon } from '@/components/icons/EyeIcon';
 import { EyeOffIcon } from '@/components/icons/EyeOffIcon';
@@ -526,6 +526,7 @@ export function ProviderDetailScreen({
   const [newModelId, setNewModelId] = useState('');
   const [newModelDisplayName, setNewModelDisplayName] = useState('');
   const [isModelSaving, setIsModelSaving] = useState(false);
+  const [newModelSupportsImage, setNewModelSupportsImage] = useState(true);
   const [availableModels, setAvailableModels] = useState<string[]>([]);
   const [isLoadingModels, setIsLoadingModels] = useState(false);
   const [modelSearchQuery, setModelSearchQuery] = useState('');
@@ -534,6 +535,7 @@ export function ProviderDetailScreen({
   const handleOpenModelModal = useCallback(() => {
     setNewModelId('');
     setNewModelDisplayName('');
+    setNewModelSupportsImage(true);
     setAvailableModels([]);
     setModelSearchQuery('');
     setIsModelModalVisible(true);
@@ -577,7 +579,10 @@ export function ProviderDetailScreen({
   const handleSelectModel = useCallback((modelId: string) => {
     setNewModelId(modelId);
     setNewModelDisplayName(modelId);
-  }, []);
+    if (provider) {
+      setNewModelSupportsImage(inferSupportsImageInput(provider.type, modelId));
+    }
+  }, [provider]);
 
   const filteredModels = useMemo(() => {
     if (!modelSearchQuery.trim()) return availableModels;
@@ -601,7 +606,7 @@ export function ProviderDetailScreen({
         cachedInputPrice: null,
         cachedOutputPrice: null,
         supportsReasoning: inferSupportsReasoning(provider.type, trimmedId),
-        supportsImageInput: false,
+        supportsImageInput: newModelSupportsImage,
         supportsImageGeneration: false,
         supportsFileInput: false,
       };
@@ -615,7 +620,7 @@ export function ProviderDetailScreen({
     } finally {
       setIsModelSaving(false);
     }
-  }, [newModelId, newModelDisplayName, isModelSaving, provider, addModel]);
+  }, [newModelId, newModelDisplayName, newModelSupportsImage, isModelSaving, provider, addModel]);
 
   // Handler for add-mode preset change
   const handlePresetChange = useCallback((presetId: PresetId) => {
@@ -1733,6 +1738,18 @@ export function ProviderDetailScreen({
                 accessibilityLabel="Display name"
                 autoCapitalize="words"
                 autoCorrect={false}
+              />
+            </View>
+
+            <View style={[styles.modelFormSection, { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }]}>
+              <Text style={[styles.modelFormLabel, { color: colors.textSecondary, marginBottom: 0 }]}>
+                Supports Image Input
+              </Text>
+              <Switch
+                value={newModelSupportsImage}
+                onValueChange={setNewModelSupportsImage}
+                trackColor={{ false: colors.border, true: colors.accent }}
+                accessibilityLabel="Supports image input"
               />
             </View>
 

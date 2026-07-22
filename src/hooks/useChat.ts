@@ -724,6 +724,15 @@ export function useChat(): UseChatResult {
         return;
       }
 
+      // Gate: reject image attachments if model doesn't support them
+      if (attachments && attachments.length > 0 && !modelConfig.supportsImageInput) {
+        setError({
+          message: 'Active model does not support image input',
+          isRetryable: false,
+        });
+        return;
+      }
+
       // Build the content for the user message
       const messageContent = text.trim();
 

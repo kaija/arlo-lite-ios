@@ -24,3 +24,32 @@ export function inferSupportsReasoning(providerType: string, modelId: string): b
       return false;
   }
 }
+
+/**
+ * Infers whether a model supports image/vision input based on
+ * the provider type and model identifier.
+ *
+ * Most modern LLMs support vision. Only known text-only models return false.
+ * Defaults to true for unknown models since false-negative (blocking images
+ * on a capable model) is worse UX than false-positive (the API will reject).
+ */
+export function inferSupportsImageInput(providerType: string, modelId: string): boolean {
+  const id = modelId.toLowerCase();
+
+  // Known text-only models that do NOT support image input
+  const textOnlyPatterns = [
+    /^gpt-3\.5/,        // GPT-3.5 series
+    /^text-/,           // text-davinci, text-ada, etc.
+    /^davinci/,         // legacy completions models
+    /^babbage/,
+    /^ada/,
+    /^curie/,
+  ];
+
+  if (textOnlyPatterns.some(p => p.test(id))) return false;
+
+  // All Anthropic Claude 3+ models support vision
+  // All OpenAI GPT-4+ models support vision
+  // Custom endpoints: default to true (API rejects if unsupported)
+  return true;
+}

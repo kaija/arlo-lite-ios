@@ -14,8 +14,9 @@
  * Requirements: 7.1, 7.2, 7.3, 7.4, 7.5, 14.1, 14.4
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import * as ImagePicker from 'expo-image-picker';
 import { GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
 import Animated, { useAnimatedStyle, interpolate, useAnimatedReaction, runOnJS } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -44,11 +45,13 @@ import { SettingsScreen } from '@/components/overlays/SettingsScreen';
 import { ProviderDetailScreen } from '@/components/overlays/ProviderDetailScreen';
 import { ContextUsagePopup } from '@/components/overlays/ContextUsagePopup';
 import { ScrollFAB } from '@/components/chat/ScrollFAB';
+import { assetsToContentParts } from '@/components/chat/AttachmentPicker';
 import { resolveModelName } from '@/utils/resolve-model-name';
 import { computeTokenBreakdown, DEFAULT_CONTEXT_WINDOW } from '@/domain/context-tracker';
 import { DEFAULT_SYSTEM_PROMPT } from '@/constants/defaults';
 
 import type { Message } from '@/database/repositories/message-repo';
+import type { ContentPart } from '@/providers/types';
 
 // ─── Props ────────────────────────────────────────────────────────────────────
 
@@ -192,13 +195,69 @@ export function ChatShell({ children }: ChatShellProps) {
     onMessageSent,
   } = useScrollBehavior(messages.length);
 
-  /** Wraps sendMessage to trigger auto-scroll on send. */
+  // ─── Pending Attachments ──────────────────────────────────────────────
+
+  const [pendingAttachments, setPendingAttachments] = useState<ContentPart[]>([]);
+
+  const handleAttach = useCallback(() => {
+    Alert.alert(
+      t('attachments.imagePickerTitle'),
+      undefined,
+      [
+        {
+          text: t('attachments.photoLibrary'),
+          onPress: async () => {
+            const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+            if (!permission.granted) {
+              Alert.alert(t('attachments.permissionDenied'), t('attachments.libraryPermissionMessage'));
+              return;
+            }
+            const result = await ImagePicker.launchImageLibraryAsync({
+              mediaTypes: ['images'],
+              quality: 0.8,
+              base64: true,
+              allowsMultipleSelection: true,
+              selectionLimit: 10,
+            });
+            if (!result.canceled && result.assets.length > 0) {
+              const parts = await assetsToContentParts(result.assets);
+              if (parts.length > 0) setPendingAttachments(prev => [...prev, ...parts]);
+            }
+          },
+        },
+        {
+          text: t('attachments.camera'),
+          onPress: async () => {
+            const permission = await ImagePicker.requestCameraPermissionsAsync();
+            if (!permission.granted) {
+              Alert.alert(t('attachments.permissionDenied'), t('attachments.cameraPermissionMessage'));
+              return;
+            }
+            const result = await ImagePicker.launchCameraAsync({
+              mediaTypes: ['images'],
+              quality: 0.8,
+              base64: true,
+            });
+            if (!result.canceled && result.assets.length > 0) {
+              const parts = await assetsToContentParts(result.assets);
+              if (parts.length > 0) setPendingAttachments(prev => [...prev, ...parts]);
+            }
+          },
+        },
+        { text: t('common.cancel'), style: 'cancel' },
+      ]
+    );
+  }, [t]);
+
+  /** Wraps sendMessage to trigger auto-scroll on send, includes pending attachments. */
   const sendMessage = useCallback(
-    async (text: string, attachments?: any) => {
+    async (text: string) => {
+      const attachments = pendingAttachments.length > 0 ? pendingAttachments : undefined;
+      setPendingAttachments([]);
       onMessageSent();
       await rawSendMessage(text, attachments);
     },
-    [rawSendMessage, onMessageSent]
+    [rawSendMessage, onMessageSent, pendingAttachments]
   );
 
   // ─── Sidebar Sync ──────────────────────────────────────────────────
@@ -596,16 +655,16 @@ export function ChatShell({ children }: ChatShellProps) {
               activeModelName={activeModel?.displayName ?? 'Select Model'}
               thinkingLevel={thinkingLevel}
               supportsThinking={activeModel?.supportsReasoning ?? false}
+              supportsImageInput={activeModel?.supportsImageInput ?? false}
               contextUsagePercent={contextUsagePercent}
               isStreaming={isStreaming}
               onModelPickerOpen={openModelPicker}
               onThinkingCycle={handleThinkingCycle}
               onSend={sendMessage}
               onStop={stopGeneration}
-              onAttach={() => {
-                // Attachment functionality handled by separate flow
-              }}
+              onAttach={handleAttach}
               onContextRingPress={openContextPopup}
+              pendingAttachmentCount={pendingAttachments.length}
             />
 
             {/* Optional children */}

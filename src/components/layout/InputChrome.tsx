@@ -20,11 +20,12 @@ import {
   Platform,
   Pressable,
   StyleSheet,
+  Text,
   TextInput,
   View,
 } from 'react-native';
 import { BlurView } from 'expo-blur';
-import Svg, { Path } from 'react-native-svg';
+import Svg, { Path, Rect } from 'react-native-svg';
 import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '@/theme';
@@ -71,6 +72,10 @@ export interface InputChromeProps {
   onAttach: () => void;
   /** Called when the context ring is tapped to show usage breakdown */
   onContextRingPress: () => void;
+  /** Number of images pending to be sent */
+  pendingAttachmentCount?: number;
+  /** Whether the active model supports image input */
+  supportsImageInput?: boolean;
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -94,6 +99,8 @@ export function InputChrome({
   onStop,
   onAttach,
   onContextRingPress,
+  pendingAttachmentCount,
+  supportsImageInput,
 }: InputChromeProps) {
   const { colors, borderRadii, isDark } = useTheme();
   const { t } = useTranslation();
@@ -157,16 +164,23 @@ export function InputChrome({
 
         {/* Compose row: attachment + text input + send/stop */}
         <View style={styles.composeRow}>
-          {/* Attachment/paperclip button - always visible, LEFT of textarea */}
-          <Pressable
-            onPress={onAttach}
-            accessibilityRole="button"
-            accessibilityLabel={t('accessibility.attachFileButton')}
-            accessibilityHint={t('accessibility.attachFileHint')}
-            style={styles.attachButton}
-          >
-            <PaperclipIcon color={colors.textTertiary} />
-          </Pressable>
+          {/* Attachment button - visible only when model supports image input */}
+          {supportsImageInput && (
+            <Pressable
+              onPress={onAttach}
+              accessibilityRole="button"
+              accessibilityLabel={t('accessibility.attachFileButton')}
+              accessibilityHint={t('accessibility.attachFileHint')}
+              style={styles.attachButton}
+            >
+              <ImageIcon color={colors.textTertiary} />
+              {(pendingAttachmentCount ?? 0) > 0 && (
+                <View style={[styles.badge, { backgroundColor: colors.accent }]}>
+                  <Text style={styles.badgeText}>{pendingAttachmentCount}</Text>
+                </View>
+              )}
+            </Pressable>
+          )}
 
           {/* Multiline text input */}
           <TextInput
@@ -206,16 +220,32 @@ export function InputChrome({
 
 // ─── Icons ──────────────────────────────────────────────────────────────────
 
-/** Paperclip/attachment icon */
-function PaperclipIcon({ color }: { color: string }) {
+/** Photo/image icon — rounded rectangle frame with mountain landscape and sun */
+function ImageIcon({ color }: { color: string }) {
   return (
     <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
-      <Path
-        d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"
+      <Rect
+        x={3}
+        y={3}
+        width={18}
+        height={18}
+        rx={2}
         stroke={color}
         strokeWidth={2}
         strokeLinecap="round"
         strokeLinejoin="round"
+      />
+      <Path
+        d="M3 16l5-5 4 4 3-3 6 6"
+        stroke={color}
+        strokeWidth={2}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <Path
+        d="M16 9a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z"
+        stroke={color}
+        strokeWidth={2}
       />
     </Svg>
   );
@@ -252,6 +282,21 @@ const styles = StyleSheet.create({
     height: ATTACHMENT_TAP_TARGET,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  badge: {
+    position: 'absolute',
+    top: 4,
+    right: 4,
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  badgeText: {
+    color: '#fff',
+    fontSize: 10,
+    fontWeight: '700',
   },
   textInput: {
     flex: 1,

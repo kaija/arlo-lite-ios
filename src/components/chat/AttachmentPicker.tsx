@@ -95,12 +95,12 @@ export function AttachmentPicker({
       mediaTypes: ['images'],
       quality: 0.8,
       base64: true,
-      allowsMultipleSelection: false,
+      allowsMultipleSelection: true,
+      selectionLimit: 10,
     });
 
     if (!result.canceled && result.assets.length > 0) {
-      const asset = result.assets[0];
-      const contentParts = await assetToContentParts(asset);
+      const contentParts = await assetsToContentParts(result.assets);
       if (contentParts.length > 0) {
         onAttachmentsSelected(contentParts);
       }
@@ -127,8 +127,7 @@ export function AttachmentPicker({
     });
 
     if (!result.canceled && result.assets.length > 0) {
-      const asset = result.assets[0];
-      const contentParts = await assetToContentParts(asset);
+      const contentParts = await assetsToContentParts(result.assets);
       if (contentParts.length > 0) {
         onAttachmentsSelected(contentParts);
       }
@@ -219,33 +218,37 @@ export function AttachmentPicker({
 }
 
 /**
- * Convert an ImagePicker asset to ContentPart[] with base64 encoding.
+ * Convert an array of ImagePicker assets to ContentPart[] with base64 encoding.
+ * Processes each asset in order, skipping failures silently.
+ * Uses asset.base64 if available, else falls back to FileSystem.readAsStringAsync.
+ * Defaults MIME type to image/jpeg when not reported by the picker.
  */
-async function assetToContentParts(
-  asset: ImagePicker.ImagePickerAsset
+export async function assetsToContentParts(
+  assets: ImagePicker.ImagePickerAsset[]
 ): Promise<ContentPart[]> {
-  let base64Data = asset.base64;
+  const parts: ContentPart[] = [];
 
-  // If base64 not available directly, read from URI
-  if (!base64Data && asset.uri) {
+  for (const asset of assets) {
     try {
-      base64Data = await FileSystem.readAsStringAsync(asset.uri, {
-        encoding: FileSystem.EncodingType.Base64,
-      });
+      let base64Data = asset.base64;
+
+      if (!base64Data && asset.uri) {
+        base64Data = await FileSystem.readAsStringAsync(asset.uri, {
+          encoding: FileSystem.EncodingType.Base64,
+        });
+      }
+
+      if (!base64Data) continue;
+
+      const mimeType = asset.mimeType || 'image/jpeg';
+      const dataUrl = `data:${mimeType};base64,${base64Data}`;
+      parts.push({ type: 'image_url', image_url: { url: dataUrl } });
     } catch {
-      return [];
+      // Skip failed assets silently
     }
   }
 
-  if (!base64Data) return [];
-
-  // Determine MIME type from the asset
-  const mimeType = asset.mimeType || 'image/jpeg';
-  const dataUrl = `data:${mimeType};base64,${base64Data}`;
-
-  return [
-    { type: 'image_url', image_url: { url: dataUrl } },
-  ];
+  return parts;
 }
 
 function createStyles(theme: Theme) {
