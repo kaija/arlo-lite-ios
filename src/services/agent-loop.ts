@@ -166,6 +166,12 @@ async function streamOnce(
     }
   }
 
+  // If tool calls came from XML fallback (embedded in text), strip the tags from content
+  // so the persisted message and model context don't contain raw XML.
+  if (toolCalls.length > 0 && content.includes('<tool_call>')) {
+    content = content.replace(/<tool_call>\s*[\s\S]*?<\/tool_call>/g, '').trim();
+  }
+
   return { content, thinking, toolCalls };
 }
 

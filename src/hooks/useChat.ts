@@ -770,21 +770,11 @@ export function useChat(): UseChatResult {
           : {}),
       };
 
-      // Check if model supports tool use → route through agent loop
-      // OpenAI and Anthropic natively support function calling on all models;
-      // only 'custom' providers need the explicit supportsToolUse flag.
-      const providerAlwaysSupportsTools = providerConfigForService.type === 'openai' || providerConfigForService.type === 'anthropic';
-      const modelSupportsTools = providerAlwaysSupportsTools || (modelConfig.supportsToolUse ?? false);
-      if (modelSupportsTools) {
-        await handleAgentLoop(prependSystemPrompt(chatMessages, providerConfigForService.type), options, sessionId, modelConfig, providerConfigForService);
-        return;
-      }
+      // Always route through the agent loop — all providers support tool use:
+      // OpenAI/Anthropic have native function calling, and Custom providers
+      // have an XML fallback parser for models that emit <tool_call> tags.
+      await handleAgentLoop(prependSystemPrompt(chatMessages, providerConfigForService.type), options, sessionId, modelConfig, providerConfigForService);
 
-      if (providerConfig.streamingEnabled) {
-        await handleStreaming(prependSystemPrompt(chatMessages, providerConfigForService.type), options, sessionId, modelConfig);
-      } else {
-        await handleNonStreaming(prependSystemPrompt(chatMessages, providerConfigForService.type), options, sessionId, modelConfig);
-      }
     },
     [
       activeSessionId,
@@ -852,21 +842,11 @@ export function useChat(): UseChatResult {
           : {}),
       };
 
-      // Check if model supports tool use → route through agent loop
-      // OpenAI and Anthropic natively support function calling on all models;
-      // only 'custom' providers need the explicit supportsToolUse flag.
-      const providerAlwaysSupportsTools = providerConfigForService.type === 'openai' || providerConfigForService.type === 'anthropic';
-      const modelSupportsTools = providerAlwaysSupportsTools || (modelConfig.supportsToolUse ?? false);
-      if (modelSupportsTools) {
-        await handleAgentLoop(prependSystemPrompt(chatMessages, providerConfigForService.type), options, activeSessionId, modelConfig, providerConfigForService);
-        return;
-      }
+      // Always route through the agent loop — all providers support tool use:
+      // OpenAI/Anthropic have native function calling, and Custom providers
+      // have an XML fallback parser for models that emit <tool_call> tags.
+      await handleAgentLoop(prependSystemPrompt(chatMessages, providerConfigForService.type), options, activeSessionId, modelConfig, providerConfigForService);
 
-      if (providerConfig.streamingEnabled) {
-        await handleStreaming(prependSystemPrompt(chatMessages, providerConfigForService.type), options, activeSessionId, modelConfig);
-      } else {
-        await handleNonStreaming(prependSystemPrompt(chatMessages, providerConfigForService.type), options, activeSessionId, modelConfig);
-      }
     },
     [
       activeSessionId,
