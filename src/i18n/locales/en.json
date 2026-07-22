@@ -211,7 +211,17 @@
     "maxTokensDescription": "Maximum number of tokens to generate in the response.",
     "thinkingExpandedByDefault": "Thinking Expanded by Default",
     "emptySubtitle": "Add a provider to start chatting with AI models",
-    "addPromptDescription": "Give your prompt a name and provide the system instructions."
+    "addPromptDescription": "Give your prompt a name and provide the system instructions.",
+    "tools": "Tools",
+    "braveSearch": {
+      "title": "Brave Search",
+      "enable": "Enable Brave Search",
+      "apiKey": "API Key",
+      "apiKeyPlaceholder": "Enter your Brave Search API key",
+      "keyStored": "API key saved",
+      "save": "Save",
+      "clear": "Clear Key"
+    }
   },
 
   "about": {

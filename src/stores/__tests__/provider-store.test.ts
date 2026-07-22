@@ -131,6 +131,7 @@ describe('provider-store', () => {
           cached_input_price: 1.25, cached_output_price: null,
           supports_reasoning: 0, supports_image_input: 1,
           supports_image_generation: 0, supports_file_input: 1,
+          supports_tool_use: 0,
         },
       ];
       mockDb.getAllAsync.mockResolvedValue(rows);
@@ -154,6 +155,7 @@ describe('provider-store', () => {
         supportsImageInput: true,
         supportsImageGeneration: false,
         supportsFileInput: true,
+        supportsToolUse: false,
       });
     });
   });
@@ -383,7 +385,8 @@ describe('provider-store', () => {
         1,  // supports_reasoning
         1,  // supports_image_input
         0,  // supports_image_generation
-        1   // supports_file_input
+        1,  // supports_file_input
+        0   // supports_tool_use
       );
       expect(result.id).toBe('mock-model-id');
       expect(result.providerId).toBe('p1');

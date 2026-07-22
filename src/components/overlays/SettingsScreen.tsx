@@ -51,6 +51,7 @@ import { useSettingsStore } from '@/stores/settings-store';
 import { useChatStore } from '@/stores/chat-store';
 import { useUIStore } from '@/stores/ui-store';
 import { useMaskedKey } from '@/hooks/useMaskedKey';
+import { BraveSearchSettings } from '@/components/settings/BraveSearchSettings';
 import { SUPPORTED_LOCALES, LOCALE_DISPLAY_NAMES } from '@/i18n/index';
 import type { SupportedLocale } from '@/i18n/index';
 import type { Provider, GenerationParams } from '@/database/repositories/provider-repo';
@@ -163,6 +164,7 @@ export function SettingsScreen({ visible, onClose }: SettingsScreenProps) {
   useEffect(() => {
     if (visible) {
       setShouldRender(true);
+      setBraveSearchVisible(false);
       translateX.value = SCREEN_WIDTH;
       translateX.value = withTiming(0, {
         duration: SETTINGS_SLIDE_DURATION,
@@ -214,6 +216,9 @@ export function SettingsScreen({ visible, onClose }: SettingsScreenProps) {
       isDefault: prompt.id === defaultSystemPromptId,
     }));
   }, [storeSystemPrompts, defaultSystemPromptId]);
+
+  // Brave Search sub-screen state
+  const [braveSearchVisible, setBraveSearchVisible] = useState(false);
 
   // Add prompt modal state
   const [addPromptModalVisible, setAddPromptModalVisible] = useState(false);
@@ -586,6 +591,36 @@ export function SettingsScreen({ visible, onClose }: SettingsScreenProps) {
                 </Pressable>
               </View>
             </View>
+
+            {/* Tools Section */}
+            <View style={styles.section}>
+              <Text style={[styles.sectionHeader, { color: colors.textTertiary }]}>
+                {t('settings.tools', 'Tools').toUpperCase()}
+              </Text>
+              <View
+                style={[
+                  styles.groupedList,
+                  {
+                    backgroundColor: colors.surface,
+                    borderRadius: borderRadii.groupedList,
+                  },
+                ]}
+              >
+                <Pressable
+                  style={styles.paramRow}
+                  onPress={() => setBraveSearchVisible(true)}
+                  accessibilityRole="button"
+                  accessibilityLabel={t('settings.braveSearch.title')}
+                >
+                  <Text style={[styles.paramLabel, { color: colors.text }]}>
+                    {t('settings.braveSearch.title')}
+                  </Text>
+                  <Text style={[styles.chevronRight, { color: colors.textTertiary }]}>
+                    {'\u203A'}
+                  </Text>
+                </Pressable>
+              </View>
+            </View>
           </>
         )}
       </ScrollView>
@@ -744,6 +779,50 @@ export function SettingsScreen({ visible, onClose }: SettingsScreenProps) {
           </KeyboardAvoidingView>
         </Pressable>
       </Modal>
+
+      {/* Brave Search Sub-Screen */}
+      {braveSearchVisible && (
+        <View style={[styles.subScreen, { backgroundColor: colors.surfaceSecondary }]}>
+          <BlurView
+            intensity={80}
+            tint={isDark ? 'dark' : 'light'}
+            style={styles.header}
+          >
+            <View style={styles.headerContent}>
+              <Pressable
+                style={styles.backButton}
+                onPress={() => setBraveSearchVisible(false)}
+                accessibilityRole="button"
+                accessibilityLabel={t('accessibility.backButton')}
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              >
+                <Text style={[styles.backChevron, { color: colors.accent }]}>
+                  {'\u2039'}
+                </Text>
+                <Text style={[styles.backLabel, { color: colors.accent }]}>
+                  {t('settings.title')}
+                </Text>
+              </Pressable>
+              <Text
+                style={[styles.headerTitle, { color: colors.text }]}
+                accessibilityRole="header"
+              >
+                {t('settings.braveSearch.title')}
+              </Text>
+              <View style={styles.headerSpacer} />
+            </View>
+            <View style={[styles.separator, { backgroundColor: colors.border }]} />
+          </BlurView>
+          <ScrollView
+            style={styles.scrollView}
+            contentContainerStyle={styles.scrollContent}
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+          >
+            <BraveSearchSettings />
+          </ScrollView>
+        </View>
+      )}
     </Animated.View>
   );
 }
@@ -977,6 +1056,11 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
     zIndex: 8,
     elevation: 8,
+  },
+  subScreen: {
+    ...StyleSheet.absoluteFillObject,
+    zIndex: 11,
+    elevation: 11,
   },
   header: {
     paddingTop: 54, // Safe area top

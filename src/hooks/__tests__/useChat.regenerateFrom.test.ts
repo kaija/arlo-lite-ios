@@ -105,6 +105,15 @@ jest.mock('@/services/completion-service', () => ({
   complete: jest.fn(),
 }));
 
+jest.mock('@/services/agent-loop', () => ({
+  runAgentLoop: jest.fn().mockResolvedValue({
+    content: 'Agent response',
+    totalUsage: { promptTokens: 10, completionTokens: 5, totalTokens: 15 },
+    terminationReason: 'final_response',
+    iterationCount: 1,
+  }),
+}));
+
 jest.mock('@/domain/cost-calculator', () => ({
   calculateMessageCost: jest.fn(() => 0.001),
 }));
@@ -115,6 +124,7 @@ import { renderHook, act } from '@testing-library/react-native';
 import { useChat } from '../useChat';
 import { useSessionStore } from '@/stores/session-store';
 import { ProviderError } from '@/providers/errors';
+import { runAgentLoop } from '@/services/agent-loop';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -175,11 +185,14 @@ describe('useChat - regenerateFrom', () => {
     mockDeleteMessageAndSubsequent.mockImplementation(async () => {
       callOrder.push('deleteMessageAndSubsequent');
     });
-    mockStreamCompletion.mockImplementation(() => {
+    (runAgentLoop as jest.Mock).mockImplementation(async () => {
       callOrder.push('resendContext');
-      return (async function* () {
-        yield { type: 'done', usage: { promptTokens: 10, completionTokens: 5, totalTokens: 15 } };
-      })();
+      return {
+        content: 'Agent response',
+        totalUsage: { promptTokens: 10, completionTokens: 5, totalTokens: 15 },
+        terminationReason: 'final_response',
+        iterationCount: 1,
+      };
     });
 
     // After deletion, getState returns truncated messages for resendContext
@@ -232,11 +245,7 @@ describe('useChat - regenerateFrom', () => {
       30
     );
 
-    mockStreamCompletion.mockReturnValue(
-      (async function* () {
-        throw providerError;
-      })()
-    );
+    (runAgentLoop as jest.Mock).mockRejectedValue(providerError);
 
     // After deletion, getState returns messages for resendContext
     mockSessionStoreGetState.mockReturnValue({
@@ -263,11 +272,7 @@ describe('useChat - regenerateFrom', () => {
   it('creates ChatError with isRetryable: true when resendContext throws a generic error', async () => {
     const genericError = new Error('Network timeout');
 
-    mockStreamCompletion.mockReturnValue(
-      (async function* () {
-        throw genericError;
-      })()
-    );
+    (runAgentLoop as jest.Mock).mockRejectedValue(genericError);
 
     // After deletion, getState returns messages for resendContext
     mockSessionStoreGetState.mockReturnValue({

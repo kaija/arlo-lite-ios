@@ -58,6 +58,15 @@ export interface ProviderConfig {
 }
 
 /**
+ * A tool call issued by the model.
+ */
+export interface ToolCall {
+  id: string;
+  name: string;
+  arguments: Record<string, unknown>;
+}
+
+/**
  * Configuration for a specific model registered under a provider.
  * Contains metadata for pricing, capabilities, and context limits.
  */
@@ -88,6 +97,8 @@ export interface ModelConfig {
   supportsImageGeneration: boolean;
   /** Whether this model accepts file inputs. */
   supportsFileInput: boolean;
+  /** Whether this model supports tool/function calling. */
+  supportsToolUse?: boolean;
 }
 
 /**
@@ -96,11 +107,15 @@ export interface ModelConfig {
  */
 export interface ChatMessage {
   /** The role of the message sender. */
-  role: 'system' | 'user' | 'assistant';
+  role: 'system' | 'user' | 'assistant' | 'tool';
   /** Message content — plain text string or array of content parts for multimodal input. */
   content: string | ContentPart[];
   /** Optional reasoning/thinking content produced by the model. */
   thinkingContent?: string;
+  /** Tool call ID — required on role:"tool" messages (OpenAI format). */
+  tool_call_id?: string;
+  /** Tool calls present on assistant messages that invoke tools. */
+  toolCalls?: ToolCall[];
 }
 
 /** A content part within a multimodal message. */
@@ -114,11 +129,13 @@ export type ContentPart =
  */
 export interface StreamChunk {
   /** The type of this chunk. */
-  type: 'text' | 'thinking' | 'done' | 'error';
+  type: 'text' | 'thinking' | 'done' | 'error' | 'tool_call';
   /** The content payload for this chunk. */
   content: string;
   /** Token usage data, typically present on the final 'done' chunk. */
   usage?: TokenUsage;
+  /** Tool call data, present on 'tool_call' chunks. */
+  toolCall?: ToolCall;
 }
 
 /**
@@ -149,6 +166,8 @@ export interface CompletionRequest {
   stream: boolean;
   /** Optional maximum number of tokens to generate. */
   maxTokens?: number;
+  /** Tool schemas formatted for the target provider. */
+  tools?: unknown[];
 }
 
 /**

@@ -1,5 +1,6 @@
 import {
   buildSecureKey,
+  buildServiceKey,
   storeApiKey,
   getApiKey,
   deleteApiKey,
@@ -32,6 +33,18 @@ describe('secure-store', () => {
       expect(buildSecureKey('my-custom_provider.v2')).toBe(
         'arlo.provider.my-custom_provider.v2.apiKey'
       );
+    });
+  });
+
+  describe('buildServiceKey', () => {
+    it('builds the correct key pattern for a service', () => {
+      expect(buildServiceKey('brave_search')).toBe(
+        'arlo.service.brave_search.apiKey'
+      );
+    });
+
+    it('uses service namespace separate from provider namespace', () => {
+      expect(buildServiceKey('foo')).not.toBe(buildSecureKey('foo'));
     });
   });
 

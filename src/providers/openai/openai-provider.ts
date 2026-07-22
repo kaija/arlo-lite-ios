@@ -195,6 +195,7 @@ export class OpenAIProvider implements IProvider {
       model: request.model,
       messages,
       stream: false,
+      ...(request.tools?.length && { tools: request.tools }),
     };
 
     if (request.maxTokens !== undefined) {
@@ -224,6 +225,7 @@ export class OpenAIProvider implements IProvider {
       model: request.model,
       input,
       stream: false,
+      ...(request.tools?.length && { tools: request.tools }),
     };
 
     if (instructions) {
@@ -264,6 +266,7 @@ export class OpenAIProvider implements IProvider {
       messages,
       stream: true,
       stream_options: { include_usage: true },
+      ...(request.tools?.length && { tools: request.tools }),
     };
 
     if (request.maxTokens !== undefined) {
@@ -274,6 +277,8 @@ export class OpenAIProvider implements IProvider {
       params.reasoning_effort = thinkingParams.reasoning_effort;
     }
 
+    console.log('[OpenAI Chat Completions] Full request payload:', JSON.stringify(params, null, 2));
+
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const stream = await client.chat.completions.create(
       params as any,
@@ -281,6 +286,9 @@ export class OpenAIProvider implements IProvider {
     );
 
     let usage: TokenUsage | undefined;
+
+    // Accumulate streamed tool calls: index → {id, name, arguments}
+    const toolCallAccum = new Map<number, { id: string; name: string; args: string }>();
 
     for await (const chunk of stream as unknown as AsyncIterable<Record<string, unknown>>) {
       if (signal.aborted) {
@@ -298,13 +306,31 @@ export class OpenAIProvider implements IProvider {
           // Reasoning/thinking content
           if (delta.reasoning_content) {
             yield { type: 'thinking', content: delta.reasoning_content as string };
-            continue;
           }
 
           // Regular text content
           if (delta.content) {
             yield { type: 'text', content: delta.content as string };
-            continue;
+          }
+
+          // Accumulate tool_calls deltas
+          const toolCalls = delta.tool_calls as Array<Record<string, unknown>> | undefined;
+          if (toolCalls) {
+            for (const tc of toolCalls) {
+              const idx = (tc.index as number) ?? 0;
+              const fn = tc.function as Record<string, unknown> | undefined;
+              const existing = toolCallAccum.get(idx);
+              if (!existing) {
+                toolCallAccum.set(idx, {
+                  id: (tc.id as string) ?? `call_${idx}`,
+                  name: (fn?.name as string) ?? '',
+                  args: (fn?.arguments as string) ?? '',
+                });
+              } else {
+                if (fn?.name) existing.name = fn.name as string;
+                if (fn?.arguments) existing.args += fn.arguments as string;
+              }
+            }
           }
         }
       }
@@ -319,6 +345,13 @@ export class OpenAIProvider implements IProvider {
           cachedTokens: (u.prompt_tokens_details as Record<string, unknown>)?.cached_tokens as number | undefined,
         };
       }
+    }
+
+    // Emit accumulated tool calls as tool_call chunks
+    for (const [, tc] of toolCallAccum) {
+      let args: Record<string, unknown> = {};
+      try { args = JSON.parse(tc.args); } catch { /* malformed args — send empty */ }
+      yield { type: 'tool_call', content: '', toolCall: { id: tc.id, name: tc.name, arguments: args } };
     }
 
     // Emit final done chunk with accumulated usage
@@ -341,6 +374,7 @@ export class OpenAIProvider implements IProvider {
       model: request.model,
       input,
       stream: true,
+      ...(request.tools?.length && { tools: request.tools }),
     };
 
     if (instructions) {
@@ -355,21 +389,7 @@ export class OpenAIProvider implements IProvider {
       params.reasoning = { effort: thinkingParams.reasoning_effort };
     }
 
-    console.log(`[OpenAI Responses API Stream] URL: ${client.baseURL}/responses`, '\nRequest params:', JSON.stringify(params, null, 2));
-
-    // Debug: test raw connectivity with both fetch implementations
-    try {
-      const testResp = await globalThis.fetch(`${client.baseURL}/models`, { method: 'GET' });
-      console.log('[OpenAI Debug] globalThis.fetch /models status:', testResp.status);
-    } catch (fetchErr) {
-      console.warn('[OpenAI Debug] globalThis.fetch /models failed:', (fetchErr as Error).message);
-    }
-    try {
-      const testResp2 = await fetch(`${client.baseURL}/models`, { method: 'GET' });
-      console.log('[OpenAI Debug] expo/fetch /models status:', testResp2.status);
-    } catch (fetchErr) {
-      console.warn('[OpenAI Debug] expo/fetch /models failed:', (fetchErr as Error).message);
-    }
+    console.log(`[OpenAI Responses API Stream] Request params:`, JSON.stringify(params, null, 2));
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const stream = await client.responses.create(
@@ -378,6 +398,9 @@ export class OpenAIProvider implements IProvider {
     );
 
     let usage: TokenUsage | undefined;
+
+    // Accumulate function call items: output_index → {call_id, name, arguments}
+    const toolCallAccum = new Map<number, { callId: string; name: string; args: string }>();
 
     for await (const event of stream as unknown as AsyncIterable<Record<string, unknown>>) {
       if (signal.aborted) {
@@ -400,6 +423,42 @@ export class OpenAIProvider implements IProvider {
           const delta = (event.delta as string) || '';
           if (delta) {
             yield { type: 'thinking', content: delta };
+          }
+          break;
+        }
+
+        // Tool call: new function_call output item added
+        case 'response.output_item.added': {
+          const item = event.item as Record<string, unknown> | undefined;
+          if (item?.type === 'function_call') {
+            const idx = (event.output_index as number) ?? 0;
+            toolCallAccum.set(idx, {
+              callId: (item.call_id as string) ?? `call_${idx}`,
+              name: (item.name as string) ?? '',
+              args: '',
+            });
+          }
+          break;
+        }
+
+        // Tool call: streaming argument deltas
+        case 'response.function_call_arguments.delta': {
+          const idx = (event.output_index as number) ?? 0;
+          const existing = toolCallAccum.get(idx);
+          if (existing) {
+            existing.args += (event.delta as string) ?? '';
+          }
+          break;
+        }
+
+        // Tool call: arguments done — update with final values
+        case 'response.function_call_arguments.done': {
+          const idx = (event.output_index as number) ?? 0;
+          const existing = toolCallAccum.get(idx);
+          if (existing) {
+            existing.args = (event.arguments as string) ?? existing.args;
+            if (event.name) existing.name = event.name as string;
+            if (event.call_id) existing.callId = event.call_id as string;
           }
           break;
         }
@@ -429,6 +488,13 @@ export class OpenAIProvider implements IProvider {
       }
     }
 
+    // Emit accumulated tool calls
+    for (const [, tc] of toolCallAccum) {
+      let args: Record<string, unknown> = {};
+      try { args = JSON.parse(tc.args); } catch { /* malformed args — send empty */ }
+      yield { type: 'tool_call', content: '', toolCall: { id: tc.callId, name: tc.name, arguments: args } };
+    }
+
     // Emit final done chunk with accumulated usage
     yield { type: 'done', content: '', ...(usage ? { usage } : {}) };
   }
@@ -441,20 +507,36 @@ export class OpenAIProvider implements IProvider {
  */
 function toChatCompletionMessage(
   msg: ChatMessage,
-): { role: string; content: string | Array<Record<string, unknown>> } {
+): Record<string, unknown> {
+  const out: Record<string, unknown> = { role: msg.role };
+
   if (typeof msg.content === 'string') {
-    return { role: msg.role, content: msg.content };
+    out.content = msg.content;
+  } else {
+    // Multimodal content parts
+    out.content = (msg.content as ContentPart[]).map((part) => {
+      if (part.type === 'text') {
+        return { type: 'text', text: part.text };
+      }
+      return { type: 'image_url', image_url: { url: part.image_url.url } };
+    });
   }
 
-  // Multimodal content parts
-  const parts = (msg.content as ContentPart[]).map((part) => {
-    if (part.type === 'text') {
-      return { type: 'text', text: part.text };
-    }
-    return { type: 'image_url', image_url: { url: part.image_url.url } };
-  });
+  // Include tool_calls on assistant messages for multi-turn tool use
+  if (msg.toolCalls?.length) {
+    out.tool_calls = msg.toolCalls.map((tc) => ({
+      id: tc.id,
+      type: 'function',
+      function: { name: tc.name, arguments: JSON.stringify(tc.arguments) },
+    }));
+  }
 
-  return { role: msg.role, content: parts };
+  // Include tool_call_id on tool result messages
+  if (msg.tool_call_id) {
+    out.tool_call_id = msg.tool_call_id;
+  }
+
+  return out;
 }
 
 /**
@@ -462,13 +544,13 @@ function toChatCompletionMessage(
  *
  * The Responses API does not accept 'system' role in the input array.
  * System messages are extracted and returned separately as `instructions`.
- * Each input item must have role 'user' or 'assistant'.
+ * Tool-related messages are converted to function_call / function_call_output items.
  */
 function convertToResponsesInput(
   messages: ChatMessage[],
-): { input: Array<{ role: string; content: string | Array<Record<string, unknown>> }>; instructions: string | undefined } {
+): { input: Array<Record<string, unknown>>; instructions: string | undefined } {
   const systemMessages: string[] = [];
-  const input: Array<{ role: string; content: string | Array<Record<string, unknown>> }> = [];
+  const input: Array<Record<string, unknown>> = [];
 
   for (const msg of messages) {
     if (msg.role === 'system') {
@@ -480,6 +562,38 @@ function convertToResponsesInput(
       continue;
     }
 
+    // Assistant message with tool calls → emit function_call items
+    if (msg.role === 'assistant' && msg.toolCalls?.length) {
+      // Emit any text content as a message item first
+      const textContent = typeof msg.content === 'string' ? msg.content : '';
+      if (textContent) {
+        input.push({ role: 'assistant', content: textContent });
+      }
+      // Emit each tool call as a function_call item
+      for (const tc of msg.toolCalls) {
+        input.push({
+          type: 'function_call',
+          call_id: tc.id,
+          name: tc.name,
+          arguments: JSON.stringify(tc.arguments),
+        });
+      }
+      continue;
+    }
+
+    // Tool result message → function_call_output item
+    if (msg.role === 'tool') {
+      // Skip tool results without call_id — can't send to API without it
+      if (!msg.tool_call_id) continue;
+      input.push({
+        type: 'function_call_output',
+        call_id: msg.tool_call_id,
+        output: typeof msg.content === 'string' ? msg.content : JSON.stringify(msg.content),
+      });
+      continue;
+    }
+
+    // Regular user/assistant messages
     if (typeof msg.content === 'string') {
       input.push({ role: msg.role, content: msg.content });
     } else {

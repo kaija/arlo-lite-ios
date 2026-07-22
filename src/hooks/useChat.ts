@@ -17,10 +17,13 @@ import { useProviderStore } from '@/stores/provider-store';
 import { useSettingsStore } from '@/stores/settings-store';
 import { streamCompletion, complete } from '@/services/completion-service';
 import type { CompletionServiceOptions } from '@/services/completion-service';
+import { runAgentLoop } from '@/services/agent-loop';
+import type { AgentLoopCallbacks, AgentLoopOptions } from '@/services/agent-loop';
 import { ProviderError } from '@/providers/errors';
 import { calculateMessageCost } from '@/domain/cost-calculator';
 import { DEFAULT_SYSTEM_PROMPT } from '@/constants/defaults';
-import type { ChatMessage, ContentPart, ProviderConfig, TokenUsage } from '@/providers/types';
+import { getTool } from '@/services/tool-registry';
+import type { ChatMessage, ContentPart, ProviderConfig, ProviderType, TokenUsage } from '@/providers/types';
 import type { Message } from '@/database/repositories/message-repo';
 
 /** Stable empty array to avoid infinite re-render loops in selectors */
@@ -58,6 +61,10 @@ export interface UseChatResult {
   retry: () => Promise<void>;
   /** Clear the current error */
   clearError: () => void;
+  /** Current agent loop iteration (0 if not in an agent loop) */
+  currentIteration: number;
+  /** Whether the agent loop is currently executing tools */
+  isToolExecuting: boolean;
 }
 
 /**
@@ -198,6 +205,10 @@ export function useChat(): UseChatResult {
   // Local error state (reactive so UI re-renders on error)
   const [error, setError] = useState<ChatError | null>(null);
 
+  // Agent loop state
+  const [currentIteration, setCurrentIteration] = useState(0);
+  const [isToolExecuting, setIsToolExecuting] = useState(false);
+
   const clearError = useCallback(() => {
     setError(null);
   }, []);
@@ -259,11 +270,19 @@ export function useChat(): UseChatResult {
    * Build ChatMessage array from session messages for the provider request.
    */
   function buildChatMessages(sessionMessages: Message[]): ChatMessage[] {
-    return sessionMessages.map((msg) => ({
-      role: msg.role,
-      content: msg.content,
-      ...(msg.thinkingContent ? { thinkingContent: msg.thinkingContent } : {}),
-    }));
+    return sessionMessages
+      .filter((msg) => {
+        // Skip tool results — they lack tool_call_id when loaded from DB
+        if (msg.role === 'tool') return false;
+        // Skip assistant messages that are just tool-call JSON (internal, not displayable)
+        if (msg.role === 'assistant' && msg.content.startsWith('{"toolCalls"')) return false;
+        return true;
+      })
+      .map((msg) => ({
+        role: msg.role as ChatMessage['role'],
+        content: msg.content,
+        ...(msg.thinkingContent ? { thinkingContent: msg.thinkingContent } : {}),
+      }));
   }
 
   /**
@@ -274,30 +293,62 @@ export function useChat(): UseChatResult {
    * 2. Global default system prompt (settings.defaultSystemPromptId)
    * 3. Built-in DEFAULT_SYSTEM_PROMPT constant
    */
-  function prependSystemPrompt(chatMessages: ChatMessage[]): ChatMessage[] {
+  function prependSystemPrompt(chatMessages: ChatMessage[], providerType?: ProviderType): ChatMessage[] {
     const { defaultSystemPromptId, systemPrompts } = useSettingsStore.getState();
     const sessions = useSessionStore.getState().sessions;
     const sessionId = useSessionStore.getState().activeSessionId;
+
+    let content: string;
 
     // 1. Try session-level prompt
     const session = sessionId ? sessions.find((s) => s.id === sessionId) : null;
     if (session?.systemPromptId) {
       const sessionPrompt = systemPrompts.find((p) => p.id === session.systemPromptId);
       if (sessionPrompt) {
-        return [{ role: 'system', content: sessionPrompt.content }, ...chatMessages];
+        content = sessionPrompt.content;
+      } else {
+        content = DEFAULT_SYSTEM_PROMPT;
       }
-    }
-
-    // 2. Try global default prompt
-    if (defaultSystemPromptId) {
+    } else if (defaultSystemPromptId) {
+      // 2. Try global default prompt
       const globalPrompt = systemPrompts.find((p) => p.id === defaultSystemPromptId);
-      if (globalPrompt) {
-        return [{ role: 'system', content: globalPrompt.content }, ...chatMessages];
+      content = globalPrompt ? globalPrompt.content : DEFAULT_SYSTEM_PROMPT;
+    } else {
+      // 3. Fallback to built-in default
+      content = DEFAULT_SYSTEM_PROMPT;
+    }
+
+    // Append current date/time so the model knows "now"
+    content += `\n\nCurrent date and time: ${new Date().toLocaleString()}.`;
+
+    // Build tool-use instructions when any tools are registered
+    const availableTools: string[] = [];
+    if (getTool('brave_web_search')) {
+      availableTools.push('- brave_web_search: Search the web for current information. Use when the user asks about current events, real-time data, or anything requiring up-to-date knowledge.');
+    }
+    if (getTool('web_fetch')) {
+      availableTools.push('- web_fetch: Fetch a URL and return its content as Markdown. Use when you need to read a specific web page, documentation, or article.');
+    }
+
+    if (availableTools.length > 0) {
+      content += '\n\n# Tools\n\nYou have access to the following tools:\n' + availableTools.join('\n');
+
+      // Tool usage behavior instructions
+      content += '\n\n## Tool Usage Rules';
+      content += '\n- Always extract and summarize the relevant information from tool results. Never show raw tool output to the user.';
+      content += '\n- After using web_fetch, summarize the key information and include a reference link: [Source title](URL).';
+      content += '\n- After using brave_web_search, synthesize the results into a clear answer with source links.';
+      content += '\n- If a tool returns an error, try an alternative approach or inform the user concisely.';
+      content += '\n- For current data (prices, rates, scores), prefer brave_web_search first, then web_fetch for specific pages.';
+
+      // Only custom/local models need explicit format instructions.
+      // OpenAI and Anthropic use native function calling triggered by the tools param.
+      if (providerType === 'custom') {
+        content += '\n\nTo call a tool, output a tool_call block with JSON containing "name" and "arguments". Example:\n<tool_call>\n{"name": "web_fetch", "arguments": {"url": "https://example.com"}}\n</tool_call>\n\nAfter calling a tool, wait for the result before continuing. Do NOT output code blocks showing how to call a tool — actually call it using the format above.';
       }
     }
 
-    // 3. Fallback to built-in default
-    return [{ role: 'system', content: DEFAULT_SYSTEM_PROMPT }, ...chatMessages];
+    return [{ role: 'system', content }, ...chatMessages];
   }
 
   /**
@@ -449,6 +500,177 @@ export function useChat(): UseChatResult {
   }
 
   /**
+   * Execute the agent loop for models that support tool use.
+   * Routes through runAgentLoop() which handles iteration, tool execution,
+   * and streaming internally.
+   */
+  async function handleAgentLoop(
+    chatMessages: ChatMessage[],
+    options: CompletionServiceOptions,
+    sessionId: string,
+    modelConfig: { inputPrice: number | null; outputPrice: number | null },
+    providerConfig: ProviderConfig
+  ) {
+    clearStream();
+    setStreaming(true);
+    resetTokenRate();
+    setCurrentIteration(0);
+    setIsToolExecuting(false);
+
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+
+    // Serialize DB writes to avoid expo-sqlite "finalizeAsync" race condition
+    let dbQueue: Promise<void> = Promise.resolve();
+    const enqueueWrite = (fn: () => Promise<void>): Promise<void> => {
+      dbQueue = dbQueue.then(fn, fn);
+      return dbQueue;
+    };
+
+    startBatcher();
+
+    const loopOptions: AgentLoopOptions = {
+      providerType: providerConfig.type,
+      supportsToolUse: true,
+      streaming: providerConfig.streamingEnabled,
+    };
+
+    const callbacks: AgentLoopCallbacks = {
+      onStreamText: (chunk: string) => {
+        textBufferRef.current += chunk;
+        bufferedChunkSizesRef.current += chunk.length;
+      },
+      onStreamThinking: (chunk: string) => {
+        thinkingBufferRef.current += chunk;
+      },
+      onIntermediateContent: async (content: string, thinkingContent?: string) => {
+        // Persist intermediate assistant text before tool calls — non-fatal
+        stopBatcher();
+        try {
+          await enqueueWrite(() => addMessage(sessionId, {
+            sessionId,
+            role: 'assistant',
+            content,
+            thinkingContent: thinkingContent || undefined,
+            providerId: options.providerId,
+            modelId: options.modelId,
+            promptTokens: null,
+            completionTokens: null,
+            totalTokens: null,
+            cachedTokens: null,
+            cost: null,
+          }).then(() => {}));
+        } catch (e) {
+          console.warn('[AgentLoop] Failed to persist intermediate content:', e);
+        }
+        clearStream();
+        startBatcher();
+      },
+      onToolCall: async (msg) => {
+        setIsToolExecuting(true);
+        setCurrentIteration((prev) => prev + 1);
+        // Persist tool call as assistant message — non-fatal if DB write fails
+        try {
+          await enqueueWrite(() => addMessage(sessionId, {
+            sessionId,
+            role: 'assistant',
+            content: JSON.stringify({ toolCalls: msg.toolCalls }),
+            providerId: options.providerId,
+            modelId: options.modelId,
+            promptTokens: null,
+            completionTokens: null,
+            totalTokens: null,
+            cachedTokens: null,
+            cost: null,
+          }).then(() => {}));
+        } catch (e) {
+          console.warn('[AgentLoop] Failed to persist tool call message:', e);
+        }
+      },
+      onToolResult: async (msg) => {
+        // Persist each tool result — non-fatal if DB write fails
+        for (const result of msg.results) {
+          try {
+            await enqueueWrite(() => addMessage(sessionId, {
+              sessionId,
+              role: 'tool',
+              content: result.content,
+              providerId: options.providerId,
+              modelId: options.modelId,
+              promptTokens: null,
+              completionTokens: null,
+              totalTokens: null,
+              cachedTokens: null,
+              cost: null,
+            }).then(() => {}));
+          } catch (e) {
+            console.warn('[AgentLoop] Failed to persist tool result message:', e);
+          }
+        }
+        setIsToolExecuting(false);
+      },
+    };
+
+    try {
+      const result = await runAgentLoop(
+        chatMessages,
+        options,
+        loopOptions,
+        callbacks,
+        controller.signal
+      );
+
+      stopBatcher();
+
+      // Persist final assistant response
+      if (result.content.length > 0 || result.thinkingContent) {
+        const cost =
+          modelConfig.inputPrice !== null && modelConfig.outputPrice !== null
+            ? calculateMessageCost(
+                result.totalUsage.promptTokens,
+                result.totalUsage.completionTokens,
+                modelConfig.inputPrice,
+                modelConfig.outputPrice
+              )
+            : null;
+
+        await addMessage(sessionId, {
+          sessionId,
+          role: 'assistant',
+          content: result.content,
+          thinkingContent: result.thinkingContent || undefined,
+          providerId: options.providerId,
+          modelId: options.modelId,
+          promptTokens: result.totalUsage.promptTokens,
+          completionTokens: result.totalUsage.completionTokens,
+          totalTokens: result.totalUsage.totalTokens,
+          cachedTokens: null,
+          cost,
+        });
+      }
+    } catch (err: unknown) {
+      stopBatcher();
+
+      if (err instanceof ProviderError) {
+        setError(providerErrorToChatError(err));
+      } else {
+        const caughtError = err instanceof Error ? err : new Error(String(err));
+        setError({
+          message: caughtError.message || 'Agent loop failed',
+          isRetryable: true,
+        });
+      }
+    } finally {
+      abortControllerRef.current = null;
+      setStreaming(false);
+      clearStream();
+      setTokenRate(0);
+      setCurrentIteration(0);
+      setIsToolExecuting(false);
+    }
+  }
+
+  /**
    * Core send flow implementation.
    */
   const sendMessage = useCallback(
@@ -548,10 +770,20 @@ export function useChat(): UseChatResult {
           : {}),
       };
 
+      // Check if model supports tool use → route through agent loop
+      // OpenAI and Anthropic natively support function calling on all models;
+      // only 'custom' providers need the explicit supportsToolUse flag.
+      const providerAlwaysSupportsTools = providerConfigForService.type === 'openai' || providerConfigForService.type === 'anthropic';
+      const modelSupportsTools = providerAlwaysSupportsTools || (modelConfig.supportsToolUse ?? false);
+      if (modelSupportsTools) {
+        await handleAgentLoop(prependSystemPrompt(chatMessages, providerConfigForService.type), options, sessionId, modelConfig, providerConfigForService);
+        return;
+      }
+
       if (providerConfig.streamingEnabled) {
-        await handleStreaming(prependSystemPrompt(chatMessages), options, sessionId, modelConfig);
+        await handleStreaming(prependSystemPrompt(chatMessages, providerConfigForService.type), options, sessionId, modelConfig);
       } else {
-        await handleNonStreaming(prependSystemPrompt(chatMessages), options, sessionId, modelConfig);
+        await handleNonStreaming(prependSystemPrompt(chatMessages, providerConfigForService.type), options, sessionId, modelConfig);
       }
     },
     [
@@ -620,10 +852,20 @@ export function useChat(): UseChatResult {
           : {}),
       };
 
+      // Check if model supports tool use → route through agent loop
+      // OpenAI and Anthropic natively support function calling on all models;
+      // only 'custom' providers need the explicit supportsToolUse flag.
+      const providerAlwaysSupportsTools = providerConfigForService.type === 'openai' || providerConfigForService.type === 'anthropic';
+      const modelSupportsTools = providerAlwaysSupportsTools || (modelConfig.supportsToolUse ?? false);
+      if (modelSupportsTools) {
+        await handleAgentLoop(prependSystemPrompt(chatMessages, providerConfigForService.type), options, activeSessionId, modelConfig, providerConfigForService);
+        return;
+      }
+
       if (providerConfig.streamingEnabled) {
-        await handleStreaming(prependSystemPrompt(chatMessages), options, activeSessionId, modelConfig);
+        await handleStreaming(prependSystemPrompt(chatMessages, providerConfigForService.type), options, activeSessionId, modelConfig);
       } else {
-        await handleNonStreaming(prependSystemPrompt(chatMessages), options, activeSessionId, modelConfig);
+        await handleNonStreaming(prependSystemPrompt(chatMessages, providerConfigForService.type), options, activeSessionId, modelConfig);
       }
     },
     [
@@ -745,5 +987,7 @@ export function useChat(): UseChatResult {
     error,
     retry,
     clearError,
+    currentIteration,
+    isToolExecuting,
   };
 }

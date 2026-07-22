@@ -211,7 +211,17 @@
     "maxTokensDescription": "回覆中生成的最大 token 數量。",
     "thinkingExpandedByDefault": "預設展開思考內容",
     "emptySubtitle": "新增提供者以開始與 AI 模型對話",
-    "addPromptDescription": "為提示詞命名並提供系統指令內容。"
+    "addPromptDescription": "為提示詞命名並提供系統指令內容。",
+    "tools": "工具",
+    "braveSearch": {
+      "title": "Brave 搜尋",
+      "enable": "啟用 Brave 搜尋",
+      "apiKey": "API 金鑰",
+      "apiKeyPlaceholder": "輸入你的 Brave Search API 金鑰",
+      "keyStored": "API 金鑰已儲存",
+      "save": "儲存",
+      "clear": "清除金鑰"
+    }
   },
 
   "about": {

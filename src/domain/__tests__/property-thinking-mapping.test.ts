@@ -112,13 +112,15 @@ describe('Property tests: mapThinkingLevelCustom', () => {
   const allCustomModes: CustomReasoningMode[] = ['auto', 'openai-reasoning-effort', 'chat-template-kwargs', 'none'];
 
   /**
-   * Property 1: Auto mode always includes chat_template_kwargs (never undefined)
+   * Property 1: Auto mode always includes chat_template_kwargs for active levels
+   * (level !== 'off' returns chat_template_kwargs; 'off' returns {})
    * Validates: Requirements 3.1, 3.2
    */
-  it('Property 1: auto mode always includes chat_template_kwargs', () => {
+  it('Property 1: auto mode always includes chat_template_kwargs for active levels', () => {
+    const activeLevels: ThinkingLevel[] = ['minimal', 'low', 'medium', 'high', 'xhigh'];
     fc.assert(
       fc.property(
-        fc.constantFrom(...allThinkingLevels),
+        fc.constantFrom(...activeLevels),
         fc.option(
           fc.dictionary(fc.string({ minLength: 1, maxLength: 10 }), fc.boolean()),
           { nil: null },
@@ -130,6 +132,22 @@ describe('Property tests: mapThinkingLevelCustom', () => {
         }
       ),
       { numRuns: 200 }
+    );
+  });
+
+  it('Property 1b: auto mode returns {} for off level', () => {
+    fc.assert(
+      fc.property(
+        fc.option(
+          fc.dictionary(fc.string({ minLength: 1, maxLength: 10 }), fc.boolean()),
+          { nil: null },
+        ),
+        (kwargs) => {
+          const result = mapThinkingLevelCustom('off', 'auto', kwargs);
+          expect(result).toEqual({});
+        }
+      ),
+      { numRuns: 100 }
     );
   });
 

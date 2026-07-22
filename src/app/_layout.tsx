@@ -12,6 +12,8 @@ import { useProviderStore } from '@/stores/provider-store';
 import { useSessionStore } from '@/stores/session-store';
 import { useSettingsStore } from '@/stores/settings-store';
 import { useChatStore } from '@/stores/chat-store';
+import { initBuiltInTools } from '@/services/tool-registry';
+import { syncBraveSearchTool } from '@/services/tools/brave-search';
 
 // Initialize i18n synchronously at module load (safe to call multiple times).
 // If a persisted locale exists in the settings store, use it as the override.
@@ -58,6 +60,10 @@ export default function RootLayout() {
         if (persistedLocale && i18n.language !== persistedLocale) {
           await changeAppLanguage(persistedLocale);
         }
+
+        // Register tools
+        initBuiltInTools();
+        await syncBraveSearchTool();
 
         // Auto-create a session if none exist and a provider+model are configured
         const sessions = useSessionStore.getState().sessions;

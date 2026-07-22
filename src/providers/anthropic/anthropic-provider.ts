@@ -108,6 +108,7 @@ export class AnthropicProvider implements IProvider {
         stream: false,
         ...(systemMessage ? { system: systemMessage } : {}),
         ...(thinkingParams.thinking ? { thinking: thinkingParams.thinking as any } : {}),
+        ...(request.tools?.length ? { tools: request.tools as any } : {}),
       });
 
       return mapResponse(response);
@@ -142,6 +143,7 @@ export class AnthropicProvider implements IProvider {
           max_tokens: request.maxTokens ?? DEFAULT_MAX_TOKENS,
           ...(systemMessage ? { system: systemMessage } : {}),
           ...(thinkingParams.thinking ? { thinking: thinkingParams.thinking as any } : {}),
+          ...(request.tools?.length ? { tools: request.tools as any } : {}),
         },
         { signal },
       );

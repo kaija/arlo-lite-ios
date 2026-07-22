@@ -90,3 +90,12 @@ export async function deleteApiKey(providerId: string): Promise<void> {
   const key = buildSecureKey(providerId);
   await SecureStore.deleteItemAsync(key);
 }
+
+/**
+ * Builds the secure storage key for a service's API key.
+ * Uses the `arlo.service.{serviceId}.apiKey` namespace to separate
+ * service credentials from LLM provider credentials.
+ */
+export function buildServiceKey(serviceId: string): string {
+  return `arlo.service.${serviceId}.apiKey`;
+}

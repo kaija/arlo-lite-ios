@@ -56,6 +56,8 @@ export interface ModelConfig {
   supportsImageInput: boolean;
   supportsImageGeneration: boolean;
   supportsFileInput: boolean;
+  /** Whether this model supports tool/function calling. */
+  supportsToolUse?: boolean;
 }
 
 /**
@@ -80,6 +82,7 @@ interface ModelRow {
   supports_image_input: number;
   supports_image_generation: number;
   supports_file_input: number;
+  supports_tool_use: number;
 }
 
 function rowToModelConfig(row: ModelRow): ModelConfig {
@@ -97,6 +100,7 @@ function rowToModelConfig(row: ModelRow): ModelConfig {
     supportsImageInput: row.supports_image_input === 1,
     supportsImageGeneration: row.supports_image_generation === 1,
     supportsFileInput: row.supports_file_input === 1,
+    supportsToolUse: row.supports_tool_use === 1,
   };
 }
 
@@ -231,8 +235,8 @@ export const useProviderStore = create<ProviderStore>((set, get) => ({
     const now = getCurrentTimestamp();
 
     await db.runAsync(
-      `INSERT INTO models (id, provider_id, model_id, display_name, context_window, input_price, output_price, cached_input_price, cached_output_price, supports_reasoning, supports_image_input, supports_image_generation, supports_file_input)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO models (id, provider_id, model_id, display_name, context_window, input_price, output_price, cached_input_price, cached_output_price, supports_reasoning, supports_image_input, supports_image_generation, supports_file_input, supports_tool_use)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       id,
       data.providerId,
       data.modelId,
@@ -245,7 +249,8 @@ export const useProviderStore = create<ProviderStore>((set, get) => ({
       data.supportsReasoning ? 1 : 0,
       data.supportsImageInput ? 1 : 0,
       data.supportsImageGeneration ? 1 : 0,
-      data.supportsFileInput ? 1 : 0
+      data.supportsFileInput ? 1 : 0,
+      data.supportsToolUse ? 1 : 0
     );
 
     const model: ModelConfig = { id, ...data };

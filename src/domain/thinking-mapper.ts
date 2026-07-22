@@ -155,6 +155,7 @@ export function mapThinkingLevelCustom(
   thinkingKwargs?: Record<string, unknown> | null,
 ): CustomThinkingParams {
   if (mode === 'none') return {};
+  if (level === 'off') return {};
 
   const enableThinking = level !== 'off';
   const reasoningEffort = mapReasoningEffortValue(level);

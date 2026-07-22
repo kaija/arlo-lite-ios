@@ -241,21 +241,37 @@ function buildBody(
   request: CompletionRequest,
   stream: boolean,
 ): Record<string, unknown> {
-  const messages = request.messages.map((msg) => ({
-    role: msg.role,
-    content:
-      typeof msg.content === 'string'
-        ? msg.content
-        : msg.content.map((part) =>
-            part.type === 'text'
-              ? { type: 'text' as const, text: part.text }
-              : { type: 'image_url' as const, image_url: { url: part.image_url.url } },
-          ),
-  }));
+  const messages = request.messages.map((msg) => {
+    const out: Record<string, unknown> = {
+      role: msg.role,
+      content:
+        typeof msg.content === 'string'
+          ? msg.content
+          : msg.content.map((part) =>
+              part.type === 'text'
+                ? { type: 'text' as const, text: part.text }
+                : { type: 'image_url' as const, image_url: { url: part.image_url.url } },
+            ),
+    };
+    // Include tool_calls on assistant messages for multi-turn tool use
+    if (msg.toolCalls?.length) {
+      out.tool_calls = msg.toolCalls.map((tc) => ({
+        id: tc.id,
+        type: 'function',
+        function: { name: tc.name, arguments: JSON.stringify(tc.arguments) },
+      }));
+    }
+    // Include tool_call_id on tool result messages
+    if (msg.tool_call_id) {
+      out.tool_call_id = msg.tool_call_id;
+    }
+    return out;
+  });
 
   const body: Record<string, unknown> = { model: request.model, messages, stream };
   if (stream) body.stream_options = { include_usage: true };
   if (request.maxTokens !== undefined) body.max_tokens = request.maxTokens;
+  if (request.tools?.length) body.tools = request.tools;
 
   const thinking = mapThinkingLevelCustom(
     request.thinkingLevel,
@@ -266,6 +282,32 @@ function buildBody(
   if (thinking.chat_template_kwargs) body.chat_template_kwargs = thinking.chat_template_kwargs;
 
   return body;
+}
+
+/**
+ * Parse <tool_call> XML tags emitted by models that don't use native function calling
+ * (Qwen, Llama, DeepSeek, etc.). These models output tool invocations as plain text
+ * when the server doesn't activate structured tool-call mode.
+ */
+function parseXMLToolCalls(text: string): Array<{ id: string; name: string; args: string }> {
+  const results: Array<{ id: string; name: string; args: string }> = [];
+  const regex = /<tool_call>\s*([\s\S]*?)\s*<\/tool_call>/g;
+  let match: RegExpExecArray | null;
+  while ((match = regex.exec(text)) !== null) {
+    try {
+      const obj = JSON.parse(match[1].trim());
+      const name = obj.name ?? obj.function ?? '';
+      const args = obj.arguments ?? obj.parameters ?? {};
+      results.push({
+        id: `call_xml_${results.length}`,
+        name: typeof name === 'string' ? name : '',
+        args: typeof args === 'string' ? args : JSON.stringify(args),
+      });
+    } catch {
+      // Malformed JSON inside tool_call tag — skip
+    }
+  }
+  return results;
 }
 
 /**
@@ -311,6 +353,11 @@ export class CustomProvider implements IProvider {
     const url = joinUrl(config.baseUrl, '/chat/completions');
     try {
       let usage: TokenUsage | undefined;
+      let accumulatedContent = '';
+
+      // Accumulate streamed tool calls: index → {id, name, arguments}
+      const toolCallAccum = new Map<number, { id: string; name: string; args: string }>();
+
       const sse = streamSSE(url, apiKey, buildBody(config, request, true), signal);
       for await (const chunk of sse) {
         const choice = (chunk.choices as Array<Record<string, unknown>> | undefined)?.[0];
@@ -319,11 +366,48 @@ export class CustomProvider implements IProvider {
           const thinking = reasoningText(delta);
           if (thinking) yield { type: 'thinking', content: thinking };
           if (typeof delta.content === 'string' && delta.content.length > 0) {
+            accumulatedContent += delta.content;
             yield { type: 'text', content: delta.content };
+          }
+
+          // Accumulate tool_calls deltas
+          const toolCalls = delta.tool_calls as Array<Record<string, unknown>> | undefined;
+          if (toolCalls) {
+            for (const tc of toolCalls) {
+              const idx = (tc.index as number) ?? 0;
+              const fn = tc.function as Record<string, unknown> | undefined;
+              const existing = toolCallAccum.get(idx);
+              if (!existing) {
+                toolCallAccum.set(idx, {
+                  id: (tc.id as string) ?? `call_${idx}`,
+                  name: (fn?.name as string) ?? '',
+                  args: (fn?.arguments as string) ?? '',
+                });
+              } else {
+                if (fn?.name) existing.name = fn.name as string;
+                if (fn?.arguments) existing.args += fn.arguments as string;
+              }
+            }
           }
         }
         if (chunk.usage) usage = parseUsage(chunk.usage as Record<string, unknown>);
       }
+
+      // Fallback: parse <tool_call> XML tags from text (Qwen, Llama, DeepSeek, etc.)
+      if (toolCallAccum.size === 0 && accumulatedContent.includes('<tool_call>')) {
+        const parsed = parseXMLToolCalls(accumulatedContent);
+        for (let i = 0; i < parsed.length; i++) {
+          toolCallAccum.set(i, parsed[i]);
+        }
+      }
+
+      // Emit accumulated tool calls as tool_call chunks
+      for (const [, tc] of toolCallAccum) {
+        let args: Record<string, unknown> = {};
+        try { args = JSON.parse(tc.args); } catch { /* malformed args — send empty */ }
+        yield { type: 'tool_call', content: '', toolCall: { id: tc.id, name: tc.name, arguments: args } };
+      }
+
       yield { type: 'done', content: '', ...(usage ? { usage } : {}) };
     } catch (error) {
       if (signal.aborted) {

@@ -32,7 +32,7 @@ export interface TokenUsageBreakdown {
  * Matches a subset of the Message interface from message-repo.
  */
 export interface TokenMessage {
-  role: 'user' | 'assistant' | 'system';
+  role: 'user' | 'assistant' | 'system' | 'tool';
   promptTokens: number | null;
   completionTokens: number | null;
   totalTokens: number | null;

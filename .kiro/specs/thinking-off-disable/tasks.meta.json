@@ -1,0 +1,94 @@
+{
+  "pbtResults": {
+    "1. Write bug condition exploration test": {
+      "status": "passed",
+      "failingExample": "Counterexample 1: [\"auto\"] — mapThinkingLevelCustom('off', 'auto') returned { chat_template_kwargs: { enable_thinking: false } } instead of {}. Counterexample 2: [\"auto\", null] — mapThinkingLevelCustom('off', 'auto', null) returned { chat_template_kwargs: { enable_thinking: false } } instead of {}.",
+      "lastRunTimestamp": 1784562365324
+    },
+    "2.1 Verify bug condition exploration test now passes": {
+      "status": "passed",
+      "lastRunTimestamp": 1784562430110
+    },
+    "3. Write preservation property tests": {
+      "status": "passed",
+      "lastRunTimestamp": 1784562928601
+    }
+  },
+  "executionHistory": {
+    "1. Write bug condition exploration test": [
+      {
+        "executionId": "06b086ea-7e3a-4509-b63a-0d461c41e00d",
+        "chatSessionId": "sess_4bef8ae1-0132-46f7-9bf1-b6aafa4285f6",
+        "timestamp": 1784562229404
+      },
+      {
+        "executionId": "06b086ea-7e3a-4509-b63a-0d461c41e00d",
+        "chatSessionId": "sess_4bef8ae1-0132-46f7-9bf1-b6aafa4285f6",
+        "timestamp": 1784562237150
+      },
+      {
+        "executionId": "06b086ea-7e3a-4509-b63a-0d461c41e00d",
+        "chatSessionId": "sess_4bef8ae1-0132-46f7-9bf1-b6aafa4285f6",
+        "timestamp": 1784562379305
+      }
+    ],
+    "2.1 Verify bug condition exploration test now passes": [
+      {
+        "executionId": "06b086ea-7e3a-4509-b63a-0d461c41e00d",
+        "chatSessionId": "sess_4bef8ae1-0132-46f7-9bf1-b6aafa4285f6",
+        "timestamp": 1784562229448
+      },
+      {
+        "executionId": "06b086ea-7e3a-4509-b63a-0d461c41e00d",
+        "chatSessionId": "sess_4bef8ae1-0132-46f7-9bf1-b6aafa4285f6",
+        "timestamp": 1784562388572
+      },
+      {
+        "executionId": "06b086ea-7e3a-4509-b63a-0d461c41e00d",
+        "chatSessionId": "sess_4bef8ae1-0132-46f7-9bf1-b6aafa4285f6",
+        "timestamp": 1784562441703
+      }
+    ],
+    "3. Write preservation property tests": [
+      {
+        "executionId": "06b086ea-7e3a-4509-b63a-0d461c41e00d",
+        "chatSessionId": "sess_4bef8ae1-0132-46f7-9bf1-b6aafa4285f6",
+        "timestamp": 1784562229482
+      },
+      {
+        "executionId": "06b086ea-7e3a-4509-b63a-0d461c41e00d",
+        "chatSessionId": "sess_4bef8ae1-0132-46f7-9bf1-b6aafa4285f6",
+        "timestamp": 1784562446900
+      },
+      {
+        "executionId": "06b086ea-7e3a-4509-b63a-0d461c41e00d",
+        "chatSessionId": "sess_4bef8ae1-0132-46f7-9bf1-b6aafa4285f6",
+        "timestamp": 1784562940250
+      }
+    ],
+    "4. Checkpoint — Ensure all tests pass": [
+      {
+        "executionId": "06b086ea-7e3a-4509-b63a-0d461c41e00d",
+        "chatSessionId": "sess_4bef8ae1-0132-46f7-9bf1-b6aafa4285f6",
+        "timestamp": 1784562229522
+      },
+      {
+        "executionId": "06b086ea-7e3a-4509-b63a-0d461c41e00d",
+        "chatSessionId": "sess_4bef8ae1-0132-46f7-9bf1-b6aafa4285f6",
+        "timestamp": 1784562945281
+      },
+      {
+        "executionId": "06b086ea-7e3a-4509-b63a-0d461c41e00d",
+        "chatSessionId": "sess_4bef8ae1-0132-46f7-9bf1-b6aafa4285f6",
+        "timestamp": 1784563692168
+      }
+    ],
+    "2. Implement the one-line fix": [
+      {
+        "executionId": "06b086ea-7e3a-4509-b63a-0d461c41e00d",
+        "chatSessionId": "sess_4bef8ae1-0132-46f7-9bf1-b6aafa4285f6",
+        "timestamp": 1784562441740
+      }
+    ]
+  }
+}

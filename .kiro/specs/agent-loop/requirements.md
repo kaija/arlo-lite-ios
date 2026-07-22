@@ -2,23 +2,9 @@
 
 ## Introduction
 
-The Agent Loop feature adds multi-step tool-use capabilities to Arlo Lite. When a user sends a message and the LLM responds with tool calls, the Agent Loop Service executes those tools locally, appends the results to the conversation, and re-invokes the provider until the model produces a final text response or a safety iteration cap is reached. This enables agentic workflows where the model can gather information, perform calculations, or take actions across multiple reasoning steps before delivering a final answer. The agent loop sits between the useChat hook and the CompletionService, wrapping the existing single-turn completion flow with an iterative tool-execution loop.
+The Agent Loop feature adds multi-step tool-use capabilities to Arlo Lite. When the LLM responds with tool calls, the app executes those tools locally, appends results to the conversation, and re-invokes the provider until the model produces a final text response or a safety cap is reached.
 
-## Glossary
-
-- **Agent_Loop_Service**: The service module responsible for orchestrating multi-step tool-use iterations between the LLM provider and the Tool_Executor.
-- **Tool_Executor**: The module responsible for dispatching tool call requests to the appropriate Tool_Handler and returning results.
-- **Tool_Handler**: An individual function or module implementing a specific tool capability (e.g., web search, code execution).
-- **Tool_Registry**: The registry that maps tool names to their Tool_Handler implementations and provides tool schemas for inclusion in LLM requests.
-- **Tool_Call**: A structured request from the LLM to invoke a specific tool with given arguments.
-- **Tool_Result**: The structured output returned after executing a Tool_Call, including success/failure status and content.
-- **Safety_Cap**: The maximum number of agent loop iterations permitted before forced termination.
-- **Iteration**: A single round-trip of sending messages to the provider, receiving a response, and optionally executing tool calls.
-- **Final_Response**: A provider response that contains text content and no pending tool calls, signaling the end of the agent loop.
-- **CompletionService**: The existing service that retrieves API keys, resolves provider adapters, and delegates completion requests to providers.
-- **useChat_Hook**: The existing React hook that orchestrates message sending, streaming, error handling, and abort support.
-- **Chat_Thread**: The visible sequence of messages in the active session's UI.
-- **Tool_Message**: A message in the Chat_Thread representing either a tool call request or a tool execution result.
+The implementation integrates with the existing provider system (IProvider interface) and sits between the useChat hook and the CompletionService. Advanced features like context compaction, guardrails, sub-agents, HITL approval, and custom user-defined tools are out of scope for this initial version.
 
 ## Requirements
 
@@ -28,34 +14,32 @@ The Agent Loop feature adds multi-step tool-use capabilities to Arlo Lite. When 
 
 #### Acceptance Criteria
 
-1. WHEN the CompletionService returns a response containing one or more Tool_Calls, THE Agent_Loop_Service SHALL execute each Tool_Call via the Tool_Executor and append the Tool_Results to the conversation context.
-2. WHEN all Tool_Results for a given Iteration have been appended, THE Agent_Loop_Service SHALL re-invoke the CompletionService with the updated conversation context.
-3. WHEN the CompletionService returns a Final_Response (text content with no Tool_Calls), THE Agent_Loop_Service SHALL terminate the loop and return the Final_Response to the useChat_Hook.
-4. THE Agent_Loop_Service SHALL pass the same provider configuration, model selection, and generation parameters to the CompletionService on each Iteration.
-5. THE Agent_Loop_Service SHALL support both streaming and non-streaming completion modes across all Iterations.
+1. WHEN the CompletionService returns a response containing one or more tool calls, the agent loop SHALL execute each tool call and append results to the conversation context.
+2. WHEN all tool results for a given iteration have been appended, the agent loop SHALL re-invoke the CompletionService with the updated conversation context.
+3. WHEN the CompletionService returns a final response (text content with no tool calls), the agent loop SHALL terminate and return the final response to the useChat hook.
+4. The agent loop SHALL pass the same provider configuration, model selection, and generation parameters to the CompletionService on each iteration.
+5. The agent loop SHALL support both streaming and non-streaming completion modes across all iterations.
 
 ### Requirement 2: Safety Cap Enforcement
 
-**User Story:** As a user, I want the agent loop to stop after a configurable maximum number of iterations, so that runaway loops do not consume excessive API credits or hang the UI.
+**User Story:** As a user, I want the agent loop to stop after a maximum number of iterations, so that runaway loops do not consume excessive API credits or hang the UI.
 
 #### Acceptance Criteria
 
-1. THE Agent_Loop_Service SHALL enforce a Safety_Cap that limits the maximum number of Iterations per invocation.
-2. THE Agent_Loop_Service SHALL use a default Safety_Cap value of 10 Iterations.
-3. WHEN the Agent_Loop_Service reaches the Safety_Cap without receiving a Final_Response, THE Agent_Loop_Service SHALL terminate the loop and return the last partial response content to the useChat_Hook along with a termination reason indicating the Safety_Cap was reached.
-4. WHERE the Safety_Cap is configurable, THE Agent_Loop_Service SHALL accept a custom Safety_Cap value as a parameter.
+1. The agent loop SHALL enforce a safety cap that limits the maximum number of iterations per invocation (default: 10).
+2. WHEN the safety cap is reached without a final response, the agent loop SHALL terminate and return the last partial response along with a termination reason.
+3. The safety cap SHALL be configurable per invocation.
 
-### Requirement 3: Tool Registry and Schema Declaration
+### Requirement 3: Tool Registry
 
-**User Story:** As a developer, I want a centralized tool registry that maps tool names to handlers and provides schemas to the LLM, so that tools are discoverable, validated, and easily extensible.
+**User Story:** As a developer, I want a centralized place to register tools with their schemas, so that tools are discoverable by the LLM and easily extensible.
 
 #### Acceptance Criteria
 
-1. THE Tool_Registry SHALL maintain a mapping of tool names to Tool_Handler implementations.
-2. THE Tool_Registry SHALL provide a method to retrieve all registered tool schemas in the format required by the active provider (OpenAI function calling format or Anthropic tool use format).
-3. THE Tool_Registry SHALL validate that each registered Tool_Handler has a unique name, a JSON Schema for its parameters, and a human-readable description.
-4. WHEN the Agent_Loop_Service initiates a completion request, THE Agent_Loop_Service SHALL include the tool schemas from the Tool_Registry in the CompletionRequest.
-5. THE Tool_Registry SHALL support runtime registration of Tool_Handlers without requiring application restart.
+1. The tool registry SHALL maintain a mapping of tool names to handler implementations.
+2. The tool registry SHALL provide tool schemas formatted for the active provider type (OpenAI function calling or Anthropic tool use format).
+3. Each registered tool SHALL have a unique name, a JSON Schema for its parameters, and a human-readable description.
+4. The agent loop SHALL include tool schemas from the registry in completion requests.
 
 ### Requirement 4: Tool Execution
 
@@ -63,80 +47,82 @@ The Agent Loop feature adds multi-step tool-use capabilities to Arlo Lite. When 
 
 #### Acceptance Criteria
 
-1. WHEN the Tool_Executor receives a Tool_Call, THE Tool_Executor SHALL resolve the corresponding Tool_Handler from the Tool_Registry by tool name.
-2. IF the Tool_Executor receives a Tool_Call for an unregistered tool name, THEN THE Tool_Executor SHALL return a Tool_Result with an error status indicating the tool is not available.
-3. WHEN the Tool_Handler completes execution, THE Tool_Executor SHALL return a Tool_Result containing the handler output and a success status.
-4. IF the Tool_Handler throws an exception during execution, THEN THE Tool_Executor SHALL catch the exception and return a Tool_Result with an error status and the error message.
-5. THE Tool_Executor SHALL execute multiple Tool_Calls from a single response concurrently when possible.
-6. THE Tool_Executor SHALL enforce a per-tool execution timeout of 30 seconds.
-7. IF the Tool_Handler exceeds the per-tool execution timeout, THEN THE Tool_Executor SHALL abort the handler and return a Tool_Result with an error status indicating a timeout.
+1. The tool executor SHALL resolve the corresponding handler from the registry by tool name.
+2. IF a tool call references an unregistered tool name, the executor SHALL return an error result (not throw).
+3. IF a tool handler throws an exception, the executor SHALL catch it and return an error result.
+4. The tool executor SHALL enforce a per-tool execution timeout of 30 seconds.
 
 ### Requirement 5: Chat Thread Visibility of Tool Steps
 
-**User Story:** As a user, I want to see each tool call and its result as separate messages in the chat thread, so that I can follow the agent's reasoning and verify its actions.
+**User Story:** As a user, I want to see each tool call and its result in the chat thread, so that I can follow the agent's reasoning.
 
 #### Acceptance Criteria
 
-1. WHEN the Agent_Loop_Service receives a response containing Tool_Calls, THE Agent_Loop_Service SHALL persist each Tool_Call as a Tool_Message with role "assistant" in the Chat_Thread.
-2. WHEN the Tool_Executor returns a Tool_Result, THE Agent_Loop_Service SHALL persist the Tool_Result as a Tool_Message with role "tool" in the Chat_Thread.
-3. THE Tool_Message for a Tool_Call SHALL include the tool name and the arguments passed to the tool.
-4. THE Tool_Message for a Tool_Result SHALL include the tool name, execution status, and the output content.
-5. THE Agent_Loop_Service SHALL persist Tool_Messages in chronological order matching the execution sequence.
+1. Each tool call SHALL be persisted as a message in the chat thread (role: "assistant") with the tool name and arguments.
+2. Each tool result SHALL be persisted as a message in the chat thread (role: "tool") with the tool name, status, and output.
+3. Tool messages SHALL be persisted in chronological order matching execution sequence.
 
 ### Requirement 6: Abort Support
 
-**User Story:** As a user, I want to be able to stop the agent loop mid-execution, so that I can cancel requests that are taking too long or going in the wrong direction.
+**User Story:** As a user, I want to stop the agent loop mid-execution, so that I can cancel requests that are taking too long.
 
 #### Acceptance Criteria
 
-1. WHEN the user triggers stop generation during an active agent loop, THE Agent_Loop_Service SHALL abort the current Iteration and cease further Iterations.
-2. WHEN abort is triggered during a Tool_Handler execution, THE Agent_Loop_Service SHALL cancel the in-progress Tool_Handler and discard its partial result.
-3. WHEN abort is triggered during a provider completion request, THE Agent_Loop_Service SHALL propagate the abort signal to the CompletionService.
-4. WHEN the agent loop is aborted, THE Agent_Loop_Service SHALL persist any content generated before the abort to the Chat_Thread.
+1. WHEN the user triggers stop generation, the agent loop SHALL abort the current iteration and cease further iterations.
+2. WHEN abort is triggered, any in-progress tool handler or provider request SHALL be cancelled.
+3. Any content generated before the abort SHALL be persisted to the chat thread.
 
-### Requirement 7: Provider Type Compatibility
+### Requirement 7: Provider Compatibility
 
-**User Story:** As a user, I want the agent loop to work with all supported providers (OpenAI, Anthropic, Custom), so that tool use is available regardless of which provider I configure.
+**User Story:** As a user, I want the agent loop to work with all supported providers (OpenAI, Anthropic, Custom).
 
 #### Acceptance Criteria
 
-1. THE Agent_Loop_Service SHALL format tool schemas according to the requirements of the active provider type (OpenAI function calling format for OpenAI and Custom providers, Anthropic tool use format for Anthropic provider).
-2. THE Agent_Loop_Service SHALL parse tool call responses according to the response format of the active provider type.
-3. THE Agent_Loop_Service SHALL format Tool_Results according to the message format expected by the active provider type when re-invoking the CompletionService.
-4. IF the active provider or model does not support tool use, THEN THE Agent_Loop_Service SHALL bypass the agent loop and delegate directly to the CompletionService for a single-turn completion.
+1. The agent loop SHALL format tool schemas according to the active provider type.
+2. The agent loop SHALL parse tool call responses according to the active provider type.
+3. The agent loop SHALL format tool results according to the active provider type when re-invoking the CompletionService.
+4. IF the active provider/model does not support tool use, the agent loop SHALL bypass and delegate directly to CompletionService for a single-turn completion.
 
 ### Requirement 8: Integration with useChat Hook
 
-**User Story:** As a developer, I want the agent loop to integrate cleanly with the existing useChat hook, so that the chat UI continues to work seamlessly with the added tool-use capability.
+**User Story:** As a developer, I want the agent loop to integrate cleanly with the existing useChat hook.
 
 #### Acceptance Criteria
 
-1. THE useChat_Hook SHALL delegate to the Agent_Loop_Service instead of directly calling the CompletionService when tool use is enabled for the active session.
-2. WHILE the Agent_Loop_Service is iterating, THE useChat_Hook SHALL report isStreaming as true.
-3. WHEN the Agent_Loop_Service emits streaming text content during the final Iteration, THE useChat_Hook SHALL update streamContent progressively.
-4. WHEN the Agent_Loop_Service emits thinking content during any Iteration, THE useChat_Hook SHALL update thinkingContent progressively.
-5. IF the Agent_Loop_Service throws an error during any Iteration, THEN THE useChat_Hook SHALL map the error to a ChatError and surface it to the UI.
-6. THE useChat_Hook SHALL pass the existing AbortController signal to the Agent_Loop_Service for abort propagation.
+1. The useChat hook SHALL delegate to the agent loop when tool use is enabled for the active model.
+2. WHILE the agent loop is iterating, isStreaming SHALL be true.
+3. Streaming text/thinking content from the final iteration SHALL update progressively.
+4. Errors from the agent loop SHALL be mapped to ChatError and surfaced to the UI.
+5. The existing AbortController signal SHALL be passed through for abort propagation.
 
 ### Requirement 9: Cost Tracking Across Iterations
 
-**User Story:** As a user, I want the cost of the full agent loop (all iterations combined) to be tracked and displayed, so that I can monitor my API spend for multi-step requests.
+**User Story:** As a user, I want the cost of the full agent loop to be tracked, so I can monitor API spend.
 
 #### Acceptance Criteria
 
-1. THE Agent_Loop_Service SHALL accumulate TokenUsage across all Iterations of a single agent loop invocation.
-2. WHEN the agent loop completes, THE Agent_Loop_Service SHALL report the total accumulated TokenUsage to the useChat_Hook.
-3. THE useChat_Hook SHALL compute the total cost from the accumulated TokenUsage and persist the cost on the final assistant message.
-4. THE Agent_Loop_Service SHALL include TokenUsage from both successful and failed Iterations in the accumulated total.
+1. The agent loop SHALL accumulate TokenUsage across all iterations.
+2. On completion, the total TokenUsage SHALL be used to compute and persist cost on the final assistant message.
+3. TokenUsage from both successful and failed iterations SHALL be included in the total.
 
-### Requirement 10: Built-in Tool Set
+### Requirement 10: Built-in Tools
 
-**User Story:** As a user, I want the app to ship with a set of useful built-in tools, so that I can immediately take advantage of agentic capabilities without configuration.
+**User Story:** As a user, I want useful built-in tools available out of the box so the agent has basic capabilities.
 
 #### Acceptance Criteria
 
-1. THE Tool_Registry SHALL include at minimum one built-in Tool_Handler upon application startup.
-2. THE Tool_Registry SHALL register all built-in Tool_Handlers automatically during application initialization.
-3. Each built-in Tool_Handler SHALL provide a JSON Schema describing its expected parameters.
-4. Each built-in Tool_Handler SHALL provide a human-readable description suitable for inclusion in LLM prompts.
-5. THE built-in Tool_Handlers SHALL operate entirely on-device without requiring additional network requests beyond those made by the LLM provider.
+1. The tool registry SHALL include `get_device_info` and `get_current_datetime` tools on startup.
+2. `get_device_info` SHALL return device OS, model, locale, and timezone.
+3. `get_current_datetime` SHALL return the current date/time in configurable formats (iso, unix, human, date_only, time_only).
+4. Both tools SHALL operate entirely on-device with no network requests.
+
+## Out of Scope
+
+- Context compaction or conversation summarization
+- Sub-agent spawning or hierarchical delegation
+- Guardrails (input/output content filtering)
+- Transient retries or mid-stream error recovery
+- MCP server integration
+- Custom user-defined tools via UI
+- Human-in-the-loop tool approval (add when tools touch network/write data)
+- Persistent tool state across sessions

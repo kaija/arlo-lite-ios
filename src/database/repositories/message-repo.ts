@@ -2,7 +2,7 @@ import type { SQLiteDatabase } from 'expo-sqlite';
 import { generateId } from '@/utils/uuid';
 import { getCurrentTimestamp } from '@/utils/date';
 
-export type MessageRole = 'user' | 'assistant' | 'system';
+export type MessageRole = 'user' | 'assistant' | 'system' | 'tool';
 
 export interface MessageRow {
   id: string;

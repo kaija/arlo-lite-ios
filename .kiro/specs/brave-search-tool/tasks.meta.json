@@ -1,0 +1,141 @@
+{
+  "pbtResults": {},
+  "executionHistory": {
+    "1. Add `unregisterTool()` to tool registry": [
+      {
+        "executionId": "433e3e7a-a19f-445a-ba34-ac8dcb2bbe3e",
+        "chatSessionId": "sess_f943e8ec-9ea3-4315-bd21-724f4e52b173",
+        "timestamp": 1784560070153
+      },
+      {
+        "executionId": "433e3e7a-a19f-445a-ba34-ac8dcb2bbe3e",
+        "chatSessionId": "sess_f943e8ec-9ea3-4315-bd21-724f4e52b173",
+        "timestamp": 1784560082708
+      },
+      {
+        "executionId": "433e3e7a-a19f-445a-ba34-ac8dcb2bbe3e",
+        "chatSessionId": "sess_f943e8ec-9ea3-4315-bd21-724f4e52b173",
+        "timestamp": 1784560225842
+      }
+    ],
+    "2. Add `buildServiceKey()` to secure store": [
+      {
+        "executionId": "433e3e7a-a19f-445a-ba34-ac8dcb2bbe3e",
+        "chatSessionId": "sess_f943e8ec-9ea3-4315-bd21-724f4e52b173",
+        "timestamp": 1784560070203
+      },
+      {
+        "executionId": "433e3e7a-a19f-445a-ba34-ac8dcb2bbe3e",
+        "chatSessionId": "sess_f943e8ec-9ea3-4315-bd21-724f4e52b173",
+        "timestamp": 1784560083379
+      },
+      {
+        "executionId": "433e3e7a-a19f-445a-ba34-ac8dcb2bbe3e",
+        "chatSessionId": "sess_f943e8ec-9ea3-4315-bd21-724f4e52b173",
+        "timestamp": 1784560226465
+      }
+    ],
+    "3. Add `braveSearchEnabled` + `setBraveSearchEnabled` to settings store": [
+      {
+        "executionId": "433e3e7a-a19f-445a-ba34-ac8dcb2bbe3e",
+        "chatSessionId": "sess_f943e8ec-9ea3-4315-bd21-724f4e52b173",
+        "timestamp": 1784560070228
+      },
+      {
+        "executionId": "433e3e7a-a19f-445a-ba34-ac8dcb2bbe3e",
+        "chatSessionId": "sess_f943e8ec-9ea3-4315-bd21-724f4e52b173",
+        "timestamp": 1784560084263
+      },
+      {
+        "executionId": "433e3e7a-a19f-445a-ba34-ac8dcb2bbe3e",
+        "chatSessionId": "sess_f943e8ec-9ea3-4315-bd21-724f4e52b173",
+        "timestamp": 1784560227319
+      }
+    ],
+    "4. Create `brave-search.ts` with tool definition + `syncBraveSearchTool()`": [
+      {
+        "executionId": "433e3e7a-a19f-445a-ba34-ac8dcb2bbe3e",
+        "chatSessionId": "sess_f943e8ec-9ea3-4315-bd21-724f4e52b173",
+        "timestamp": 1784560070250
+      },
+      {
+        "executionId": "433e3e7a-a19f-445a-ba34-ac8dcb2bbe3e",
+        "chatSessionId": "sess_f943e8ec-9ea3-4315-bd21-724f4e52b173",
+        "timestamp": 1784560238739
+      },
+      {
+        "executionId": "433e3e7a-a19f-445a-ba34-ac8dcb2bbe3e",
+        "chatSessionId": "sess_f943e8ec-9ea3-4315-bd21-724f4e52b173",
+        "timestamp": 1784560394588
+      }
+    ],
+    "5. Add startup call to `syncBraveSearchTool`": [
+      {
+        "executionId": "433e3e7a-a19f-445a-ba34-ac8dcb2bbe3e",
+        "chatSessionId": "sess_f943e8ec-9ea3-4315-bd21-724f4e52b173",
+        "timestamp": 1784560070309
+      },
+      {
+        "executionId": "433e3e7a-a19f-445a-ba34-ac8dcb2bbe3e",
+        "chatSessionId": "sess_f943e8ec-9ea3-4315-bd21-724f4e52b173",
+        "timestamp": 1784560408222
+      },
+      {
+        "executionId": "433e3e7a-a19f-445a-ba34-ac8dcb2bbe3e",
+        "chatSessionId": "sess_f943e8ec-9ea3-4315-bd21-724f4e52b173",
+        "timestamp": 1784560994431
+      }
+    ],
+    "6. Create `BraveSearchSettings` UI component": [
+      {
+        "executionId": "433e3e7a-a19f-445a-ba34-ac8dcb2bbe3e",
+        "chatSessionId": "sess_f943e8ec-9ea3-4315-bd21-724f4e52b173",
+        "timestamp": 1784560070339
+      },
+      {
+        "executionId": "433e3e7a-a19f-445a-ba34-ac8dcb2bbe3e",
+        "chatSessionId": "sess_f943e8ec-9ea3-4315-bd21-724f4e52b173",
+        "timestamp": 1784560408832
+      },
+      {
+        "executionId": "433e3e7a-a19f-445a-ba34-ac8dcb2bbe3e",
+        "chatSessionId": "sess_f943e8ec-9ea3-4315-bd21-724f4e52b173",
+        "timestamp": 1784560996222
+      }
+    ],
+    "7. Wire `BraveSearchSettings` into settings screen navigation": [
+      {
+        "executionId": "433e3e7a-a19f-445a-ba34-ac8dcb2bbe3e",
+        "chatSessionId": "sess_f943e8ec-9ea3-4315-bd21-724f4e52b173",
+        "timestamp": 1784560070366
+      },
+      {
+        "executionId": "433e3e7a-a19f-445a-ba34-ac8dcb2bbe3e",
+        "chatSessionId": "sess_f943e8ec-9ea3-4315-bd21-724f4e52b173",
+        "timestamp": 1784561004818
+      },
+      {
+        "executionId": "433e3e7a-a19f-445a-ba34-ac8dcb2bbe3e",
+        "chatSessionId": "sess_f943e8ec-9ea3-4315-bd21-724f4e52b173",
+        "timestamp": 1784561309002
+      }
+    ],
+    "8. Checkpoint": [
+      {
+        "executionId": "433e3e7a-a19f-445a-ba34-ac8dcb2bbe3e",
+        "chatSessionId": "sess_f943e8ec-9ea3-4315-bd21-724f4e52b173",
+        "timestamp": 1784560070388
+      },
+      {
+        "executionId": "433e3e7a-a19f-445a-ba34-ac8dcb2bbe3e",
+        "chatSessionId": "sess_f943e8ec-9ea3-4315-bd21-724f4e52b173",
+        "timestamp": 1784561323162
+      },
+      {
+        "executionId": "433e3e7a-a19f-445a-ba34-ac8dcb2bbe3e",
+        "chatSessionId": "sess_f943e8ec-9ea3-4315-bd21-724f4e52b173",
+        "timestamp": 1784561510819
+      }
+    ]
+  }
+}

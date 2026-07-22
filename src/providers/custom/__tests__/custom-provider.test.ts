@@ -231,7 +231,7 @@ describe('CustomProvider', () => {
       );
       body = lastRequestBody();
       expect(body.reasoning_effort).toBeUndefined();
-      expect(body.chat_template_kwargs).toEqual({ enable_thinking: false });
+      expect(body.chat_template_kwargs).toBeUndefined();
     });
 
     it('custom thinkingKwargs replace the defaults', async () => {
@@ -350,6 +350,51 @@ describe('CustomProvider', () => {
         provider.streamCompletion(makeConfig(), makeRequest(), 'k', controller.signal),
       );
       expect(chunks).toEqual([{ type: 'done', content: '' }]);
+    });
+
+    it('parses <tool_call> XML tags from text content when no structured tool_calls arrive (Qwen fallback)', async () => {
+      respondSSE([
+        'data: {"choices":[{"delta":{"content":"<tool_call>\\n{\\"name\\":\\"web_fetch\\",\\"arguments\\":{\\"url\\":\\"https://example.com\\"}}\\n</tool_call>"}}]}\n\n',
+        'data: [DONE]\n\n',
+      ]);
+      const chunks = await collect(
+        provider.streamCompletion(makeConfig(), makeRequest(), 'k', new AbortController().signal),
+      );
+      const toolChunk = chunks.find((c) => c.type === 'tool_call');
+      expect(toolChunk).toBeDefined();
+      expect(toolChunk!.toolCall).toEqual({
+        id: 'call_xml_0',
+        name: 'web_fetch',
+        arguments: { url: 'https://example.com' },
+      });
+    });
+
+    it('does NOT parse XML when structured tool_calls are present', async () => {
+      respondSSE([
+        'data: {"choices":[{"delta":{"content":"<tool_call>{\\"name\\":\\"should_ignore\\",\\"arguments\\":{}}\\n</tool_call>","tool_calls":[{"index":0,"id":"call_real","function":{"name":"real_tool","arguments":"{\\"x\\":1}"}}]}}]}\n\n',
+        'data: [DONE]\n\n',
+      ]);
+      const chunks = await collect(
+        provider.streamCompletion(makeConfig(), makeRequest(), 'k', new AbortController().signal),
+      );
+      const toolChunks = chunks.filter((c) => c.type === 'tool_call');
+      expect(toolChunks).toHaveLength(1);
+      expect(toolChunks[0].toolCall!.name).toBe('real_tool');
+    });
+
+    it('handles multiple <tool_call> tags in a single response', async () => {
+      const content = '<tool_call>\\n{\\"name\\":\\"tool_a\\",\\"arguments\\":{\\"k\\":\\"v\\"}}\\n</tool_call>\\n<tool_call>\\n{\\"name\\":\\"tool_b\\",\\"arguments\\":{}}\\n</tool_call>';
+      respondSSE([
+        `data: {"choices":[{"delta":{"content":"${content}"}}]}\n\n`,
+        'data: [DONE]\n\n',
+      ]);
+      const chunks = await collect(
+        provider.streamCompletion(makeConfig(), makeRequest(), 'k', new AbortController().signal),
+      );
+      const toolChunks = chunks.filter((c) => c.type === 'tool_call');
+      expect(toolChunks).toHaveLength(2);
+      expect(toolChunks[0].toolCall!.name).toBe('tool_a');
+      expect(toolChunks[1].toolCall!.name).toBe('tool_b');
     });
   });
 

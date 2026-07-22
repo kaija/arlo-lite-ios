@@ -21,6 +21,7 @@ export interface SettingsState {
   defaultSystemPromptId: string | null;
   systemPrompts: SystemPrompt[];
   thinkingExpandedByDefault: boolean;
+  braveSearchEnabled: boolean;
 }
 
 export interface SettingsActions {
@@ -28,6 +29,7 @@ export interface SettingsActions {
   setLocale: (locale: string) => void;
   setDefaultSystemPromptId: (id: string | null) => void;
   setThinkingExpandedByDefault: (value: boolean) => void;
+  setBraveSearchEnabled: (value: boolean) => void;
   loadSystemPrompts: (db: SQLiteDatabase) => Promise<void>;
   addSystemPrompt: (db: SQLiteDatabase, data: CreateSystemPromptData) => Promise<SystemPrompt>;
   updateSystemPrompt: (db: SQLiteDatabase, id: string, updates: UpdateSystemPromptData) => Promise<void>;
@@ -58,6 +60,7 @@ export const useSettingsStore = create<SettingsStore>()(
       defaultSystemPromptId: null,
       systemPrompts: [],
       thinkingExpandedByDefault: false,
+      braveSearchEnabled: false,
 
       // Actions
       setTheme: (theme: ThemeMode) => {
@@ -76,6 +79,10 @@ export const useSettingsStore = create<SettingsStore>()(
 
       setThinkingExpandedByDefault: (value: boolean) => {
         set({ thinkingExpandedByDefault: value });
+      },
+
+      setBraveSearchEnabled: (value: boolean) => {
+        set({ braveSearchEnabled: value });
       },
 
       loadSystemPrompts: async (db: SQLiteDatabase) => {
@@ -120,6 +127,7 @@ export const useSettingsStore = create<SettingsStore>()(
         locale: state.locale,
         defaultSystemPromptId: state.defaultSystemPromptId,
         thinkingExpandedByDefault: state.thinkingExpandedByDefault,
+        braveSearchEnabled: state.braveSearchEnabled,
       }),
       // Normalize stale locale values (e.g. 'zh-Hant-TW' → 'zh-TW') on rehydrate
       onRehydrateStorage: () => (state) => {

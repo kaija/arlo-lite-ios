@@ -105,7 +105,14 @@ export function ChatShell({ children }: ChatShellProps) {
   const sessions = useSessionStore((state) => state.sessions);
   const activeSessionId = useSessionStore((state) => state.activeSessionId);
   const messagesMap = useSessionStore((state) => state.messages);
-  const messages = (activeSessionId ? messagesMap[activeSessionId] : undefined) ?? EMPTY_MESSAGES;
+  const allMessages = (activeSessionId ? messagesMap[activeSessionId] : undefined) ?? EMPTY_MESSAGES;
+  // Filter out internal messages: system, tool results, and tool-call-only assistant messages
+  const messages = allMessages.filter((m) => {
+    if (m.role === 'system' || m.role === 'tool') return false;
+    // Hide assistant messages that are just tool call JSON (no human-readable content)
+    if (m.role === 'assistant' && m.content.startsWith('{"toolCalls"')) return false;
+    return true;
+  });
   const deleteSession = useSessionStore((state) => state.deleteSession);
   const deleteMessage = useSessionStore((state) => state.deleteMessage);
   const renameSession = useSessionStore((state) => state.renameSession);

@@ -1,0 +1,141 @@
+{
+  "pbtResults": {},
+  "executionHistory": {
+    "1. Extend provider types": [
+      {
+        "executionId": "9ed7a0d5-3c76-4ab6-a658-a02ad805633b",
+        "chatSessionId": "sess_27327b10-9054-4893-899c-db33aa561200",
+        "timestamp": 1784553575412
+      },
+      {
+        "executionId": "9ed7a0d5-3c76-4ab6-a658-a02ad805633b",
+        "chatSessionId": "sess_27327b10-9054-4893-899c-db33aa561200",
+        "timestamp": 1784553589897
+      },
+      {
+        "executionId": "9ed7a0d5-3c76-4ab6-a658-a02ad805633b",
+        "chatSessionId": "sess_27327b10-9054-4893-899c-db33aa561200",
+        "timestamp": 1784554817790
+      }
+    ],
+    "2. Tool Registry + Built-in Tools": [
+      {
+        "executionId": "9ed7a0d5-3c76-4ab6-a658-a02ad805633b",
+        "chatSessionId": "sess_27327b10-9054-4893-899c-db33aa561200",
+        "timestamp": 1784553575446
+      },
+      {
+        "executionId": "9ed7a0d5-3c76-4ab6-a658-a02ad805633b",
+        "chatSessionId": "sess_27327b10-9054-4893-899c-db33aa561200",
+        "timestamp": 1784554834081
+      },
+      {
+        "executionId": "9ed7a0d5-3c76-4ab6-a658-a02ad805633b",
+        "chatSessionId": "sess_27327b10-9054-4893-899c-db33aa561200",
+        "timestamp": 1784555673868
+      }
+    ],
+    "3. Tool Executor": [
+      {
+        "executionId": "9ed7a0d5-3c76-4ab6-a658-a02ad805633b",
+        "chatSessionId": "sess_27327b10-9054-4893-899c-db33aa561200",
+        "timestamp": 1784553575498
+      },
+      {
+        "executionId": "9ed7a0d5-3c76-4ab6-a658-a02ad805633b",
+        "chatSessionId": "sess_27327b10-9054-4893-899c-db33aa561200",
+        "timestamp": 1784555683484
+      },
+      {
+        "executionId": "9ed7a0d5-3c76-4ab6-a658-a02ad805633b",
+        "chatSessionId": "sess_27327b10-9054-4893-899c-db33aa561200",
+        "timestamp": 1784555926919
+      }
+    ],
+    "4. Agent Loop Service": [
+      {
+        "executionId": "9ed7a0d5-3c76-4ab6-a658-a02ad805633b",
+        "chatSessionId": "sess_27327b10-9054-4893-899c-db33aa561200",
+        "timestamp": 1784553575526
+      },
+      {
+        "executionId": "9ed7a0d5-3c76-4ab6-a658-a02ad805633b",
+        "chatSessionId": "sess_27327b10-9054-4893-899c-db33aa561200",
+        "timestamp": 1784555936213
+      },
+      {
+        "executionId": "9ed7a0d5-3c76-4ab6-a658-a02ad805633b",
+        "chatSessionId": "sess_27327b10-9054-4893-899c-db33aa561200",
+        "timestamp": 1784556146823
+      }
+    ],
+    "5. Provider adapter passthrough": [
+      {
+        "executionId": "9ed7a0d5-3c76-4ab6-a658-a02ad805633b",
+        "chatSessionId": "sess_27327b10-9054-4893-899c-db33aa561200",
+        "timestamp": 1784553575552
+      },
+      {
+        "executionId": "9ed7a0d5-3c76-4ab6-a658-a02ad805633b",
+        "chatSessionId": "sess_27327b10-9054-4893-899c-db33aa561200",
+        "timestamp": 1784554834790
+      },
+      {
+        "executionId": "9ed7a0d5-3c76-4ab6-a658-a02ad805633b",
+        "chatSessionId": "sess_27327b10-9054-4893-899c-db33aa561200",
+        "timestamp": 1784555674606
+      }
+    ],
+    "6. DB migration": [
+      {
+        "executionId": "9ed7a0d5-3c76-4ab6-a658-a02ad805633b",
+        "chatSessionId": "sess_27327b10-9054-4893-899c-db33aa561200",
+        "timestamp": 1784553575577
+      },
+      {
+        "executionId": "9ed7a0d5-3c76-4ab6-a658-a02ad805633b",
+        "chatSessionId": "sess_27327b10-9054-4893-899c-db33aa561200",
+        "timestamp": 1784553590602
+      },
+      {
+        "executionId": "9ed7a0d5-3c76-4ab6-a658-a02ad805633b",
+        "chatSessionId": "sess_27327b10-9054-4893-899c-db33aa561200",
+        "timestamp": 1784554818522
+      }
+    ],
+    "7. useChat integration": [
+      {
+        "executionId": "9ed7a0d5-3c76-4ab6-a658-a02ad805633b",
+        "chatSessionId": "sess_27327b10-9054-4893-899c-db33aa561200",
+        "timestamp": 1784553575601
+      },
+      {
+        "executionId": "9ed7a0d5-3c76-4ab6-a658-a02ad805633b",
+        "chatSessionId": "sess_27327b10-9054-4893-899c-db33aa561200",
+        "timestamp": 1784556162084
+      },
+      {
+        "executionId": "9ed7a0d5-3c76-4ab6-a658-a02ad805633b",
+        "chatSessionId": "sess_27327b10-9054-4893-899c-db33aa561200",
+        "timestamp": 1784557893022
+      }
+    ],
+    "8. Smoke test": [
+      {
+        "executionId": "9ed7a0d5-3c76-4ab6-a658-a02ad805633b",
+        "chatSessionId": "sess_27327b10-9054-4893-899c-db33aa561200",
+        "timestamp": 1784553575637
+      },
+      {
+        "executionId": "9ed7a0d5-3c76-4ab6-a658-a02ad805633b",
+        "chatSessionId": "sess_27327b10-9054-4893-899c-db33aa561200",
+        "timestamp": 1784556162879
+      },
+      {
+        "executionId": "9ed7a0d5-3c76-4ab6-a658-a02ad805633b",
+        "chatSessionId": "sess_27327b10-9054-4893-899c-db33aa561200",
+        "timestamp": 1784557892283
+      }
+    ]
+  }
+}

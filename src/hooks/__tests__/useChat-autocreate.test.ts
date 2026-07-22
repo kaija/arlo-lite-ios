@@ -80,6 +80,10 @@ jest.mock('@/services/completion-service', () => ({
   complete: jest.fn(),
 }));
 
+jest.mock('@/services/agent-loop', () => ({
+  runAgentLoop: jest.fn(),
+}));
+
 jest.mock('@/domain/cost-calculator', () => ({
   calculateMessageCost: jest.fn(() => 0.001),
 }));
