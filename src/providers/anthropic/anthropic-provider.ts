@@ -101,7 +101,7 @@ export class AnthropicProvider implements IProvider {
     const thinkingParams = mapThinkingLevelAnthropic(request.thinkingLevel);
 
     try {
-      const response = await client.messages.create({
+      const requestParams = {
         model: request.model,
         messages,
         max_tokens: request.maxTokens ?? DEFAULT_MAX_TOKENS,
@@ -109,7 +109,10 @@ export class AnthropicProvider implements IProvider {
         ...(systemMessage ? { system: systemMessage } : {}),
         ...(thinkingParams.thinking ? { thinking: thinkingParams.thinking as any } : {}),
         ...(request.tools?.length ? { tools: request.tools as any } : {}),
-      });
+      };
+      console.log('[Anthropic API] Full request payload:', JSON.stringify(requestParams, null, 2));
+
+      const response = await client.messages.create(requestParams as any);
 
       return mapResponse(response);
     } catch (error) {
@@ -136,20 +139,48 @@ export class AnthropicProvider implements IProvider {
     let outputTokens = 0;
 
     try {
+      const requestParams = {
+        model: request.model,
+        messages,
+        max_tokens: request.maxTokens ?? DEFAULT_MAX_TOKENS,
+        ...(systemMessage ? { system: systemMessage } : {}),
+        ...(thinkingParams.thinking ? { thinking: thinkingParams.thinking as any } : {}),
+        ...(request.tools?.length ? { tools: request.tools as any } : {}),
+      };
+      console.log('[Anthropic API] Full request payload:', JSON.stringify(requestParams, null, 2));
+
       const stream = client.messages.stream(
-        {
-          model: request.model,
-          messages,
-          max_tokens: request.maxTokens ?? DEFAULT_MAX_TOKENS,
-          ...(systemMessage ? { system: systemMessage } : {}),
-          ...(thinkingParams.thinking ? { thinking: thinkingParams.thinking as any } : {}),
-          ...(request.tools?.length ? { tools: request.tools as any } : {}),
-        },
+        requestParams as any,
         { signal },
       );
 
+      // Accumulate tool_use blocks from the stream
+      const toolCallAccum = new Map<number, { id: string; name: string; args: string }>();
+      let currentBlockIndex = -1;
+
       for await (const event of stream) {
         if (signal.aborted) break;
+
+        // Track content block starts for tool_use
+        if (event.type === 'content_block_start') {
+          currentBlockIndex = event.index;
+          if (event.content_block.type === 'tool_use') {
+            toolCallAccum.set(currentBlockIndex, {
+              id: event.content_block.id,
+              name: event.content_block.name,
+              args: '',
+            });
+          }
+        }
+
+        // Accumulate tool_use input JSON deltas
+        if (event.type === 'content_block_delta' && event.delta.type === 'input_json_delta') {
+          const existing = toolCallAccum.get(currentBlockIndex);
+          if (existing) {
+            existing.args += (event.delta as any).partial_json ?? '';
+          }
+          continue; // Don't pass to mapStreamEvent
+        }
 
         const chunk = mapStreamEvent(event);
         if (chunk) {
@@ -164,6 +195,13 @@ export class AnthropicProvider implements IProvider {
         if (event.type === 'message_delta') {
           outputTokens = event.usage?.output_tokens ?? outputTokens;
         }
+      }
+
+      // Emit accumulated tool calls
+      for (const [, tc] of toolCallAccum) {
+        let args: Record<string, unknown> = {};
+        try { args = JSON.parse(tc.args); } catch { /* malformed args — send empty */ }
+        yield { type: 'tool_call' as const, content: '', toolCall: { id: tc.id, name: tc.name, arguments: args } };
       }
 
       // Final done chunk with accumulated usage
@@ -268,15 +306,68 @@ function extractSystemMessage(messages: ChatMessage[]): string | undefined {
 /**
  * Format app ChatMessages into Anthropic SDK MessageParam format.
  * Excludes system messages (they go into the top-level `system` param).
+ * Handles tool_use (assistant) and tool_result (user) message conversion.
+ *
+ * Anthropic requires:
+ * - Only 'user' and 'assistant' roles
+ * - Assistant tool calls → content blocks with type:'tool_use'
+ * - Tool results → user message with type:'tool_result' content blocks
  */
 function formatMessages(messages: ChatMessage[]): MessageParam[] {
-  return messages
-    .filter((m) => m.role !== 'system')
-    .map(formatMessage);
+  const result: MessageParam[] = [];
+
+  for (const msg of messages) {
+    if (msg.role === 'system') continue;
+
+    if (msg.role === 'tool') {
+      // Anthropic tool_result format: role:'user', content:[{type:'tool_result',...}]
+      // Group consecutive tool messages into one user message
+      const lastMsg = result[result.length - 1];
+      const toolResultBlock = {
+        type: 'tool_result' as const,
+        tool_use_id: msg.tool_call_id ?? '',
+        content: typeof msg.content === 'string' ? msg.content : JSON.stringify(msg.content),
+      };
+
+      if (lastMsg && lastMsg.role === 'user' && Array.isArray(lastMsg.content) &&
+          (lastMsg.content as any[]).every((b: any) => b.type === 'tool_result')) {
+        // Merge into existing tool_result user message
+        (lastMsg.content as any[]).push(toolResultBlock);
+      } else {
+        result.push({ role: 'user', content: [toolResultBlock] as any });
+      }
+      continue;
+    }
+
+    if (msg.role === 'assistant' && msg.toolCalls?.length) {
+      // Assistant message with tool calls → content blocks
+      const blocks: any[] = [];
+      const textContent = typeof msg.content === 'string' ? msg.content : '';
+      if (textContent) {
+        blocks.push({ type: 'text', text: textContent });
+      }
+      for (const tc of msg.toolCalls) {
+        blocks.push({
+          type: 'tool_use',
+          id: tc.id,
+          name: tc.name,
+          input: tc.arguments,
+        });
+      }
+      result.push({ role: 'assistant', content: blocks as any });
+      continue;
+    }
+
+    // Regular user/assistant message
+    result.push(formatMessage(msg));
+  }
+
+  return result;
 }
 
 /**
  * Format a single ChatMessage into Anthropic SDK MessageParam.
+ * Handles plain text and multimodal content parts.
  */
 function formatMessage(msg: ChatMessage): MessageParam {
   if (typeof msg.content === 'string') {
@@ -419,3 +510,6 @@ function extractRetryAfter(headers: Headers | undefined | null): number | null {
   if (isNaN(seconds)) return null;
   return seconds;
 }
+
+/** @internal Exported for testing only. */
+export { formatMessages as _formatMessages };
