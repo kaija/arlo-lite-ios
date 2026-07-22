@@ -1,11 +1,17 @@
 #!/bin/sh
 set -e
 
+# Ensure we're running native arm64, not under Rosetta emulation
+if [ "$(uname -m)" = "x86_64" ] && [ "$(sysctl -n sysctl.proc_translated 2>/dev/null)" = "1" ]; then
+  echo "Re-launching under native arm64 (was running under Rosetta)"
+  exec env /usr/bin/arch -arm64 /bin/sh "$0" "$@"
+fi
+
 # Navigate to the repository root
 cd "$CI_PRIMARY_REPOSITORY_PATH"
 
-# Install Node.js using Homebrew (Xcode Cloud macOS images have Homebrew)
-brew install node
+# Install Node.js and cmake using Homebrew (Xcode Cloud macOS images have Homebrew)
+brew install node cmake
 
 # Install project dependencies
 npm install
