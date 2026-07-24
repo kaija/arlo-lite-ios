@@ -1,0 +1,227 @@
+{
+  "pbtResults": {
+    "2.3 Write property tests for `assetsToContentParts`": {
+      "status": "passed",
+      "lastRunTimestamp": 1784726519748
+    }
+  },
+  "executionHistory": {
+    "1.1 Swap PaperclipIcon SVG with mountain/landscape ImageIcon in `src/components/layout/InputChrome.tsx`": [
+      {
+        "executionId": "7b06b488-2817-4065-ae16-3367a25a000f",
+        "chatSessionId": "sess_5fa2016f-d9c6-484d-a1be-e35f7d3ac1d7",
+        "timestamp": 1784726155153
+      },
+      {
+        "executionId": "7b06b488-2817-4065-ae16-3367a25a000f",
+        "chatSessionId": "sess_5fa2016f-d9c6-484d-a1be-e35f7d3ac1d7",
+        "timestamp": 1784726165058
+      },
+      {
+        "executionId": "7b06b488-2817-4065-ae16-3367a25a000f",
+        "chatSessionId": "sess_5fa2016f-d9c6-484d-a1be-e35f7d3ac1d7",
+        "timestamp": 1784726321656
+      }
+    ],
+    "2.1 Update `pickImageFromLibrary` in `src/components/chat/AttachmentPicker.tsx` to support multi-select": [
+      {
+        "executionId": "7b06b488-2817-4065-ae16-3367a25a000f",
+        "chatSessionId": "sess_5fa2016f-d9c6-484d-a1be-e35f7d3ac1d7",
+        "timestamp": 1784726155203
+      },
+      {
+        "executionId": "7b06b488-2817-4065-ae16-3367a25a000f",
+        "chatSessionId": "sess_5fa2016f-d9c6-484d-a1be-e35f7d3ac1d7",
+        "timestamp": 1784726328021
+      },
+      {
+        "executionId": "7b06b488-2817-4065-ae16-3367a25a000f",
+        "chatSessionId": "sess_5fa2016f-d9c6-484d-a1be-e35f7d3ac1d7",
+        "timestamp": 1784726395592
+      }
+    ],
+    "2.2 Extract `assetsToContentParts` helper function": [
+      {
+        "executionId": "7b06b488-2817-4065-ae16-3367a25a000f",
+        "chatSessionId": "sess_5fa2016f-d9c6-484d-a1be-e35f7d3ac1d7",
+        "timestamp": 1784726155242
+      },
+      {
+        "executionId": "7b06b488-2817-4065-ae16-3367a25a000f",
+        "chatSessionId": "sess_5fa2016f-d9c6-484d-a1be-e35f7d3ac1d7",
+        "timestamp": 1784726165841
+      },
+      {
+        "executionId": "7b06b488-2817-4065-ae16-3367a25a000f",
+        "chatSessionId": "sess_5fa2016f-d9c6-484d-a1be-e35f7d3ac1d7",
+        "timestamp": 1784726322571
+      }
+    ],
+    "2.3 Write property tests for `assetsToContentParts`": [
+      {
+        "executionId": "7b06b488-2817-4065-ae16-3367a25a000f",
+        "chatSessionId": "sess_5fa2016f-d9c6-484d-a1be-e35f7d3ac1d7",
+        "timestamp": 1784726155275
+      },
+      {
+        "executionId": "7b06b488-2817-4065-ae16-3367a25a000f",
+        "chatSessionId": "sess_5fa2016f-d9c6-484d-a1be-e35f7d3ac1d7",
+        "timestamp": 1784726401907
+      },
+      {
+        "executionId": "7b06b488-2817-4065-ae16-3367a25a000f",
+        "chatSessionId": "sess_5fa2016f-d9c6-484d-a1be-e35f7d3ac1d7",
+        "timestamp": 1784726534686
+      }
+    ],
+    "3.1 Add image capability check before send in `src/hooks/useChat.ts`": [
+      {
+        "executionId": "7b06b488-2817-4065-ae16-3367a25a000f",
+        "chatSessionId": "sess_5fa2016f-d9c6-484d-a1be-e35f7d3ac1d7",
+        "timestamp": 1784726155340
+      },
+      {
+        "executionId": "7b06b488-2817-4065-ae16-3367a25a000f",
+        "chatSessionId": "sess_5fa2016f-d9c6-484d-a1be-e35f7d3ac1d7",
+        "timestamp": 1784726328874
+      },
+      {
+        "executionId": "7b06b488-2817-4065-ae16-3367a25a000f",
+        "chatSessionId": "sess_5fa2016f-d9c6-484d-a1be-e35f7d3ac1d7",
+        "timestamp": 1784726396380
+      }
+    ],
+    "3.2 Write property test for message content structure": [
+      {
+        "executionId": "7b06b488-2817-4065-ae16-3367a25a000f",
+        "chatSessionId": "sess_5fa2016f-d9c6-484d-a1be-e35f7d3ac1d7",
+        "timestamp": 1784726155373
+      },
+      {
+        "executionId": "7b06b488-2817-4065-ae16-3367a25a000f",
+        "chatSessionId": "sess_5fa2016f-d9c6-484d-a1be-e35f7d3ac1d7",
+        "timestamp": 1784726402970
+      },
+      {
+        "executionId": "7b06b488-2817-4065-ae16-3367a25a000f",
+        "chatSessionId": "sess_5fa2016f-d9c6-484d-a1be-e35f7d3ac1d7",
+        "timestamp": 1784726535562
+      }
+    ],
+    "4.1 Update `pickImageFromCamera` in `src/components/chat/AttachmentPicker.tsx`": [
+      {
+        "executionId": "7b06b488-2817-4065-ae16-3367a25a000f",
+        "chatSessionId": "sess_5fa2016f-d9c6-484d-a1be-e35f7d3ac1d7",
+        "timestamp": 1784726155407
+      },
+      {
+        "executionId": "7b06b488-2817-4065-ae16-3367a25a000f",
+        "chatSessionId": "sess_5fa2016f-d9c6-484d-a1be-e35f7d3ac1d7",
+        "timestamp": 1784726329806
+      },
+      {
+        "executionId": "7b06b488-2817-4065-ae16-3367a25a000f",
+        "chatSessionId": "sess_5fa2016f-d9c6-484d-a1be-e35f7d3ac1d7",
+        "timestamp": 1784726397271
+      }
+    ],
+    "5. Checkpoint - Ensure all tests pass": [
+      {
+        "executionId": "7b06b488-2817-4065-ae16-3367a25a000f",
+        "chatSessionId": "sess_5fa2016f-d9c6-484d-a1be-e35f7d3ac1d7",
+        "timestamp": 1784726155440
+      },
+      {
+        "executionId": "7b06b488-2817-4065-ae16-3367a25a000f",
+        "chatSessionId": "sess_5fa2016f-d9c6-484d-a1be-e35f7d3ac1d7",
+        "timestamp": 1784726550596
+      },
+      {
+        "executionId": "7b06b488-2817-4065-ae16-3367a25a000f",
+        "chatSessionId": "sess_5fa2016f-d9c6-484d-a1be-e35f7d3ac1d7",
+        "timestamp": 1784726677514
+      }
+    ],
+    "6.1 Verify permission-denied and cancellation paths": [
+      {
+        "executionId": "7b06b488-2817-4065-ae16-3367a25a000f",
+        "chatSessionId": "sess_5fa2016f-d9c6-484d-a1be-e35f7d3ac1d7",
+        "timestamp": 1784726155474
+      },
+      {
+        "executionId": "7b06b488-2817-4065-ae16-3367a25a000f",
+        "chatSessionId": "sess_5fa2016f-d9c6-484d-a1be-e35f7d3ac1d7",
+        "timestamp": 1784726551379
+      },
+      {
+        "executionId": "7b06b488-2817-4065-ae16-3367a25a000f",
+        "chatSessionId": "sess_5fa2016f-d9c6-484d-a1be-e35f7d3ac1d7",
+        "timestamp": 1784726678280
+      }
+    ],
+    "6.2 Write unit tests for multi-select and gate behavior": [
+      {
+        "executionId": "7b06b488-2817-4065-ae16-3367a25a000f",
+        "chatSessionId": "sess_5fa2016f-d9c6-484d-a1be-e35f7d3ac1d7",
+        "timestamp": 1784726155507
+      },
+      {
+        "executionId": "7b06b488-2817-4065-ae16-3367a25a000f",
+        "chatSessionId": "sess_5fa2016f-d9c6-484d-a1be-e35f7d3ac1d7",
+        "timestamp": 1784726682800
+      },
+      {
+        "executionId": "7b06b488-2817-4065-ae16-3367a25a000f",
+        "chatSessionId": "sess_5fa2016f-d9c6-484d-a1be-e35f7d3ac1d7",
+        "timestamp": 1784726819388
+      }
+    ],
+    "7. Final checkpoint - Ensure all tests pass": [
+      {
+        "executionId": "7b06b488-2817-4065-ae16-3367a25a000f",
+        "chatSessionId": "sess_5fa2016f-d9c6-484d-a1be-e35f7d3ac1d7",
+        "timestamp": 1784726155541
+      },
+      {
+        "executionId": "7b06b488-2817-4065-ae16-3367a25a000f",
+        "chatSessionId": "sess_5fa2016f-d9c6-484d-a1be-e35f7d3ac1d7",
+        "timestamp": 1784726824384
+      }
+    ],
+    "1. Replace paperclip icon with image icon in InputChrome": [
+      {
+        "executionId": "7b06b488-2817-4065-ae16-3367a25a000f",
+        "chatSessionId": "sess_5fa2016f-d9c6-484d-a1be-e35f7d3ac1d7",
+        "timestamp": 1784726321718
+      }
+    ],
+    "4. Enforce camera capture constraints": [
+      {
+        "executionId": "7b06b488-2817-4065-ae16-3367a25a000f",
+        "chatSessionId": "sess_5fa2016f-d9c6-484d-a1be-e35f7d3ac1d7",
+        "timestamp": 1784726397307
+      }
+    ],
+    "2. Enable multi-select and encode all assets in AttachmentPicker": [
+      {
+        "executionId": "7b06b488-2817-4065-ae16-3367a25a000f",
+        "chatSessionId": "sess_5fa2016f-d9c6-484d-a1be-e35f7d3ac1d7",
+        "timestamp": 1784726534774
+      }
+    ],
+    "3. Add supportsImageInput gate in useChat": [
+      {
+        "executionId": "7b06b488-2817-4065-ae16-3367a25a000f",
+        "chatSessionId": "sess_5fa2016f-d9c6-484d-a1be-e35f7d3ac1d7",
+        "timestamp": 1784726535604
+      }
+    ],
+    "6. Wire end-to-end and verify permission handling": [
+      {
+        "executionId": "7b06b488-2817-4065-ae16-3367a25a000f",
+        "chatSessionId": "sess_5fa2016f-d9c6-484d-a1be-e35f7d3ac1d7",
+        "timestamp": 1784726819435
+      }
+    ]
+  }
+}
